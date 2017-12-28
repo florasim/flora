@@ -1,0 +1,37 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+src/*.so
+src/**/*_m.h
+src/**/*_m.cc
+src/Makefile
+
+/run
+/debug
+/memcheck
+
+/out
+
+simulations/**/results
+simulations/**/.tkenvrc
+simulations/**/valgrind.out
+simulations/**/log.txt

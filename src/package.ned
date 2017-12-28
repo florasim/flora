@@ -1,0 +1,3 @@
+package loranetwork;
+
+@license(LGPL);
