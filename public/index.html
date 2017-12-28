@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en" ng-app="myApp" class="no-js">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Home | FLoRa - A Framework for LoRa simulations</title>
+  <link rel="shortcut icon" href="images/favicon.ico" />
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
+
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"> 
+  <link rel="stylesheet" type="text/css" href="css/style.css"/>
+  <!-- Global Site Tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106799350-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments)};
+    gtag('js', new Date());
+
+    gtag('config', 'UA-106799350-1');
+  </script>
+
+</head>
+
+<body>
+
+
+  <nav class="navbar navbar-inverse navbar-fixed-top navbar-shrink">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#page-top">FLoRa</a>
+      </div>
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav navbar-right" style="padding-right: 70px;">
+          <li><a href="#about">About</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#download">Download</a></li>
+          <li><a href="#install">Installation</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+ <div class="container" style="padding-top: 100px;">
+   <!--SECTION 1 -->
+   <div class="row section-heading" id="about">
+   <div class="col-md-offset-1 col-md-9">
+   <b>FLoRa</b>
+   </div>
+   </div>
+  <div class="row section-text">
+   <div class="myoffset col-md-offset-1 col-md-9">
+    FLoRa (Framework for LoRa) is a simulation framework for carrying out end-to-end simulations for LoRa networks. It is based on the <a href="https://omnetpp.org/">OMNeT++</a> network simulator and uses components from the <a href="https://inet.omnetpp.org/">INET framework</a> as well.
+    <p></p>
+    FLoRa allows the creation of LoRa networks with modules for LoRa nodes, gateway(s) and a network server. Application logic can be deployed as independent modules that are connected with the network server. Finally, the network server and nodes support dynamic management of configuration parameters through Adaptive Data Rate (ADR). Finally, the energy consumption statistics are collected in every node.
+  </div>
+
+  <div class="row section-text section-end">
+  <div class="myoffset col-md-offset-1 col-md-9" style="padding-top: 15px; padding-bottom: 10px;" >
+        <img class="img-responsive center-block" src="images/lora-network-omnet.png" alt="stack photo" width="700" > </img>
+        </div>
+  </div>
+  </div>
+<!-- END SECTION ONE -->
+
+  <!--SECTION 2 -->
+   <div class="row section-heading" id="publications">
+   <div class="col-md-offset-1 col-md-9">
+   <b>Related Publication</b>
+   </div>
+   </div>
+  <div class="row section-text section-end" style="padding-bottom: 20px;">
+   <div class="myoffset col-md-offset-1 col-md-9">
+    <ul>
+    <li><a href="download/slabicki2018adaptive.pdf" download>Adaptive Configuration of LoRa Networks for Dense IoT Deployments</a>, Mariusz Slabicki, Gopika Premsankar, Mario Di Francesco, <i>Author submitted version, Accepted at NOMS 2018</i></li>
+    </ul>
+  </div>
+  </div>
+<!-- END SECTION 2 -->
+
+   <!--SECTION 3 -->
+   <div class="row section-heading" id="features">
+   <div class="col-md-offset-1 col-md-9">
+   <b>Features</b>
+   </div>
+   </div>
+  <div class="row section-text section-end">
+   <div class="myoffset col-md-offset-1 col-md-9">
+   <ul>
+    <li>Accurate model of LoRa physical layer (including collisions and capture effect)</li>
+    <li>Simulations with one (or more) gateways in the network</li>
+    <li>End-to-end simulations, including accurate modeling of the backhaul network</li>
+    <li>Statistics of energy consumption in network</li>
+    </ul>
+  </div>
+  </div>
+<!-- END SECTION 3 -->
+
+  <!--SECTION 4 -->
+   <div class="row section-heading" id="install">
+   <div class="col-md-offset-1 col-md-9">
+   <b>Download</b>
+   </div>
+   </div>
+  <div class="row section-text section-end">
+   <div class="myoffset col-md-offset-1 col-md-9">
+   <ul>
+    <!-- Update link in Section 5 too -->
+   <li>Current version of FLoRa: <a href="download/flora-0.6.tar.gz">FLoRa 0.6</a></li>
+   </ul>
+  </div>
+  </div>
+  <!--SECTION 4 -->
+
+   <!--SECTION 5 -->
+   <div class="row section-heading" id="requirements">
+   <div class="col-md-offset-1 col-md-9">
+   <b>Requirements</b>
+   </div>
+   </div>
+  <div class="row section-text section-end">
+   <div class="myoffset col-md-offset-1 col-md-9">
+   <ul>
+    <li>OMNeT++ 5.0</li>
+    <li>INET framework 3.4</li>
+    </ul>
+  </div>
+  </div>
+<!-- END SECTION 5 -->
+
+
+
+   <!--SECTION 6 -->
+   <div class="row section-heading" id="install">
+   <div class="col-md-offset-1 col-md-9">
+   <b>Installation</b>
+   </div>
+   </div>
+  <div class="row section-text section-end">
+   <div class="myoffset col-md-offset-1 col-md-9">
+   <ul>
+   <li>Download <a href="https://omnetpp.org/omnetpp">OMNeT++ 5.0</a> and install following the <a href="https://omnetpp.org/documentation">installation guide</a></li>
+   <li>Download <a href="https://inet.omnetpp.org/Download.html">INET 3.4</a> framework and install following the <a href="https://inet.omnetpp.org/Installation.html">installation guide</a></li>
+   <li>Download <a href="download/flora-0.6.tar.gz">FLoRa</a>, extract the files and import it as a new project into your OMNeT++ workspace (File > Import > General > Existing project into Workspace)</li>
+   <li>Make sure the FLoRa project has INET project as a project reference (Project > Properties > Project References)</li>
+   <li>Build the FLoRa project (right-click on the project and select 'Build project')</li>
+   <li>Check if FLoRa is working correctly by running a sample simulation scenario located under 'simulations' directory. Right click on loRaNetworkTest.ini and select Run as > OMNeT++ simulation. If all goes well, the simulation terminates on completion of simulated time</li>
+   </ul>
+  </div>
+  </div>
+  <!-- END SECTION 6 -->
+
+     <!--SECTION 7 -->
+   <div class="row section-heading" id="example">
+   <div class="col-md-offset-1 col-md-9">
+   <b>Sample scenario</b>
+   </div>
+   </div>
+  <div class="row section-text section-end">
+   <div class="myoffset col-md-offset-1 col-md-9">
+   A sample scenario is present in the simulations directory of FLoRa. The scenario is defined in the loRaNetworkTest.ini file
+ </p>
+   The sample scenario has the following features:
+   <ul>
+   <li>A network of 10 nodes, one gateway and a network server</li>
+   <li>The nodes are placed uniformly randomly distributed in a square deployment area</li>
+   <li>Each node sends a packet after a time drawn from an exponential distribution with a mean of 100s</li>
+   <li>Spreading factor and transmission power for each node are chosen randomly (uniform) from available settings</li>
+   <li>ADR is disabled on both the network server and nodes</li>
+   <li>Simulation time limit is configured for 7 days with a warm-up period of 1 day</li>
+   <li>The backhaul network configuration is defined by cloudDelays.xml file</li>
+   <li>The backhaul network links are set in package.ned</li>
+   </ul>
+  </p>
+  The simulation statistics files are generated in simulations/results directory on completion of the run. The simulation statistics can be viewed through the OMNeT++ GUI.
+  </div>
+  </div>
+  <!-- END SECTION 7 -->
+
+   <!--SECTION 8 -->
+   <div class="row section-heading" id="authors">
+   <div class="col-md-offset-1 col-md-9">
+   <b>Authors</b>
+   </div>
+   </div>
+  <div class="row section-text section-end" style="padding-bottom: 20px;">
+   <div class="myoffset col-md-offset-1 col-md-9">
+    <ul>
+    <li><a href="https://users.aalto.fi/~slabicm1/">Mariusz Slabicki</a></li>
+    <li><a href="https://users.aalto.fi/~premsag1/">Gopika Premsankar</a></li>
+    </ul>
+  </div>
+  </div>
+<!-- END SECTION 8 -->
+
+
+
+
+ </div>
+
+
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "codetutorial-mean-seed",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.12.2",
+    "express": "^4.12.3",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-express": "^1.4.1",
+    "method-override": "^2.3.2",
+    "mongoose": "^3.8.25"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-gh-pages": "^2.0.0",
+    "grunt-parallel": "^0.5.1"
+  }
+}
