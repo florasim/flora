@@ -6,3 +6,5 @@ FLoRa allows the creation of LoRa networks with modules for LoRa nodes, gateway(
 Application logic can be deployed as independent modules that are connected with the network server. 
 The network server and nodes support dynamic management of configuration parameters through Adaptive Data Rate (ADR). 
 Finally, the energy consumption statistics are collected in every node.
+
+More information here: [flora.aalto.fi](http://flora.aalto.fi/)
