@@ -19,6 +19,8 @@
 *.exe
 *.out
 *.app
+src/flora
+src/flora_dbg
 
 src/*.so
 src/**/*_m.h
@@ -31,7 +33,11 @@ src/Makefile
 
 /out
 
+.settings/*
+simulations/*
 simulations/**/results
 simulations/**/.tkenvrc
 simulations/**/valgrind.out
 simulations/**/log.txt
+
+
