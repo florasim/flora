@@ -11,7 +11,7 @@ cleanall: checkmakefiles
 
 INET_PROJ=../inet
 makefiles:
-	@cd src && opp_makemake -o flora -f --deep -r -KINET_PROJ=../inet -I$(INET_PROJ)/src/ -L$$\(INET_PROJ\)/out/$$\(CONFIGNAME\)/src -lINET
+	@cd src && opp_makemake -o flora  -O out -f --deep -KINET_PROJ=../../inet -DINET_IMPORT -I. -I$$\(INET_PROJ\)/src -L$$\(INET_PROJ\)/src -lINET$$\(D\)
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
