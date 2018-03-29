@@ -19,8 +19,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/csmaca/CsmaCaMac.h"
-
-#include <LoRaMac.h>
+#include "LoRaMac.h"
 
 namespace inet {
 

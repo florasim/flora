@@ -14,8 +14,8 @@
 // 
 #ifndef LORAPHY_LORAMEDIUM_H_
 #define LORAPHY_LORAMEDIUM_H_
-#include <RadioMedium.h>
-#include "../LoRa/LoRaRadio.h"
+#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "LoRa/LoRaRadio.h"
 #include "inet/common/IntervalTree.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"

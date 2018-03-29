@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <LoRaBandListening.h>
+#include "LoRaBandListening.h"
 
 namespace inet {
 

@@ -16,8 +16,8 @@
 #ifndef LORAENERGYMODULES_LORAENERGYCONSUMER_H_
 #define LORAENERGYMODULES_LORAENERGYCONSUMER_H_
 
-#include "StateBasedEpEnergyConsumer.h"
-#include "IdealEpEnergyStorage.h"
+#include "inet/physicallayer/energyconsumer/StateBasedEpEnergyConsumer.h"
+#include "inet/power/storage/IdealEpEnergyStorage.h"
 #include <map>
 #include "inet/common/ModuleAccess.h"
 

@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORABANDLISTENING_H_
 #define LORAPHY_LORABANDLISTENING_H_
 
-#include <BandListening.h>
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/base/packetlevel/ListeningBase.h"
 
 namespace inet {

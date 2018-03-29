@@ -22,15 +22,15 @@
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
-#include <ScalarSNIR.h>
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
 #include "LoRaModulation.h"
 #include "LoRaTransmission.h"
 #include "LoRaReception.h"
 #include "LoRaBandListening.h"
-#include "LoRaRadio.h"
-#include <SimpleLoRaApp.h>
-#include <LoRaMac.h>
-#include <LoRaGWMac.h>
+#include "LoRa/LoRaRadio.h"
+#include "LoRaApp/SimpleLoRaApp.h"
+#include "LoRa/LoRaMac.h"
+#include "LoRa/LoRaGWMac.h"
 
 #include "LoRaRadioControlInfo_m.h"
 

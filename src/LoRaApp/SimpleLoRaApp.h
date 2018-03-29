@@ -23,7 +23,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
 #include "LoRaAppPacket_m.h"
-#include "../LoRa/LoRaMacControlInfo_m.h"
+#include "LoRa/LoRaMacControlInfo_m.h"
 
 using namespace omnetpp;
 

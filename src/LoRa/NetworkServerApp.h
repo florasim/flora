@@ -17,7 +17,7 @@
 #define __LORANETWORK_NETWORKSERVERAPP_H_
 
 #include <omnetpp.h>
-#include "RadioControlInfo_m.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include <vector>
 #include <tuple>
 #include <algorithm>
@@ -27,7 +27,7 @@
 #include "LoRaMacFrame_m.h"
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "LoRaAppPacket_m.h"
+#include "LoRaApp/LoRaAppPacket_m.h"
 #include <list>
 
 namespace inet {

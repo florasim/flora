@@ -5,7 +5,7 @@
  *      Author: slabicm1
  */
 
-#include <LoRaReception.h>
+#include "LoRaReception.h"
 
 namespace inet {
 

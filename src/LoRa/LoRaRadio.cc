@@ -13,16 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <LoRaRadio.h>
-#include "../LoRaPhy/LoRaMedium.h"
+#include "LoRaRadio.h"
+#include "LoRaPhy/LoRaMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
-#include <LoRaTransmitter.h>
-#include <LoRaReceiver.h>
-#include <LoRaMacFrame_m.h>
+#include "LoRaPhy/LoRaTransmitter.h"
+#include "LoRaPhy/LoRaReceiver.h"
+#include "LoRaMacFrame_m.h"
 
 namespace inet {
 

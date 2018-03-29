@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <SimpleLoRaApp.h>
+#include "SimpleLoRaApp.h"
 #include "inet/mobility/static/StationaryMobility.h"
 namespace inet {
 

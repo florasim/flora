@@ -19,8 +19,8 @@
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "LoRaModulation.h"
 #include "LoRaTransmission.h"
-#include "LoRaRadio.h"
-#include <LoRaMacFrame_m.h>
+#include "LoRa/LoRaRadio.h"
+#include "LoRa/LoRaMacFrame_m.h"
 
 namespace inet {
 

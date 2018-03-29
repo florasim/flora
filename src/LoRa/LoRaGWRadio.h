@@ -16,14 +16,14 @@
 #ifndef LORA_LORAGWRADIO_H_
 #define LORA_LORAGWRADIO_H_
 
-#include <FlatRadioBase.h>
-#include <LoRaTransmitter.h>
-#include <LoRaReceiver.h>
-#include <LoRaTransmission.h>
-#include <LoRaReception.h>
-#include <LoRaMacFrame_m.h>
+#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "LoRaPhy/LoRaTransmitter.h"
+#include "LoRaPhy/LoRaReceiver.h"
+#include "LoRaPhy/LoRaTransmission.h"
+#include "LoRaPhy/LoRaReception.h"
+#include "LoRaMacFrame_m.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
-#include <LoRaMedium.h>
+#include "LoRaPhy/LoRaMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
 
 namespace inet {

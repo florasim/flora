@@ -5,7 +5,7 @@
  *      Author: slabicm1
  */
 
-#include <LoRaTransmission.h>
+#include "LoRaTransmission.h"
 
 namespace inet {
 namespace physicallayer {
