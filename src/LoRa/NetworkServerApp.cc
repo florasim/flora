@@ -37,11 +37,12 @@ void NetworkServerApp::initialize(int stage)
         startUDP();
         getSimulation()->getSystemModule()->subscribe("LoRa_AppPacketSent", this);
         evaluateADRinServer = par("evaluateADRinServer");
+        adrDeviceMargin = par("adrDeviceMargin");
         receivedRSSI.setName("Received RSSI");
-        numOfReceivedPackets = 0;
+        totalReceivedPackets = 0;
         for(int i=0;i<6;i++)
         {
-            counterOfReceivedPacketsPerSF[i] = 0;
+            counterUniqueReceivedPacketsPerSF[i] = 0;
             counterOfSentPacketsFromNodesPerSF[i] = 0;
         }
     }
@@ -62,8 +63,7 @@ void NetworkServerApp::handleMessage(cMessage *msg)
         LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
         if (simTime() >= getSimulation()->getWarmupPeriod())
         {
-            numOfReceivedPackets++;
-            counterOfReceivedPacketsPerSF[frame->getLoRaSF()-7]++;
+            totalReceivedPackets++;
         }
         updateKnownNodes(frame);
         processLoraMACPacket(PK(msg));
@@ -87,7 +87,7 @@ void NetworkServerApp::processLoraMACPacket(cPacket *pk)
 
 void NetworkServerApp::finish()
 {
-    recordScalar("LoRa_NS_DER", double(counterOfReceivedPackets)/counterOfSentPacketsFromNodes);
+    recordScalar("LoRa_NS_DER", double(counterUniqueReceivedPackets)/counterOfSentPacketsFromNodes);
     for(uint i=0;i<knownNodes.size();i++)
     {
         delete knownNodes[i].historyAllSNIR;
@@ -97,44 +97,44 @@ void NetworkServerApp::finish()
         recordScalar("Send ADR for node", knownNodes[i].numberOfSentADRPackets);
     }
     receivedRSSI.recordAs("receivedRSSI");
-    recordScalar("numOfReceivedPackets", numOfReceivedPackets);
+    recordScalar("totalReceivedPackets", totalReceivedPackets);
     for(uint i=0;i<receivedPackets.size();i++)
     {
         delete receivedPackets[i].rcvdPacket;
     }
-    recordScalar("numOfReceivedPacketsPerSF SF7", counterOfReceivedPacketsPerSF[0]);
-    recordScalar("numOfReceivedPacketsPerSF SF8", counterOfReceivedPacketsPerSF[1]);
-    recordScalar("numOfReceivedPacketsPerSF SF9", counterOfReceivedPacketsPerSF[2]);
-    recordScalar("numOfReceivedPacketsPerSF SF10", counterOfReceivedPacketsPerSF[3]);
-    recordScalar("numOfReceivedPacketsPerSF SF11", counterOfReceivedPacketsPerSF[4]);
-    recordScalar("numOfReceivedPacketsPerSF SF12", counterOfReceivedPacketsPerSF[5]);
+    recordScalar("counterUniqueReceivedPacketsPerSF SF7", counterUniqueReceivedPacketsPerSF[0]);
+    recordScalar("counterUniqueReceivedPacketsPerSF SF8", counterUniqueReceivedPacketsPerSF[1]);
+    recordScalar("counterUniqueReceivedPacketsPerSF SF9", counterUniqueReceivedPacketsPerSF[2]);
+    recordScalar("counterUniqueReceivedPacketsPerSF SF10", counterUniqueReceivedPacketsPerSF[3]);
+    recordScalar("counterUniqueReceivedPacketsPerSF SF11", counterUniqueReceivedPacketsPerSF[4]);
+    recordScalar("counterUniqueReceivedPacketsPerSF SF12", counterUniqueReceivedPacketsPerSF[5]);
     if (counterOfSentPacketsFromNodesPerSF[0] > 0)
-        recordScalar("DER SF7", double(counterOfReceivedPacketsPerSF[0]) / counterOfSentPacketsFromNodesPerSF[0]);
+        recordScalar("DER SF7", double(counterUniqueReceivedPacketsPerSF[0]) / counterOfSentPacketsFromNodesPerSF[0]);
     else
         recordScalar("DER SF7", 0);
 
     if (counterOfSentPacketsFromNodesPerSF[1] > 0)
-        recordScalar("DER SF8", double(counterOfReceivedPacketsPerSF[1]) / counterOfSentPacketsFromNodesPerSF[1]);
+        recordScalar("DER SF8", double(counterUniqueReceivedPacketsPerSF[1]) / counterOfSentPacketsFromNodesPerSF[1]);
     else
         recordScalar("DER SF8", 0);
 
     if (counterOfSentPacketsFromNodesPerSF[2] > 0)
-        recordScalar("DER SF9", double(counterOfReceivedPacketsPerSF[2]) / counterOfSentPacketsFromNodesPerSF[2]);
+        recordScalar("DER SF9", double(counterUniqueReceivedPacketsPerSF[2]) / counterOfSentPacketsFromNodesPerSF[2]);
     else
         recordScalar("DER SF9", 0);
 
     if (counterOfSentPacketsFromNodesPerSF[3] > 0)
-        recordScalar("DER SF10", double(counterOfReceivedPacketsPerSF[3]) / counterOfSentPacketsFromNodesPerSF[3]);
+        recordScalar("DER SF10", double(counterUniqueReceivedPacketsPerSF[3]) / counterOfSentPacketsFromNodesPerSF[3]);
     else
         recordScalar("DER SF10", 0);
 
     if (counterOfSentPacketsFromNodesPerSF[4] > 0)
-        recordScalar("DER SF11", double(counterOfReceivedPacketsPerSF[4]) / counterOfSentPacketsFromNodesPerSF[4]);
+        recordScalar("DER SF11", double(counterUniqueReceivedPacketsPerSF[4]) / counterOfSentPacketsFromNodesPerSF[4]);
     else
         recordScalar("DER SF11", 0);
 
     if (counterOfSentPacketsFromNodesPerSF[5] > 0)
-        recordScalar("DER SF12", double(counterOfReceivedPacketsPerSF[5]) / counterOfSentPacketsFromNodesPerSF[5]);
+        recordScalar("DER SF12", double(counterUniqueReceivedPacketsPerSF[5]) / counterOfSentPacketsFromNodesPerSF[5]);
     else
         recordScalar("DER SF12", 0);
 }
@@ -216,6 +216,10 @@ void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
 void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
 {
     LoRaMacFrame *frame = static_cast<LoRaMacFrame *>(selfMsg->getContextPointer());
+    if (simTime() >= getSimulation()->getWarmupPeriod())
+    {
+        counterUniqueReceivedPacketsPerSF[frame->getLoRaSF()-7]++;
+    }
     L3Address pickedGateway;
     double SNIRinGW = -99999999999;
     double RSSIinGW = -99999999999;
@@ -239,10 +243,13 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     emit(LoRa_ServerPacketReceived, true);
     if (simTime() >= getSimulation()->getWarmupPeriod())
     {
-        counterOfReceivedPackets++;
+        counterUniqueReceivedPackets++;
     }
     receivedRSSI.collect(frame->getRSSI());
-    evaluateADR(frame, pickedGateway, SNIRinGW, RSSIinGW);
+    if(evaluateADRinServer)
+    {
+        evaluateADR(frame, pickedGateway, SNIRinGW, RSSIinGW);
+    }
     delete receivedPackets[packetNumber].rcvdPacket;
     delete selfMsg;
     receivedPackets.erase(receivedPackets.begin()+packetNumber);
@@ -253,7 +260,7 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
     bool sendADR = false;
     bool sendADRAckRep = false;
     double SNRm; //needed for ADR
-    int numberOfPickedNodes;
+    int nodeIndex;
 
     LoRaAppPacket *rcvAppPacket = check_and_cast<LoRaAppPacket*>(pkt->decapsulate());
     if(rcvAppPacket->getOptions().getADRACKReq())
@@ -265,41 +272,36 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
     {
         if(knownNodes[i].srcAddr == pkt->getTransmitterAddress())
         {
-            knownNodes[i].receivedSNIR.push_back(SNIRinGW);
-            //knownNodes[i].historyAllSNIR->record(SNIRinGW);
+            knownNodes[i].adrListSNIR.push_back(SNIRinGW);
             knownNodes[i].historyAllSNIR->record(SNIRinGW);
             knownNodes[i].historyAllRSSI->record(RSSIinGW);
             knownNodes[i].receivedSeqNumber->record(pkt->getSequenceNumber());
-            if(knownNodes[i].receivedSNIR.size() > 20) knownNodes[i].receivedSNIR.pop_front();
-            if(evaluateADRinServer)
+            if(knownNodes[i].adrListSNIR.size() == 20) knownNodes[i].adrListSNIR.pop_front();
+            knownNodes[i].framesFromLastADRCommand++;
+
+            if(knownNodes[i].framesFromLastADRCommand == 20)
             {
-                knownNodes[i].framesFromLastADRCommand++;
-                if(knownNodes[i].framesFromLastADRCommand > 20)
+                nodeIndex = i;
+                knownNodes[i].framesFromLastADRCommand = 0;
+                sendADR = true;
+                if(adrMethod == "max")
                 {
-                    numberOfPickedNodes = i;
-                    knownNodes[i].framesFromLastADRCommand = 0;
-                    sendADR = true;
-                    if(adrMethod == "max")
-                    {
-                        SNRm = *max_element(knownNodes[i].receivedSNIR.begin(), knownNodes[i].receivedSNIR.end());
-                    }
-                    if(adrMethod == "avg")
-                    {
-                        double totalSNR = *knownNodes[i].receivedSNIR.begin();
-                        int numberOfFields = 1;
-                        for (std::list<double>::iterator it=knownNodes[i].receivedSNIR.begin()++; it != knownNodes[i].receivedSNIR.end(); ++it)
-                        {
-                            totalSNR+=*it;
-                            numberOfFields++;
-                        }
-                        SNRm = totalSNR/numberOfFields;
-                    }
+                    SNRm = *max_element(knownNodes[i].adrListSNIR.begin(), knownNodes[i].adrListSNIR.end());
                 }
+                if(adrMethod == "avg")
+                {
+                    double totalSNR = 0;
+                    int numberOfFields = 0;
+                    for (std::list<double>::iterator it=knownNodes[i].adrListSNIR.begin(); it != knownNodes[i].adrListSNIR.end(); ++it)
+                    {
+                        totalSNR+=*it;
+                        numberOfFields++;
+                    }
+                    SNRm = totalSNR/numberOfFields;
+                }
+
             }
-            if(sendADR || sendADRAckRep)
-            {
-                knownNodes[i].numberOfSentADRPackets++;
-            }
+
         }
     }
 
@@ -308,11 +310,10 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
         LoRaAppPacket *mgmtPacket = new LoRaAppPacket("ADRcommand");
         mgmtPacket->setMsgType(TXCONFIG);
 
-        if(evaluateADRinServer && sendADR)
+        if(sendADR)
         {
             double SNRmargin;
             double requiredSNR;
-            double margin_db = 15;
             if(pkt->getLoRaSF() == 7) requiredSNR = -7.5;
             if(pkt->getLoRaSF() == 8) requiredSNR = -10;
             if(pkt->getLoRaSF() == 9) requiredSNR = -12.5;
@@ -320,8 +321,8 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
             if(pkt->getLoRaSF() == 11) requiredSNR = -17.5;
             if(pkt->getLoRaSF() == 12) requiredSNR = -20;
 
-            SNRmargin = SNRm - requiredSNR - margin_db;
-            knownNodes[numberOfPickedNodes].calculatedSNRmargin->record(SNRmargin);
+            SNRmargin = SNRm - requiredSNR - adrDeviceMargin;
+            knownNodes[nodeIndex].calculatedSNRmargin->record(SNRmargin);
             int Nstep = round(SNRmargin/3);
             LoRaOptions newOptions;
 
@@ -353,6 +354,11 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
             newOptions.setLoRaSF(calculatedSF);
             newOptions.setLoRaTP(calculatedPowerdBm);
             mgmtPacket->setOptions(newOptions);
+        }
+
+        if(simTime() >= getSimulation()->getWarmupPeriod())
+        {
+            knownNodes[nodeIndex].numberOfSentADRPackets++;
         }
 
         LoRaMacFrame *frameToSend = new LoRaMacFrame("ADRPacket");

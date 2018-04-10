@@ -39,7 +39,7 @@ public:
     int framesFromLastADRCommand;
     int lastSeqNoProcessed;
     int numberOfSentADRPackets;
-    std::list<double> receivedSNIR;
+    std::list<double> adrListSNIR;
     cOutVector *historyAllSNIR;
     cOutVector *historyAllRSSI;
     cOutVector *receivedSeqNumber;
@@ -66,15 +66,14 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     std::vector<knownNode> knownNodes;
     std::vector<knownGW> knownGateways;
     std::vector<receivedPacket> receivedPackets;
-
-    std::vector<L3Address> destAddresses;
     int localPort = -1, destPort = -1;
     std::vector<std::tuple<DevAddr, int>> recvdPackets;
     // state
     UDPSocket socket;
     cMessage *selfMsg = nullptr;
-    int numOfReceivedPackets;
+    int totalReceivedPackets;
     std::string adrMethod;
+    double adrDeviceMargin;
 
   protected:
     virtual void initialize(int stage) override;
@@ -97,8 +96,8 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     simsignal_t LoRa_ServerPacketReceived;
     int counterOfSentPacketsFromNodes = 0;
     int counterOfSentPacketsFromNodesPerSF[6];
-    int counterOfReceivedPackets = 0;
-    int counterOfReceivedPacketsPerSF[6];
+    int counterUniqueReceivedPackets = 0;
+    int counterUniqueReceivedPacketsPerSF[6];
 };
 } //namespace inet
 #endif

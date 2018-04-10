@@ -22,12 +22,12 @@ simple NetworkServerApp like IUDPApp
     @signal[LoRa_ServerPacketReceived](type=bool); // optional
     @statistic[LoRa_ServerPacketReceived](source=LoRa_ServerPacketReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
-    string destAddresses = default(""); // list of IP addresses, separated by spaces ("": don't send)
     string localAddress = default("");
     int destPort = default(-1);
     bool evaluateADRinServer = default(false);
 	
 	string adrMethod = default("max");
+	double adrDeviceMargin = default(15);
 	
     gates:
     output udpOut;
