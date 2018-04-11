@@ -65,6 +65,7 @@ void SimpleLoRaApp::initialize(int stage)
         evaluateADRinNode = par("evaluateADRinNode");
         sfVector.setName("SF Vector");
         tpVector.setName("TP Vector");
+        if ( (loRaCR > 4) || (loRaCR < 1) ) error("Coding rate beyond range");
     }
 }
 
