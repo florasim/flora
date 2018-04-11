@@ -114,8 +114,16 @@ void SimpleLoRaApp::handleMessage(cMessage *msg)
                 if(loRaSF == 10) time = 49.3568;
                 if(loRaSF == 11) time = 85.6064;
                 if(loRaSF == 12) time = 171.2128;
+                simtime_t prevTimeToNextPacket = par("timeToNextPacket");
+                short int isTTNPconstant = 0;
                 do {
                     timeToNextPacket = par("timeToNextPacket");
+                    if (timeToNextPacket == prevTimeToNextPacket)
+                    {
+                        isTTNPconstant++;
+                        if (isTTNPconstant > 3)
+                            error("timeToNextPacket is constant and shorter than packet transmission time");
+                    }
                     //if(timeToNextPacket < 3) error("Time to next packet must be grater than 3");
                 } while(timeToNextPacket <= time);
                 sendMeasurements = new cMessage("sendMeasurements");
