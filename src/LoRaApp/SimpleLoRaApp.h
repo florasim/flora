@@ -52,6 +52,7 @@ class INET_API SimpleLoRaApp : public cSimpleModule, public ILifecycle
         int lastSentMeasurement;
         simtime_t timeToFirstPacket;
         simtime_t timeToNextPacket;
+        double transmissionTimeTable[6];
 
         cMessage *configureLoRaParameters;
         cMessage *sendMeasurements;
@@ -79,6 +80,7 @@ class INET_API SimpleLoRaApp : public cSimpleModule, public ILifecycle
         units::values::Hz loRaBW;
         int loRaCR;
         bool loRaUseHeader;
+        double loRaDC;
 };
 
 }
