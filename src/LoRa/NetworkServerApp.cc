@@ -67,8 +67,7 @@ void NetworkServerApp::handleMessage(cMessage *msg)
         }
         updateKnownNodes(frame);
         processLoraMACPacket(PK(msg));
-    }
-    if(msg->isSelfMessage())
+    } else if(msg->isSelfMessage())
     {
         processScheduledPacket(msg);
     }
