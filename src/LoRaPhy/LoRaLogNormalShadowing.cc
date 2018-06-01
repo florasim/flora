@@ -14,6 +14,7 @@
 // 
 
 #include "LoRaLogNormalShadowing.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
@@ -52,6 +53,19 @@ double LoRaLogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequenc
     double PL_db = PL_d0_db + 10 * gamma * log10(unit(distance / d0).get()) + normal(0.0, sigma);
     return math::dB2fraction(-PL_db);
 }
+
+m LoRaLogNormalShadowing::computeRange(W transmissionPower) const
+{
+    // parameters taken from paper "Do LoRa Low-Power Wide-Area Networks Scale?"
+    double PL_d0_db = 127.41;
+    double max_sensitivity = -137;
+    double trans_power_db = round(10 * log10(transmissionPower.get()*1000));
+    EV << "LoRaLogNormalShadowing transmissionPower in W = " << transmissionPower << " in dBm = " << trans_power_db << endl;
+    double rhs = (trans_power_db - PL_d0_db - max_sensitivity)/(10 * gamma);
+    double distance = d0.get() * pow(10, rhs);
+    return m(distance);
+}
+
 
 }
 

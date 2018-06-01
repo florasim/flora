@@ -30,13 +30,7 @@ module LoRaRadio extends FlatRadioBase
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
 
-        carrierFrequency = 2450 MHz;
-
-
-        // B_20dB ATmega256RFR2 (page 564)
-        // *.bandwidth = default(2.8 MHz);
-        // what is meant by bandwidth here?
-        // the B_20dB bandwidth would lead to far too low BERs
+        carrierFrequency = 868 MHz;
         bandwidth = default(0.25 MHz);
 
         // 802.15.4-2006 (page 28)
@@ -52,12 +46,8 @@ module LoRaRadio extends FlatRadioBase
         // RSSI sensitivity (ATmega256RFR2, page 566)
         receiver.energyDetection = default(-90dBm);
 
-        // Receiver sensitivity (ATmega256RFR2, page 565)
-        // TODO That is not quite true, because sensitivity
-        //      is defined as the input signal power that yields
-        //      a PER < 1% for a PSDU of 20 octets, but INET handles it
-        //      as minimum reception power.
-        receiver.sensitivity = default(-100dBm);
+        // Lowest receiver sensitivity at SF 12, 
+        receiver.sensitivity = default(-137dBm);
 
         // There is no fixed boundary, because of the
         // DSSS and the capture effect. Taking the sensitivity minus some
@@ -68,8 +58,8 @@ module LoRaRadio extends FlatRadioBase
         // -8 dB results into 98% PER for a PSDU of 20 octets
         receiver.snirThreshold = default(-8 dB);
 
-        // TX Output power (typ. 3.5 dBm, ATmega256RFR2, page 564)
-        transmitter.power = default(2.24mW);
+        //Default transmitter power set to maximum for cache limits
+        transmitter.power = default(25.118mW);
         transmitter.preambleDuration = 0.001s;
         //*.energySourceModule = default(absPath(energySourceModule));
         energySourceModule = default(absPath(energySourceModule));

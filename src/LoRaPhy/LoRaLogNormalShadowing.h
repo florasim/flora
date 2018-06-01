@@ -40,6 +40,7 @@ class INET_API LoRaLogNormalShadowing : public FreeSpacePathLoss
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     //virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
+    m computeRange(W transmissionPower) const;
 };
 
 } // namespace physicallayer
