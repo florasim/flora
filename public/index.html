@@ -13,7 +13,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
 
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"> 
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="css/style.css"/>
   <!-- Global Site Tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106799350-1"></script>
@@ -117,7 +117,7 @@
    <div class="myoffset col-md-offset-1 col-md-9">
    <ul>
     <!-- Update link in Section 5 too -->
-   <li>Stable version of FLoRa: <a href="download/flora-0.7.tar.gz">FLoRa 0.7</a></li>
+   <li>Last stable version of FLoRa: <a href="https://github.com/mariuszslabicki/flora/archive/master.zip">FLoRa</a></li>
    <li>Repository with the code: <a href="https://github.com/mariuszslabicki/flora">GitHub</a></li>
    </ul>
   </div>
@@ -135,6 +135,7 @@
    <ul>
     <li>OMNeT++ 5.2.1</li>
     <li>INET framework 3.6.3</li>
+    <li>Note: We have checked that FLoRa works also with newer versions (OMNeT++ 5.3, and INET 3.6.4), but we have not verified all functions.</l>
     </ul>
   </div>
   </div>
@@ -151,9 +152,10 @@
   <div class="row section-text section-end">
    <div class="myoffset col-md-offset-1 col-md-9">
    <ul>
+   <li>Note: For some reasons, FLoRa does not work on Windows, when compiled with clang. To solve this problem, you can compile the whole environment with gcc. To do that, just set the default compiler to 'gcc' instead of 'clang'. You can do that in a configure.user file located in the main OMNeT++ directory</li>
    <li>Download <a href="https://omnetpp.org/omnetpp">OMNeT++ 5.2.1</a> and install following the <a href="https://omnetpp.org/documentation">installation guide</a></li>
    <li>Download <a href="https://inet.omnetpp.org/Download.html">INET 3.6.3</a> framework and install following the <a href="https://inet.omnetpp.org/Installation.html">installation guide</a></li>
-   <li>Download <a href="download/flora-0.7.tar.gz">FLoRa</a>, extract the files and import it as a new project into your OMNeT++ workspace (File > Import > General > Existing project into Workspace). HINT: If this is your first experience with OMNeT++ it is convenient to extract the archive into "samples" directory in the main OMNeT++ directory.</li>
+   <li>Download <a href="https://github.com/mariuszslabicki/flora/archive/master.zip">FLoRa</a>, extract the files and import it as a new project into your OMNeT++ workspace (File > Import > General > Existing project into Workspace). HINT: If this is your first experience with OMNeT++ it is convenient to extract the archive into "samples" directory in the main OMNeT++ directory, and change name of this directory to "flora" (instead of "flora-master").</li>
    <li>Make sure the FLoRa project has INET project as a project reference (Project > Properties > Project References)</li>
    <li>Build the FLoRa project (right-click on the project and select 'Build project')</li>
    <li>Check if FLoRa is working correctly by running a sample simulation scenario located under 'simulations' directory. Right click on loRaNetworkTest.ini and select Run as > OMNeT++ simulation. If all goes well, the simulation terminates on completion of simulated time</li>
@@ -197,19 +199,34 @@
    </div>
   <div class="row section-text section-end">
    <div class="myoffset col-md-offset-1 col-md-9">
- </p>
-   0.7
-   <ul>
-   <li>Updated to the newest OMNeT++ and INET</li>
-   <li>Code published on GitHub: <a href="https://github.com/mariuszslabicki/flora">link</a></li>
-   </ul>
-  </p>
- </p>
-   0.6
-   <ul>
-   <li>Initial working version published online</li>
-   </ul>
-  </p>
+     <p>
+       0.8
+       <ul>
+       <li>Update default parameters with LoRaWAN values</li>
+       <li>Multiple changes to add cache to speed up simulations for large networks</li>
+       </ul>
+     </p>
+     <p>
+       0.7.1
+       <ul>
+       <li>Solve segmentation fault that occurs infrequently in networks with multiple gateways</li>
+       <li>Move the source executables to the correct directory</li>
+       <li>Update statistics collection for networks with multiple gateways</li>
+       </ul>
+     </p>
+     <p>
+       0.7
+       <ul>
+       <li>Updated to the newest OMNeT++ and INET</li>
+       <li>Code published on GitHub: <a href="https://github.com/mariuszslabicki/flora">link</a></li>
+       </ul>
+     </p>
+     <p>
+       0.6
+       <ul>
+       <li>Initial working version published online</li>
+       </ul>
+      </p>
   </div>
   </div>
   <!-- END SECTION 8 -->
@@ -223,7 +240,7 @@
   <div class="row section-text section-end" style="padding-bottom: 20px;">
    <div class="myoffset col-md-offset-1 col-md-9">
     <ul>
-    <li><a href="https://users.aalto.fi/~slabicm1/">Mariusz Slabicki</a></li>
+    <li><a href="https://mariuszslabicki.github.io">Mariusz Slabicki</a></li>
     <li><a href="https://users.aalto.fi/~premsag1/">Gopika Premsankar</a></li>
     </ul>
   </div>
