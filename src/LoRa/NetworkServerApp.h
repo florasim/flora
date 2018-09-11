@@ -74,6 +74,7 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     int totalReceivedPackets;
     std::string adrMethod;
     double adrDeviceMargin;
+    std::map<int, int> numReceivedPerNode;
 
   protected:
     virtual void initialize(int stage) override;

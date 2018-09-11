@@ -95,6 +95,12 @@ void NetworkServerApp::finish()
         delete knownNodes[i].calculatedSNRmargin;
         recordScalar("Send ADR for node", knownNodes[i].numberOfSentADRPackets);
     }
+    for (std::map<int,int>::iterator it=numReceivedPerNode.begin(); it != numReceivedPerNode.end(); ++it)
+    {
+        const std::string stringScalar = "numReceivedFromNode " + std::to_string(it->first);
+        recordScalar(stringScalar.c_str(), it->second);
+    }
+
     receivedRSSI.recordAs("receivedRSSI");
     recordScalar("totalReceivedPackets", totalReceivedPackets);
     for(uint i=0;i<receivedPackets.size();i++)
@@ -223,11 +229,20 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     double SNIRinGW = -99999999999;
     double RSSIinGW = -99999999999;
     int packetNumber;
+    int nodeNumber;
     for(uint i=0;i<receivedPackets.size();i++)
     {
         if(receivedPackets[i].rcvdPacket->getTransmitterAddress() == frame->getTransmitterAddress() && receivedPackets[i].rcvdPacket->getSequenceNumber() == frame->getSequenceNumber())
         {
             packetNumber = i;
+            nodeNumber = frame->getTransmitterAddress().getInt();
+            if (numReceivedPerNode.count(nodeNumber-1)>0)
+            {
+                ++numReceivedPerNode[nodeNumber-1];
+            } else {
+                numReceivedPerNode[nodeNumber-1] = 1;
+            }
+
             for(uint j=0;j<receivedPackets[i].possibleGateways.size();j++)
             {
                 if(SNIRinGW < std::get<1>(receivedPackets[i].possibleGateways[j]))
