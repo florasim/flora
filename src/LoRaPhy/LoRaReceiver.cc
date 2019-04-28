@@ -118,11 +118,12 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     W signalRSSI_w = loRaReception->getPower();
     double signalRSSI_mw = signalRSSI_w.get()*1000;
     double signalRSSI_dBm = math::mW2dBm(signalRSSI_mw);
+    int receptionSF = loRaReception->getLoRaSF();
     for (auto interferingReception : *interferingReceptions) {
         bool overlap = false;
         bool frequencyColision = false;
         bool spreadingFactorColision = false;
-        bool captureEffect = false;
+        bool captureEffect = true; //packet on default is always accepted, unless found interference
         bool timingCollison = false; //Collision is acceptable in first part of preambles
         const LoRaReception *loRaInterference = check_and_cast<const LoRaReception *>(interferingReception);
 
@@ -138,18 +139,14 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             frequencyColision = true;
         }
 
-        if(loRaReception->getLoRaSF() == loRaInterference->getLoRaSF())
-        {
-            spreadingFactorColision = true;
-        }
-
         W interferenceRSSI_w = loRaInterference->getPower();
         double interferenceRSSI_mw = interferenceRSSI_w.get()*1000;
         double interferenceRSSI_dBm = math::mW2dBm(interferenceRSSI_mw);
+        int interferenceSF = loRaInterference->getLoRaSF();
 
-        if(signalRSSI_dBm - interferenceRSSI_dBm < P_threshold)
+        if(signalRSSI_dBm - interferenceRSSI_dBm < nonOrthDelta[receptionSF-7][interferenceSF-7])
         {
-            captureEffect = true;
+            captureEffect = false;
         }
 
         double nPreamble = 8; //from the paper "Does Lora networks..."
@@ -161,7 +158,16 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
         {
             timingCollison = true;
         }
-        if (overlap && frequencyColision && spreadingFactorColision) // && captureEffect && timingCollison)
+        EV << "[MSDEBUG] Received packet at SF: " << receptionSF << " with power " << signalRSSI_dBm << endl;
+        EV << "[MSDEBUG] Received interference at SF: " << interferenceSF << " with power " << interferenceRSSI_dBm << endl;
+        EV << "[MSDEBUG] Acceptable diff is equal " << nonOrthDelta[receptionSF-7][interferenceSF-7] << endl;
+        EV << "[MSDEBUG] Diff is equal " << signalRSSI_dBm - interferenceRSSI_dBm << endl;
+        if (captureEffect == false)
+        {
+            EV << "[MSDEBUG] Packet is discarded" << endl;
+        } else
+            EV << "[MSDEBUG] Packet is not discarded" << endl;
+        if (overlap && frequencyColision) // && captureEffect && timingCollison)
         {
             if(alohaChannelModel == true)
             {
@@ -170,7 +176,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             }
             if(alohaChannelModel == false)
             {
-                if(captureEffect && timingCollison)
+                if(captureEffect == false && timingCollison)
                 {
                     if(iAmGateway && (part == IRadioSignal::SIGNAL_PART_DATA || part == IRadioSignal::SIGNAL_PART_WHOLE)) const_cast<LoRaReceiver* >(this)->emit(LoRaReceptionCollision, true);
                     return true;

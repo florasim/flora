@@ -59,6 +59,15 @@ private:
     W energyDetection;
     simsignal_t LoRaReceptionCollision;
 
+    int nonOrthDelta[6][6] = {
+       {1, -8, -9, -9, -9, -9},
+       {-11, 1, -11, -12, -13, -13},
+       {-15, -13, 1, -13, -14, -15},
+       {-19, -18, -17, 1, -17, -18},
+       {-22, -22, -21, -20, 1, -20},
+       {-25, -25, -25, -24, -23, 1}
+    };
+
     //statistics
     long numCollisions;
     long rcvBelowSensitivity;
