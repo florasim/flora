@@ -121,10 +121,8 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     int receptionSF = loRaReception->getLoRaSF();
     for (auto interferingReception : *interferingReceptions) {
         bool overlap = false;
-        bool frequencyColision = false;
-        bool spreadingFactorColision = false;
-        bool captureEffect = true; //packet on default is always accepted, unless found interference
-        bool timingCollison = false; //Collision is acceptable in first part of preambles
+        bool frequencyCollision = false;
+        bool captureEffect = false; //packet on default is always accepted, unless found interference
         const LoRaReception *loRaInterference = check_and_cast<const LoRaReception *>(interferingReception);
 
         simtime_t m_y = (loRaInterference->getStartTime() + loRaInterference->getEndTime())/2;
@@ -136,7 +134,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
 
         if(loRaReception->getLoRaCF() == loRaInterference->getLoRaCF())
         {
-            frequencyColision = true;
+            frequencyCollision = true;
         }
 
         W interferenceRSSI_w = loRaInterference->getPower();
@@ -144,20 +142,11 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
         double interferenceRSSI_dBm = math::mW2dBm(interferenceRSSI_mw);
         int interferenceSF = loRaInterference->getLoRaSF();
 
-        if(signalRSSI_dBm - interferenceRSSI_dBm < nonOrthDelta[receptionSF-7][interferenceSF-7])
+        if(signalRSSI_dBm - interferenceRSSI_dBm >= nonOrthDelta[receptionSF-7][interferenceSF-7])
         {
-            captureEffect = false;
+            captureEffect = true;
         }
 
-        double nPreamble = 8; //from the paper "Does Lora networks..."
-        //double Npream = nPreamble + 4.25; //4.25 is a constant added by Lora Transceiver
-
-        simtime_t Tsym = (pow(2, loRaReception->getLoRaSF()))/(loRaReception->getLoRaBW().get()/1000)/1000;
-        simtime_t csBegin = loRaReception->getPreambleStartTime() + Tsym * (nPreamble - 5);
-        if(csBegin < loRaInterference->getEndTime())
-        {
-            timingCollison = true;
-        }
         EV << "[MSDEBUG] Received packet at SF: " << receptionSF << " with power " << signalRSSI_dBm << endl;
         EV << "[MSDEBUG] Received interference at SF: " << interferenceSF << " with power " << interferenceRSSI_dBm << endl;
         EV << "[MSDEBUG] Acceptable diff is equal " << nonOrthDelta[receptionSF-7][interferenceSF-7] << endl;
@@ -167,7 +156,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             EV << "[MSDEBUG] Packet is discarded" << endl;
         } else
             EV << "[MSDEBUG] Packet is not discarded" << endl;
-        if (overlap && frequencyColision) // && captureEffect && timingCollison)
+        if (overlap && frequencyCollision)
         {
             if(alohaChannelModel == true)
             {
@@ -176,7 +165,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             }
             if(alohaChannelModel == false)
             {
-                if(captureEffect == false && timingCollison)
+                if(captureEffect == false)
                 {
                     if(iAmGateway && (part == IRadioSignal::SIGNAL_PART_DATA || part == IRadioSignal::SIGNAL_PART_WHOLE)) const_cast<LoRaReceiver* >(this)->emit(LoRaReceptionCollision, true);
                     return true;
