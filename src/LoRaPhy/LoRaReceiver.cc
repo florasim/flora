@@ -122,7 +122,8 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     for (auto interferingReception : *interferingReceptions) {
         bool overlap = false;
         bool frequencyCollision = false;
-        bool captureEffect = false; //packet on default is always accepted, unless found interference
+        bool captureEffect = false;
+        bool timingCollision = false; //Collision is acceptable in first part of preamble
         const LoRaReception *loRaInterference = check_and_cast<const LoRaReception *>(interferingReception);
 
         simtime_t m_y = (loRaInterference->getStartTime() + loRaInterference->getEndTime())/2;
@@ -142,6 +143,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
         double interferenceRSSI_dBm = math::mW2dBm(interferenceRSSI_mw);
         int interferenceSF = loRaInterference->getLoRaSF();
 
+        /* If difference in power between two signals is greater than threshold, no collision*/
         if(signalRSSI_dBm - interferenceRSSI_dBm >= nonOrthDelta[receptionSF-7][interferenceSF-7])
         {
             captureEffect = true;
@@ -156,6 +158,16 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             EV << "[MSDEBUG] Packet is discarded" << endl;
         } else
             EV << "[MSDEBUG] Packet is not discarded" << endl;
+
+        /* If last 6 symbols of preamble are received, no collision*/
+        double nPreamble = 8; //from the paper "Do Lora networks..."
+        simtime_t Tsym = (pow(2, loRaReception->getLoRaSF()))/(loRaReception->getLoRaBW().get()/1000)/1000;
+        simtime_t csBegin = loRaReception->getPreambleStartTime() + Tsym * (nPreamble - 6);
+        if(csBegin < loRaInterference->getEndTime())
+        {
+            timingCollision = true;
+        }
+
         if (overlap && frequencyCollision)
         {
             if(alohaChannelModel == true)
@@ -165,7 +177,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             }
             if(alohaChannelModel == false)
             {
-                if(captureEffect == false)
+                if(captureEffect == false && timingCollision)
                 {
                     if(iAmGateway && (part == IRadioSignal::SIGNAL_PART_DATA || part == IRadioSignal::SIGNAL_PART_WHOLE)) const_cast<LoRaReceiver* >(this)->emit(LoRaReceptionCollision, true);
                     return true;
