@@ -195,15 +195,22 @@ void SimpleLoRaApp::sendJoinRequest()
         if(ADR_ACK_CNT >= ADR_ACK_LIMIT + ADR_ACK_DELAY)
         {
             ADR_ACK_CNT = 0;
-            increaseSFIfPossible();
+            increaseTPOrSFIfPossible();
         }
     }
     emit(LoRa_AppPacketSent, loRaSF);
 }
 
-void SimpleLoRaApp::increaseSFIfPossible()
+void SimpleLoRaApp::increaseTPOrSFIfPossible()
 {
-    if(loRaSF < 12) loRaSF++;
+    if(loRaTP < 14)
+    {
+        loRaTP += 3; // at the beginning increase the Transmission Power
+    }
+    else if(loRaSF < 12) 
+    {
+        loRaSF++; // secondly increase Spreading Factor
+    }
 }
 
 } //end namespace inet
