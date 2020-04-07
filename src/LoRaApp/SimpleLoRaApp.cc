@@ -61,10 +61,19 @@ void SimpleLoRaApp::initialize(int stage)
         loRaSF = par("initialLoRaSF");
         loRaBW = inet::units::values::Hz(par("initialLoRaBW").doubleValue());
         loRaCR = par("initialLoRaCR");
+        loRaDC = par("initialLoRaDC").doubleValue(); //no sense to use inet::units::values::percent cuz  % no allowed in ned
         loRaUseHeader = par("initialUseHeader");
         evaluateADRinNode = par("evaluateADRinNode");
         sfVector.setName("SF Vector");
         tpVector.setName("TP Vector");
+        
+        // Calculate transmission time according to duty cycle and coding rate
+        transmissionTimeTable[0] = (49.408  + loRaCR*7.168) / loRaDC / 10.0; //SF 7
+        transmissionTimeTable[1] = (90.624  + loRaCR*12.288) / loRaDC / 10.0; //SF 8
+        transmissionTimeTable[2] = (164.864 + loRaCR*20.48) / loRaDC / 10.0; //SF 9
+        transmissionTimeTable[3] = (329.728 + loRaCR*40.96) / loRaDC / 10.0; //SF 10
+        transmissionTimeTable[4] = (659.456 + loRaCR*81.92) / loRaDC / 10.0; //SF 11
+        transmissionTimeTable[5] = (1187.84 + loRaCR*131.072) / loRaDC / 10.0; //SF 12
     }
 }
 
@@ -108,12 +117,12 @@ void SimpleLoRaApp::handleMessage(cMessage *msg)
             if(numberOfPacketsToSend == 0 || sentPackets < numberOfPacketsToSend)
             {
                 double time;
-                if(loRaSF == 7) time = 7.808;
-                if(loRaSF == 8) time = 13.9776;
-                if(loRaSF == 9) time = 24.6784;
-                if(loRaSF == 10) time = 49.3568;
-                if(loRaSF == 11) time = 85.6064;
-                if(loRaSF == 12) time = 171.2128;
+                if(loRaSF == 7) time = transmissionTimeTable[0];
+                if(loRaSF == 8) time = transmissionTimeTable[1];
+                if(loRaSF == 9) time = transmissionTimeTable[2];
+                if(loRaSF == 10) time = transmissionTimeTable[3];
+                if(loRaSF == 11) time = transmissionTimeTable[4];
+                if(loRaSF == 12) time = transmissionTimeTable[5];
                 do {
                     timeToNextPacket = par("timeToNextPacket");
                     //if(timeToNextPacket < 3) error("Time to next packet must be grater than 3");
