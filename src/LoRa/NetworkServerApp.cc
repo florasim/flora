@@ -204,6 +204,7 @@ void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
             packetExists = true;
             receivedPackets[i].possibleGateways.emplace_back(cInfo->getSrcAddr(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
             delete pkt;
+            break;
         }
     }
     if(packetExists == false)
