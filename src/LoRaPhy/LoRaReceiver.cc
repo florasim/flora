@@ -39,15 +39,17 @@ void LoRaReceiver::initialize(int stage)
         alohaChannelModel = par("alohaChannelModel");
         LoRaReceptionCollision = registerSignal("LoRaReceptionCollision");
         numCollisions = 0;
-        rcvBelowSensitivity = 0;
+        packetCollided = 0;
+        correctReception = 0;
     }
 }
 
 void LoRaReceiver::finish()
 {
-        recordScalar("numCollisions", numCollisions);
-        recordScalar("rcvBelowSensitivity", rcvBelowSensitivity);
-
+        if(iAmGateway) {
+            EV << "packetCollided " << packetCollided << endl;
+            EV << "correctReception " << correctReception << endl;
+        }
 }
 
 bool LoRaReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
@@ -73,9 +75,6 @@ bool LoRaReceiver::computeIsReceptionPossible(const IListening *listening, const
         W sensitivity = getSensitivity(loRaReception);
         bool isReceptionPossible = minReceptionPower >= sensitivity;
         EV_DEBUG << "Computing whether reception is possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
-        if(isReceptionPossible == false) {
-           const_cast<LoRaReceiver* >(this)->rcvBelowSensitivity++;
-        }
         return isReceptionPossible;
     }
 }
@@ -108,6 +107,19 @@ bool LoRaReceiver::computeIsReceptionAttempted(const IListening *listening, cons
 
 bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const
 {
+    bool packetIsCollided = true;
+    std::map<std::string, bool> result_map = evaluateLoRaCollision(reception, part, interference);
+    if(result_map["correctReception"] == true){
+        packetIsCollided = false;
+    }
+    return packetIsCollided;
+}
+
+std::map<std::string, bool> LoRaReceiver::evaluateLoRaCollision(const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const
+{
+    std::map<std::string, bool> receptionStats;
+    receptionStats["packetCollided"] = false;
+    receptionStats["correctReception"] = true;
     auto radio = reception->getReceiver();
     //auto radioMedium = radio->getMedium();
     auto interferingReceptions = interference->getInterferingReceptions();
@@ -115,6 +127,15 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     simtime_t m_x = (loRaReception->getStartTime() + loRaReception->getEndTime())/2;
     simtime_t d_x = (loRaReception->getEndTime() - loRaReception->getStartTime())/2;
     double P_threshold = 6;
+
+    W minReceptionPower = loRaReception->computeMinPower(reception->getStartTime(part), reception->getEndTime(part));
+    W sensitivity = getSensitivity(loRaReception);
+    bool isReceptionPossible = minReceptionPower >= sensitivity;
+    if(isReceptionPossible == false) {
+        receptionStats["correctReception"] = false;
+        return receptionStats;
+    }
+
     W signalRSSI_w = loRaReception->getPower();
     double signalRSSI_mw = signalRSSI_w.get()*1000;
     double signalRSSI_dBm = math::mW2dBm(signalRSSI_mw);
@@ -149,15 +170,6 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             captureEffect = true;
         }
 
-        EV << "[MSDEBUG] Received packet at SF: " << receptionSF << " with power " << signalRSSI_dBm << endl;
-        EV << "[MSDEBUG] Received interference at SF: " << interferenceSF << " with power " << interferenceRSSI_dBm << endl;
-        EV << "[MSDEBUG] Acceptable diff is equal " << nonOrthDelta[receptionSF-7][interferenceSF-7] << endl;
-        EV << "[MSDEBUG] Diff is equal " << signalRSSI_dBm - interferenceRSSI_dBm << endl;
-        if (captureEffect == false)
-        {
-            EV << "[MSDEBUG] Packet is discarded" << endl;
-        } else
-            EV << "[MSDEBUG] Packet is not discarded" << endl;
 
         /* If last 6 symbols of preamble are received, no collision*/
         double nPreamble = 8; //from the paper "Do Lora networks..."
@@ -173,20 +185,22 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
             if(alohaChannelModel == true)
             {
                 if(iAmGateway && (part == IRadioSignal::SIGNAL_PART_DATA || part == IRadioSignal::SIGNAL_PART_WHOLE)) const_cast<LoRaReceiver* >(this)->emit(LoRaReceptionCollision, true);
-                return true;
             }
             if(alohaChannelModel == false)
             {
                 if(captureEffect == false && timingCollision)
                 {
-                    if(iAmGateway && (part == IRadioSignal::SIGNAL_PART_DATA || part == IRadioSignal::SIGNAL_PART_WHOLE)) const_cast<LoRaReceiver* >(this)->emit(LoRaReceptionCollision, true);
-                    return true;
+                    if(iAmGateway && (part == IRadioSignal::SIGNAL_PART_DATA || part == IRadioSignal::SIGNAL_PART_WHOLE)) {
+                        const_cast<LoRaReceiver* >(this)->emit(LoRaReceptionCollision, true);
+                        receptionStats["packetCollided"] = true;
+                        receptionStats["correctReception"] = false;
+                    }
                 }
             }
 
         }
     }
-    return false;
+    return receptionStats;
 }
 
 const ReceptionIndication *LoRaReceiver::computeReceptionIndication(const ISNIR *snir) const
@@ -210,6 +224,13 @@ const IReceptionDecision *LoRaReceiver::computeReceptionDecision(const IListenin
     auto isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
     auto isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, part, interference);
     auto isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, part, interference, snir);
+    std::map<std::string, bool> result_map = evaluateLoRaCollision(reception, part, interference);
+    if(result_map["packetCollided"] == true) {
+        const_cast<LoRaReceiver* >(this)->packetCollided++;
+    }
+    if(result_map["correctReception"] == true) {
+        const_cast<LoRaReceiver* >(this)->correctReception++;
+    }
     return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 

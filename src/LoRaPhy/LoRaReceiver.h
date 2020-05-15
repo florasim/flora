@@ -70,7 +70,8 @@ private:
 
     //statistics
     long numCollisions;
-    long rcvBelowSensitivity;
+    long packetCollided;
+    long correctReception;
 
 public:
   LoRaReceiver();
@@ -103,6 +104,7 @@ public:
   W getSensitivity(const LoRaReception *loRaReception) const;
 
   bool isPacketCollided(const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const;
+  std::map<std::string, bool> evaluateLoRaCollision(const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const;
 
   virtual void setLoRaTP(W newTP) { LoRaTP = newTP; };
   virtual void setLoRaCF(Hz newCF) { LoRaCF = newCF; };
