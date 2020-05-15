@@ -37,7 +37,6 @@ void LoRaReceiver::initialize(int stage)
             iAmGateway = true;
         } else iAmGateway = false;
         alohaChannelModel = par("alohaChannelModel");
-        LoRaReceptionCollision = registerSignal("LoRaReceptionCollision");
         numCollisions = 0;
         packetCollided = 0;
         correctReception = 0;
@@ -47,8 +46,8 @@ void LoRaReceiver::initialize(int stage)
 void LoRaReceiver::finish()
 {
         if(iAmGateway) {
-            EV << "packetCollided " << packetCollided << endl;
-            EV << "correctReception " << correctReception << endl;
+            recordScalar("packetCollided", packetCollided);
+            recordScalar("correctReception", correctReception);
         }
 }
 
@@ -191,7 +190,6 @@ std::map<std::string, bool> LoRaReceiver::evaluateLoRaCollision(const IReception
                 if(captureEffect == false && timingCollision)
                 {
                     if(iAmGateway && (part == IRadioSignal::SIGNAL_PART_DATA || part == IRadioSignal::SIGNAL_PART_WHOLE)) {
-                        const_cast<LoRaReceiver* >(this)->emit(LoRaReceptionCollision, true);
                         receptionStats["packetCollided"] = true;
                         receptionStats["correctReception"] = false;
                     }
