@@ -68,12 +68,22 @@ void SimpleLoRaApp::initialize(int stage)
         tpVector.setName("TP Vector");
         
         // Calculate transmission time according to duty cycle and coding rate
-        transmissionTimeTable[0] = (49.408  + loRaCR*7.168) / loRaDC / 10.0; //SF 7
-        transmissionTimeTable[1] = (90.624  + loRaCR*12.288) / loRaDC / 10.0; //SF 8
-        transmissionTimeTable[2] = (164.864 + loRaCR*20.48) / loRaDC / 10.0; //SF 9
-        transmissionTimeTable[3] = (329.728 + loRaCR*40.96) / loRaDC / 10.0; //SF 10
-        transmissionTimeTable[4] = (659.456 + loRaCR*81.92) / loRaDC / 10.0; //SF 11
-        transmissionTimeTable[5] = (1187.84 + loRaCR*131.072) / loRaDC / 10.0; //SF 12
+        int nPreamble = 8;
+
+        int payloadBytes = 20;   // TODO: Should be a parameter in config?
+
+
+        for(uint sf=7; sf<=12; sf++) {
+            double Tsym = (pow(2, loRaSF))/(par("initialLoRaBW").doubleValue()/1000);
+            double Tpreamble = (nPreamble + 4.25) * Tsym / 1000;
+            int payloadSymbNb = 8 + math::max(ceil((8*payloadBytes - 4*loRaSF + 28 + 16 - 20*0)/(4*(loRaSF-2*0)))*(loRaCR + 4), 0);
+
+            double transmissionTime =  Tpreamble + (8+payloadSymbNb) * Tsym / 1000;
+            transmissionTimeTable[sf-7] = transmissionTime*100;
+
+        }
+
+
     }
 }
 
@@ -117,12 +127,7 @@ void SimpleLoRaApp::handleMessage(cMessage *msg)
             if(numberOfPacketsToSend == 0 || sentPackets < numberOfPacketsToSend)
             {
                 double time;
-                if(loRaSF == 7) time = transmissionTimeTable[0];
-                if(loRaSF == 8) time = transmissionTimeTable[1];
-                if(loRaSF == 9) time = transmissionTimeTable[2];
-                if(loRaSF == 10) time = transmissionTimeTable[3];
-                if(loRaSF == 11) time = transmissionTimeTable[4];
-                if(loRaSF == 12) time = transmissionTimeTable[5];
+                time = transmissionTimeTable[loRaSF-7];
                 do {
                     timeToNextPacket = par("timeToNextPacket");
                     //if(timeToNextPacket < 3) error("Time to next packet must be grater than 3");
