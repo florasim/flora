@@ -32,7 +32,6 @@ simple SimpleLoRaApp
         double initialLoRaBW @unit(Hz) = default(125kHz);
         int initialLoRaCR = default(4);
         bool initialUseHeader = default(true);
-        double initialLoRaDC = default(1);
     	@class(inet::SimpleLoRaApp);
     	bool evaluateADRinNode = default(false);
     gates:

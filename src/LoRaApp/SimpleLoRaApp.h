@@ -80,7 +80,6 @@ class INET_API SimpleLoRaApp : public cSimpleModule, public ILifecycle
         units::values::Hz loRaBW;
         int loRaCR;
         bool loRaUseHeader;
-        double loRaDC;
 };
 
 }

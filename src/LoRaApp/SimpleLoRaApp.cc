@@ -61,7 +61,6 @@ void SimpleLoRaApp::initialize(int stage)
         loRaSF = par("initialLoRaSF");
         loRaBW = inet::units::values::Hz(par("initialLoRaBW").doubleValue());
         loRaCR = par("initialLoRaCR");
-        loRaDC = par("initialLoRaDC").doubleValue(); //no sense to use inet::units::values::percent cuz  % no allowed in ned
         loRaUseHeader = par("initialUseHeader");
         evaluateADRinNode = par("evaluateADRinNode");
         sfVector.setName("SF Vector");
@@ -77,7 +76,6 @@ void SimpleLoRaApp::initialize(int stage)
             double Tsym = (pow(2, loRaSF))/(par("initialLoRaBW").doubleValue()/1000);
             double Tpreamble = (nPreamble + 4.25) * Tsym / 1000;
             int payloadSymbNb = 8 + math::max(ceil((8*payloadBytes - 4*loRaSF + 28 + 16 - 20*0)/(4*(loRaSF-2*0)))*(loRaCR + 4), 0);
-
             double transmissionTime =  Tpreamble + (8+payloadSymbNb) * Tsym / 1000;
             transmissionTimeTable[sf-7] = transmissionTime*100;
 
