@@ -42,7 +42,7 @@ public:
     std::list<double> adrListSNIR;
     cOutVector *historyAllSNIR;
     cOutVector *historyAllRSSI;
-    cOutVector *receivedSeqNumber;
+    std::list<double> receivedSeqNumber;//cOutVector *receivedSeqNumber;
     cOutVector *calculatedSNRmargin;
 };
 

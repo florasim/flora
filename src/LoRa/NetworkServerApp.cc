@@ -19,11 +19,11 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include <math.h>
 
 namespace inet {
 
 Define_Module(NetworkServerApp);
-
 
 void NetworkServerApp::initialize(int stage)
 {
@@ -91,7 +91,7 @@ void NetworkServerApp::finish()
     {
         delete knownNodes[i].historyAllSNIR;
         delete knownNodes[i].historyAllRSSI;
-        delete knownNodes[i].receivedSeqNumber;
+        //delete knownNodes[i].receivedSeqNumber;
         delete knownNodes[i].calculatedSNRmargin;
         recordScalar("Send ADR for node", knownNodes[i].numberOfSentADRPackets);
     }
@@ -167,6 +167,7 @@ void NetworkServerApp::updateKnownNodes(LoRaMacFrame* pkt)
             if(knownNodes[i].lastSeqNoProcessed < pkt->getSequenceNumber())
             {
                 knownNodes[i].lastSeqNoProcessed = pkt->getSequenceNumber();
+
             }
             break;
         }
@@ -185,8 +186,8 @@ void NetworkServerApp::updateKnownNodes(LoRaMacFrame* pkt)
         newNode.historyAllRSSI = new cOutVector;
         newNode.historyAllRSSI->setName("Vector of RSSI per node");
         newNode.historyAllRSSI->record(pkt->getRSSI());
-        newNode.receivedSeqNumber = new cOutVector;
-        newNode.receivedSeqNumber->setName("Received Sequence number");
+        //newNode.receivedSeqNumber = new cOutVector;
+        //newNode.receivedSeqNumber->setName("Received Sequence number");
         newNode.calculatedSNRmargin = new cOutVector;
         newNode.calculatedSNRmargin->setName("Calculated SNRmargin in ADR");
         knownNodes.push_back(newNode);
@@ -204,7 +205,6 @@ void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
             packetExists = true;
             receivedPackets[i].possibleGateways.emplace_back(cInfo->getSrcAddr(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
             delete pkt;
-            break;
         }
     }
     if(packetExists == false)
@@ -290,10 +290,12 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
             knownNodes[i].adrListSNIR.push_back(SNIRinGW);
             knownNodes[i].historyAllSNIR->record(SNIRinGW);
             knownNodes[i].historyAllRSSI->record(RSSIinGW);
-            knownNodes[i].receivedSeqNumber->record(pkt->getSequenceNumber());
+            //knownNodes[i].receivedSeqNumber->record(pkt->getSequenceNumber());
+            knownNodes[i].receivedSeqNumber.push_back(pkt->getSequenceNumber());
             if(knownNodes[i].adrListSNIR.size() == 20) knownNodes[i].adrListSNIR.pop_front();
+            if(knownNodes[i].receivedSeqNumber.size() == 20) knownNodes[i].receivedSeqNumber.pop_front();
             knownNodes[i].framesFromLastADRCommand++;
-
+            recordScalar("knownNodes",knownNodes[i].framesFromLastADRCommand);
             if(knownNodes[i].framesFromLastADRCommand == 20)
             {
                 nodeIndex = i;
@@ -302,6 +304,11 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
                 if(adrMethod == "max")
                 {
                     SNRm = *max_element(knownNodes[i].adrListSNIR.begin(), knownNodes[i].adrListSNIR.end());
+                }
+                if(adrMethod == "min")
+                {
+					//min ADR
+                    SNRm = *min_element(knownNodes[i].adrListSNIR.begin(), knownNodes[i].adrListSNIR.end());
                 }
                 if(adrMethod == "avg")
                 {
@@ -313,6 +320,35 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
                         numberOfFields++;
                     }
                     SNRm = totalSNR/numberOfFields;
+                }
+                if(adrMethod == "owa")
+                {
+                    double begin=knownNodes[i].receivedSeqNumber.front();
+                    double end=knownNodes[i].receivedSeqNumber.back();
+                    double size=knownNodes[i].receivedSeqNumber.size();
+                    double pathloss=(end-begin-18)/(end-begin);
+                    double pathlossRate = (int)(pathloss * 100000 + .5);
+                    pathlossRate=pathlossRate / 100000;
+                    knownNodes[i].adrListSNIR.sort();
+                    double totalSNR = 0;
+                    double result=0;
+                    int last = 19;
+                    for (std::list<double>::iterator j=knownNodes[i].adrListSNIR.begin(); j != knownNodes[i].adrListSNIR.end(); ++j)
+                    {
+                        //pessimistic owa ADR
+                        if(last==1){
+                            result=pow(pathlossRate,(19-last));
+                        }else{
+                            result=(1-pathlossRate)*pow(pathlossRate,(19-last));
+                        }
+                        result = (int)(result * 100000 + .5);
+                        result=result / 100000;
+
+                        totalSNR=(*j * result)+totalSNR;
+
+                        last=last-1;
+                    }
+                    SNRm = totalSNR;
                 }
 
             }
@@ -336,7 +372,11 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
             if(pkt->getLoRaSF() == 11) requiredSNR = -17.5;
             if(pkt->getLoRaSF() == 12) requiredSNR = -20;
 
+            //recordScalar("SNRm", SNRm);
+            //recordScalar("requiredSNR", requiredSNR);
+            //recordScalar("requiredSNR", requiredSNR);
             SNRmargin = SNRm - requiredSNR - adrDeviceMargin;
+            //recordScalar("SNRmargin", SNRmargin);
             knownNodes[nodeIndex].calculatedSNRmargin->record(SNRmargin);
             int Nstep = round(SNRmargin/3);
             LoRaOptions newOptions;
@@ -400,3 +440,4 @@ void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, l
 }
 
 } //namespace inet
+
