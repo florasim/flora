@@ -14,9 +14,9 @@
 // 
 
 package loranetwork.LoRa;
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
-simple NetworkServerApp like IUDPApp
+simple NetworkServerApp like IApp
 {
     @class(inet::NetworkServerApp);
     @signal[LoRa_ServerPacketReceived](type=bool); // optional
@@ -30,7 +30,7 @@ simple NetworkServerApp like IUDPApp
 	double adrDeviceMargin = default(15);
 	
     gates:
-    output udpOut;
-    input udpIn;
+    output socketOut;
+    input socketIn;
 
 }

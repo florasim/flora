@@ -16,7 +16,7 @@
 #include "LoRaRadio.h"
 #include "LoRaPhy/LoRaMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
@@ -168,7 +168,7 @@ const ITransmission *LoRaRadio::getTransmissionInProgress() const
     if (!transmissionTimer->isScheduled())
         return nullptr;
     else
-        return static_cast<RadioFrame *>(transmissionTimer->getContextPointer())->getTransmission();
+        return static_cast<Signal *>(transmissionTimer->getContextPointer())->getTransmission();
 }
 
 const ITransmission *LoRaRadio::getReceptionInProgress() const
@@ -176,7 +176,7 @@ const ITransmission *LoRaRadio::getReceptionInProgress() const
     if (receptionTimer == nullptr)
         return nullptr;
     else
-        return static_cast<RadioFrame *>(receptionTimer->getControlInfo())->getTransmission();
+        return static_cast<Signal *>(receptionTimer->getControlInfo())->getTransmission();
 }
 
 IRadioSignal::SignalPart LoRaRadio::getTransmittedSignalPart() const
@@ -207,7 +207,7 @@ void LoRaRadio::handleMessageWhenUp(cMessage *message)
             delete message;
         }
         else
-            handleUpperPacket(check_and_cast<cPacket *>(message));
+            handleUpperPacket(check_and_cast<Packet *>(message));
     }
     else if (message->getArrivalGate() == radioIn) {
         if (!message->isPacket()) {
@@ -215,7 +215,7 @@ void LoRaRadio::handleMessageWhenUp(cMessage *message)
             delete message;
         }
         else
-            handleLowerPacket(check_and_cast<RadioFrame *>(message));
+            handleLowerPacket(check_and_cast<Signal *>(message));
     }
     else
         throw cRuntimeError("Unknown arrival gate '%s'.", message->getArrivalGate()->getFullName());
@@ -282,9 +282,9 @@ void LoRaRadio::handleLowerCommand(cMessage *message)
     throw cRuntimeError("Unsupported command");
 }
 
-void LoRaRadio::handleUpperPacket(cPacket *packet)
+void LoRaRadio::handleUpperPacket(Packet *packet)
 {
-    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
+    emit(packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
         if (transmissionTimer->isScheduled())
             throw cRuntimeError("Received frame from upper layer while already transmitting.");
@@ -299,7 +299,7 @@ void LoRaRadio::handleUpperPacket(cPacket *packet)
     }
 }
 
-void LoRaRadio::handleLowerPacket(RadioFrame *radioFrame)
+void LoRaRadio::handleLowerPacket(Signal *radioFrame)
 {
     auto receptionTimer = createReceptionTimer(radioFrame);
     if (separateReceptionParts)
@@ -312,7 +312,7 @@ bool LoRaRadio::handleNodeStart(IDoneCallback *doneCallback)
 {
     // NOTE: we ignore radio mode switching during start
     completeRadioModeSwitch(RADIO_MODE_OFF);
-    return PhysicalLayerBase::handleNodeStart(doneCallback);
+    return handleNodeStart(doneCallback);
 }
 
 bool LoRaRadio::handleNodeShutdown(IDoneCallback *doneCallback)
@@ -322,7 +322,7 @@ bool LoRaRadio::handleNodeShutdown(IDoneCallback *doneCallback)
     if (transmissionTimer->isScheduled())
         abortTransmission();
     completeRadioModeSwitch(RADIO_MODE_OFF);
-    return PhysicalLayerBase::handleNodeShutdown(doneCallback);
+    return handleNodeShutdown(doneCallback);
 }
 
 void LoRaRadio::handleNodeCrash()
@@ -331,34 +331,34 @@ void LoRaRadio::handleNodeCrash()
     if (transmissionTimer->isScheduled())
         abortTransmission();
     completeRadioModeSwitch(RADIO_MODE_OFF);
-    PhysicalLayerBase::handleNodeCrash();
+    handleNodeCrash();
 }
 
-void LoRaRadio::startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part)
+void LoRaRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)
 {
     auto radioFrame = createRadioFrame(macFrame);
     auto transmission = radioFrame->getTransmission();
     transmissionTimer->setKind(part);
-    transmissionTimer->setContextPointer(const_cast<RadioFrame *>(radioFrame));
+    transmissionTimer->setContextPointer(const_cast<Signal *>(radioFrame));
 
     scheduleAt(transmission->getEndTime(part), transmissionTimer);
-    EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
+    EV_INFO << "Transmission started: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
     //check_and_cast<LoRaMedium *>(medium)->fireTransmissionStarted(transmission);
-    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
+    check_and_cast<LoRaMedium *>(medium)->emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void LoRaRadio::continueTransmission()
 {
     auto previousPart = (IRadioSignal::SignalPart)transmissionTimer->getKind();
     auto nextPart = (IRadioSignal::SignalPart)(previousPart + 1);
-    auto radioFrame = static_cast<RadioFrame *>(transmissionTimer->getContextPointer());
+    auto radioFrame = static_cast<Signal *>(transmissionTimer->getContextPointer());
     auto transmission = radioFrame->getTransmission();
-    EV_INFO << "Transmission ended: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << radioFrame->getTransmission() << endl;
+    EV_INFO << "Transmission ended: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << radioFrame->getTransmission() << endl;
     transmissionTimer->setKind(nextPart);
     scheduleAt(transmission->getEndTime(nextPart), transmissionTimer);
-    EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << transmission << endl;
+    EV_INFO << "Transmission started: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
 }
@@ -366,86 +366,86 @@ void LoRaRadio::continueTransmission()
 void LoRaRadio::endTransmission()
 {
     auto part = (IRadioSignal::SignalPart)transmissionTimer->getKind();
-    auto radioFrame = static_cast<RadioFrame *>(transmissionTimer->getContextPointer());
+    auto radioFrame = static_cast<Signal *>(transmissionTimer->getContextPointer());
     auto transmission = radioFrame->getTransmission();
     transmissionTimer->setContextPointer(nullptr);
-    EV_INFO << "Transmission ended: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
+    EV_INFO << "Transmission ended: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
     //check_and_cast<LoRaMedium *>(medium)->fireTransmissionEnded(transmission);
-    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
+    check_and_cast<LoRaMedium *>(medium)->emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void LoRaRadio::abortTransmission()
 {
     auto part = (IRadioSignal::SignalPart)transmissionTimer->getKind();
-    auto radioFrame = static_cast<RadioFrame *>(transmissionTimer->getContextPointer());
+    auto radioFrame = static_cast<Signal *>(transmissionTimer->getContextPointer());
     auto transmission = radioFrame->getTransmission();
     transmissionTimer->setContextPointer(nullptr);
-    EV_INFO << "Transmission aborted: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
+    EV_INFO << "Transmission aborted: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     EV_WARN << "Aborting ongoing transmissions is not supported" << endl;
     cancelEvent(transmissionTimer);
     updateTransceiverState();
     updateTransceiverPart();
 }
 
-RadioFrame *LoRaRadio::createRadioFrame(cPacket *packet) const
+Signal *LoRaRadio::createRadioFrame(Packet *packet) const
 {
-    RadioFrame *radioFrame = check_and_cast<RadioFrame *>(medium->transmitPacket(this, packet));
+    Signal *radioFrame = check_and_cast<Signal *>(medium->transmitPacket(this, packet));
     ASSERT(radioFrame->getDuration() != 0);
     return radioFrame;
 }
 
 void LoRaRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
 {
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<Signal *>(timer->getControlInfo());
     auto arrival = radioFrame->getArrival();
     auto reception = radioFrame->getReception();
 // TODO: should be this, but it breaks fingerprints: if (receptionTimer == nullptr && isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
     if (isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
         auto transmission = radioFrame->getTransmission();
         auto isReceptionAttempted = medium->isReceptionAttempted(this, transmission, part);
-        EV_INFO << "Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         if (isReceptionAttempted)
         {
             receptionTimer = timer;
         }
     }
     else
-        EV_INFO << "Reception started: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "Reception started: ignoring " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     timer->setKind(part);
     scheduleAt(arrival->getEndTime(part), timer);
     updateTransceiverState();
     updateTransceiverPart();
     //check_and_cast<LoRaMedium *>(medium)->fireReceptionStarted(reception);
-    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::receptionStartedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
 }
 
 void LoRaRadio::continueReception(cMessage *timer)
 {
     auto previousPart = (IRadioSignal::SignalPart)timer->getKind();
     auto nextPart = (IRadioSignal::SignalPart)(previousPart + 1);
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<Signal *>(timer->getControlInfo());
     auto arrival = radioFrame->getArrival();
     auto reception = radioFrame->getReception();
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime(previousPart) == simTime()) {
         auto transmission = radioFrame->getTransmission();
         bool isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, previousPart);
-        EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
+        EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
         if (!isReceptionSuccessful)
         {
             receptionTimer = nullptr;
         }
         auto isReceptionAttempted = medium->isReceptionAttempted(this, transmission, nextPart);
-        EV_INFO << "Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
+        EV_INFO << "Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
         if (!isReceptionAttempted)
         {
             receptionTimer = nullptr;
         }
     }
     else {
-        EV_INFO << "Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
-        EV_INFO << "Reception started: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
+        EV_INFO << "Reception ended: ignoring " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
+        EV_INFO << "Reception started: ignoring " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
     }
     timer->setKind(nextPart);
     scheduleAt(arrival->getEndTime(nextPart), timer);
@@ -456,7 +456,7 @@ void LoRaRadio::continueReception(cMessage *timer)
 void LoRaRadio::endReception(cMessage *timer)
 {
     auto part = (IRadioSignal::SignalPart)timer->getKind();
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<Signal *>(timer->getControlInfo());
     auto arrival = radioFrame->getArrival();
     auto reception = radioFrame->getReception();
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime() == simTime()) {
@@ -464,11 +464,11 @@ void LoRaRadio::endReception(cMessage *timer)
         auto transmission = radioFrame->getTransmission();
 // TODO: this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
         auto isReceptionSuccessful = medium->getReceptionDecision(this, radioFrame->getListening(), transmission, part)->isReceptionSuccessful();
-        EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, radioFrame);
         if(isReceptionSuccessful)
         {
-            emit(LayeredProtocolBase::packetSentToUpperSignal, macFrame);
+            emit(packetSentToUpperSignal, macFrame);
             sendUp(macFrame);
         }
         else
@@ -479,20 +479,20 @@ void LoRaRadio::endReception(cMessage *timer)
         receptionTimer = nullptr;
     }
     else
-        EV_INFO << "Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "Reception ended: ignoring " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
     //check_and_cast<LoRaMedium *>(medium)->fireReceptionEnded(reception);
-    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::receptionEndedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
     delete timer;
 }
 
 void LoRaRadio::abortReception(cMessage *timer)
 {
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<Signal *>(timer->getControlInfo());
     auto part = (IRadioSignal::SignalPart)timer->getKind();
     auto reception = radioFrame->getReception();
-    EV_INFO << "Reception aborted: for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+    EV_INFO << "Reception aborted: for " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     if (timer == receptionTimer)
     {
         receptionTimer = nullptr;
@@ -509,19 +509,19 @@ void LoRaRadio::captureReception(cMessage *timer)
 
 void LoRaRadio::sendUp(cPacket *macFrame)
 {
-    auto indication = check_and_cast<const ReceptionIndication *>(macFrame->getControlInfo());
+    auto indication = check_and_cast<const LoRaReceptionIndication *>(macFrame->getControlInfo());
     emit(minSNIRSignal, indication->getMinSNIR());
-    if (!std::isnan(indication->getPacketErrorRate()))
-        emit(packetErrorRateSignal, indication->getPacketErrorRate());
-    if (!std::isnan(indication->getBitErrorRate()))
-        emit(bitErrorRateSignal, indication->getBitErrorRate());
-    if (!std::isnan(indication->getSymbolErrorRate()))
-        emit(symbolErrorRateSignal, indication->getSymbolErrorRate());
+//    if (!std::isnan(indication->getPacketErrorRate()))
+//        emit(packetErrorRateSignal, indication->getPacketErrorRate());
+//    if (!std::isnan(indication->getBitErrorRate()))
+//        emit(bitErrorRateSignal, indication->getBitErrorRate());
+//    if (!std::isnan(indication->getSymbolErrorRate()))
+//        emit(symbolErrorRateSignal, indication->getSymbolErrorRate());
     EV_INFO << "Sending up " << macFrame << endl;
     send(macFrame, upperLayerOut);
 }
 
-cMessage *LoRaRadio::createReceptionTimer(RadioFrame *radioFrame) const
+cMessage *LoRaRadio::createReceptionTimer(Signal *radioFrame) const
 {
     cMessage *timer = new cMessage("receptionTimer");
     timer->setControlInfo(radioFrame);

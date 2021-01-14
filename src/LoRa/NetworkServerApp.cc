@@ -14,8 +14,11 @@
 // 
 
 #include "NetworkServerApp.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+//#include "inet/networklayer/ipv4/IPv4Datagram.h"
+//#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
@@ -196,13 +199,17 @@ void NetworkServerApp::updateKnownNodes(LoRaMacFrame* pkt)
 void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
 {
     bool packetExists = false;
-    UDPDataIndication *cInfo = check_and_cast<UDPDataIndication*>(pkt->getControlInfo());
+//    UDPDataIndication *cInfo = check_and_cast<UDPDataIndication*>(pkt->getControlInfo());
+//    L3Address remoteAddress = check_and_cast<Packet*>(pkt->getTag<L3AddressInd>()->getSrcAddress());
+    auto packet = check_and_cast<Packet *>(pkt);
+    packet->getTag<L3AddressInd>()->getSrcAddress();
     for(uint i=0;i<receivedPackets.size();i++)
     {
         if(receivedPackets[i].rcvdPacket->getTransmitterAddress() == pkt->getTransmitterAddress() && receivedPackets[i].rcvdPacket->getSequenceNumber() == pkt->getSequenceNumber())
         {
             packetExists = true;
-            receivedPackets[i].possibleGateways.emplace_back(cInfo->getSrcAddr(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
+            receivedPackets[i].possibleGateways.emplace_back(packet->getTag<L3AddressInd>()->getSrcAddress(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
+//            receivedPackets[i].possibleGateways.emplace_back(cInfo->getSrcAddr(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
             delete pkt;
             break;
         }
@@ -213,7 +220,7 @@ void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
         rcvPkt.rcvdPacket = pkt;
         rcvPkt.endOfWaiting = new cMessage("endOfWaitingWindow");
         rcvPkt.endOfWaiting->setContextPointer(pkt);
-        rcvPkt.possibleGateways.emplace_back(cInfo->getSrcAddr(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
+        rcvPkt.possibleGateways.emplace_back(packet->getTag<L3AddressInd>()->getSrcAddress(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
         scheduleAt(simTime() + 1.2, rcvPkt.endOfWaiting);
         receivedPackets.push_back(rcvPkt);
     }
@@ -385,7 +392,9 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
         frameToSend->setLoRaCF(pkt->getLoRaCF());
         frameToSend->setLoRaSF(pkt->getLoRaSF());
         frameToSend->setLoRaBW(pkt->getLoRaBW());
-        socket.sendTo(frameToSend, pickedGateway, destPort);
+        Packet *envelope = new Packet("EnvelopeForLoRaPacket");
+        envelope->encapsulate(frameToSend);
+        socket.sendTo(envelope, pickedGateway, destPort);
     }
     delete rcvAppPacket;
 }

@@ -22,9 +22,9 @@ import inet.linklayer.loopback.LoopbackInterface;
 import loranetwork.LoRa.LoRaGWNic;
 import loranetwork.LoRaApp.SimpleLoRaApp;
 import loranetwork.LoRa.PacketForwarder;
-import inet.linklayer.contract.IWiredNic;
-import inet.applications.contract.IUDPApp;
-import inet.transportlayer.contract.IUDP;
+import inet.linklayer.contract.IWiredInterface;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IUdp;
 import inet.networklayer.contract.IRoutingTable;
 
 module LoRaGW
@@ -33,11 +33,13 @@ module LoRaGW
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
-        string networkLayerType = default("IPv4NetworkLayer");
-        string routingTableType = default("IPv4RoutingTable");
+        *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
+        
+        string networkLayerType = default("Ipv4NetworkLayer");
+        string routingTableType = default("Ipv4RoutingTable");
         int numUdpApps = default(0);
         bool hasUdp = true;
-        string udpType = default(firstAvailableOrEmpty("UDP"));
+        string udpType = default(firstAvailableOrEmpty("Udp"));
 
         @display("bgb=611,560;i=device/antennatower");
     gates:
@@ -55,11 +57,11 @@ module LoRaGW
         packetForwarder: PacketForwarder {
             @display("p=256.056,162.432;is=vl");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredInterface {
             parameters:
                 @display("p=340.656,442.17603,row,60;q=txQueue");
         }
-        udp: <udpType> like IUDP if hasUdp {
+        udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             parameters:
                 @display("p=314.712,240.264");
         }
@@ -73,13 +75,13 @@ module LoRaGW
     connections allowunconnected:
         packetForwarder.lowerLayerOut --> LoRaGWNic.upperLayerIn;
         LoRaGWNic.upperLayerOut --> packetForwarder.lowerLayerIn;
-        packetForwarder.udpOut --> udp.appIn++;
-        packetForwarder.udpIn <-- udp.appOut++;
+        packetForwarder.socketOut --> udp.appIn;
+        packetForwarder.socketIn <-- udp.appOut;
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> { @display("m=s"); } <--> eth[i].phys;
-            eth[i].upperLayerOut --> networkLayer.ifIn++;
-            eth[i].upperLayerIn <-- networkLayer.ifOut++;
+            eth[i].upperLayerOut --> networkLayer.ifIn;
+            eth[i].upperLayerIn <-- networkLayer.ifOut;
         }
-        udp.ipOut --> networkLayer.transportIn++;
-        udp.ipIn <-- networkLayer.transportOut++;
+        udp.ipOut --> networkLayer.transportIn;
+        udp.ipIn <-- networkLayer.transportOut;
 }

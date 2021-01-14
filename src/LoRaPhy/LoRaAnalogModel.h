@@ -34,7 +34,7 @@ class INET_API LoRaAnalogModel : public ScalarAnalogModelBase
     virtual W computeReceptionPower(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
     const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const override;
+    virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
 
 } // namespace physicallayer

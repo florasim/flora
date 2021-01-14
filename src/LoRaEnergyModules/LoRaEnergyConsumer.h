@@ -31,7 +31,7 @@ public:
     void finish() override;
     virtual W getPowerConsumption() const override;
     bool readConfigurationFile();
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details);
 
 protected:
     int energyConsumerId;

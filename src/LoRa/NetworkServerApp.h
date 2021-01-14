@@ -26,7 +26,7 @@
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "LoRaApp/LoRaAppPacket_m.h"
 #include <list>
 
@@ -35,7 +35,7 @@ namespace inet {
 class knownNode
 {
 public:
-    DevAddr srcAddr;
+    MacAddress srcAddr;
     int framesFromLastADRCommand;
     int lastSeqNoProcessed;
     int numberOfSentADRPackets;
@@ -67,9 +67,9 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     std::vector<knownGW> knownGateways;
     std::vector<receivedPacket> receivedPackets;
     int localPort = -1, destPort = -1;
-    std::vector<std::tuple<DevAddr, int>> recvdPackets;
+    std::vector<std::tuple<MacAddress, int>> recvdPackets;
     // state
-    UDPSocket socket;
+    UdpSocket socket;
     cMessage *selfMsg = nullptr;
     int totalReceivedPackets;
     std::string adrMethod;
@@ -89,7 +89,7 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     void addPktToProcessingTable(LoRaMacFrame* pkt);
     void processScheduledPacket(cMessage* selfMsg);
     void evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW);
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details);
     bool evaluateADRinServer;
 
     cHistogram receivedRSSI;

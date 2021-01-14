@@ -18,6 +18,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/UserPriority.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/csmaca/CsmaCaMac.h"
 #include "LoRaMac.h"
 
@@ -42,11 +43,11 @@ LoRaMac::~LoRaMac()
  */
 void LoRaMac::initialize(int stage)
 {
-    MACProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
 
-        maxQueueSize = par("maxQueueSize");
+//        maxQueueSize = par("maxQueueSize");
         headerLength = par("headerLength");
         ackLength = par("ackLength");
         ackTimeout = par("ackTimeout");
@@ -60,13 +61,13 @@ void LoRaMac::initialize(int stage)
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address
-            address = DevAddr::generateAutoAddress();
+            address = MacAddress::generateAutoAddress();
             // change module parameter from "auto" to concrete address
             par("address").setStringValue(address.str().c_str());
         }
         else
             address.setAddress(addressString);
-        registerInterface();
+//        registerInterface();
 
         // subscribe for the information of the carrier sense
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -119,8 +120,9 @@ void LoRaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+    }
 }
 
 void LoRaMac::finish()
@@ -135,20 +137,20 @@ void LoRaMac::finish()
     recordScalar("numReceivedBroadcast", numReceivedBroadcast);
 }
 
-InterfaceEntry *LoRaMac::createInterfaceEntry()
+void LoRaMac::configureInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
-
+    MacAddress address = parseMacAddressParameter(par("address"));
     // data rate
-    e->setDatarate(bitrate);
+    interfaceEntry->setDatarate(bitrate);
+
+    // generate a link-layer address to be used as interface token for IPv6
+    interfaceEntry->setMacAddress(address);
+    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    e->setMtu(par("mtu"));
-    e->setMulticast(true);
-    e->setBroadcast(true);
-    e->setPointToPoint(false);
-
-    return e;
+//    interfaceEntry->setMtu(par("mtu"));
+    interfaceEntry->setMulticast(true);
+    interfaceEntry->setBroadcast(true);
 }
 
 /****************************************************************
@@ -160,7 +162,7 @@ void LoRaMac::handleSelfMessage(cMessage *msg)
     handleWithFsm(msg);
 }
 
-void LoRaMac::handleUpperPacket(cPacket *msg)
+void LoRaMac::handleUpperPacket(Packet *msg)
 {
     if(fsm.getState() != IDLE)
         {
@@ -175,7 +177,7 @@ void LoRaMac::handleUpperPacket(cPacket *msg)
     frame->setLoRaBW(cInfo->getLoRaBW());
     frame->setLoRaCR(cInfo->getLoRaCR());
     frame->setSequenceNumber(sequenceNumber);
-    frame->setReceiverAddress(DevAddr::BROADCAST_ADDRESS);
+    frame->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
     ++sequenceNumber;
     frame->setLoRaUseHeader(cInfo->getLoRaUseHeader());
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
@@ -183,7 +185,7 @@ void LoRaMac::handleUpperPacket(cPacket *msg)
     handleWithFsm(frame);
 }
 
-void LoRaMac::handleLowerPacket(cPacket *msg)
+void LoRaMac::handleLowerPacket(Packet *msg)
 {
     if( (fsm.getState() == RECEIVING_1) || (fsm.getState() == RECEIVING_2)) handleWithFsm(msg);
     else delete msg;
@@ -365,11 +367,11 @@ void LoRaMac::sendDataFrame(LoRaMacFrame *frameToSend)
 
 void LoRaMac::sendAckFrame()
 {
-    EV << "sending Ack frame\n";
-    auto ackFrame = new CsmaCaMacAckFrame("CsmaAck");
-    ackFrame->setByteLength(ackLength);
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(ackFrame);
+//    EV << "sending Ack frame\n";
+//    auto ackFrame = new CsmaCaMacAckHeader("CsmaAck");
+//    ackFrame->setByteLength(ackLength);
+//    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+//    sendDown(ackFrame);
 }
 
 /****************************************************************
@@ -393,11 +395,11 @@ void LoRaMac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
     delete transmissionQueue.pop();
-    if (queueModule) {
-        // tell queue module that we've become idle
-        EV << "requesting another frame from queue module\n";
-        queueModule->requestPacket();
-    }
+//    if (queueModule) {
+//        // tell queue module that we've become idle
+//        EV << "requesting another frame from queue module\n";
+//        queueModule->requestPacket();
+//    }
 }
 
 bool LoRaMac::isReceiving()
@@ -434,7 +436,7 @@ void LoRaMac::turnOffReceiver()
     loraRadio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 }
 
-DevAddr LoRaMac::getAddress()
+MacAddress LoRaMac::getAddress()
 {
     return address;
 }

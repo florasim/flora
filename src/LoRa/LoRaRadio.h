@@ -17,7 +17,7 @@
 #define LORA_LORARADIO_H_
 
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
-#include "inet/physicallayer/common/packetlevel/RadioFrame.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
@@ -166,18 +166,18 @@ class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, pu
     virtual void handleReceptionTimer(cMessage *message) override;
     virtual void handleUpperCommand(cMessage *command) override;
     virtual void handleLowerCommand(cMessage *command) override;
-    virtual void handleUpperPacket(cPacket *packet) override;
-    virtual void handleLowerPacket(RadioFrame *packet) override;
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleUpperPacket(Packet *packet) override;
+    virtual void handleLowerPacket(Signal *packet);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 
-    virtual void startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part) override;
+    virtual void startTransmission(Packet *macFrame, IRadioSignal::SignalPart part) override;
     virtual void continueTransmission() override;
     virtual void endTransmission() override;
     virtual void abortTransmission() override;
 
-    virtual RadioFrame *createRadioFrame(cPacket *packet) const override;
+    virtual Signal *createRadioFrame(Packet *packet) const;
 
     virtual void startReception(cMessage *timer, IRadioSignal::SignalPart part) override;
     virtual void continueReception(cMessage *timer) override;
@@ -185,8 +185,8 @@ class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, pu
     virtual void abortReception(cMessage *timer) override;
     virtual void captureReception(cMessage *timer) override;
 
-    virtual void sendUp(cPacket *macFrame) override;
-    virtual cMessage *createReceptionTimer(RadioFrame *radioFrame) const override;
+    virtual void sendUp(cPacket *macFrame);
+    virtual cMessage *createReceptionTimer(Signal *radioFrame) const override;
     virtual bool isReceptionTimer(const cMessage *message) const override;
 
     virtual bool isReceiverMode(IRadio::RadioMode radioMode) const override;

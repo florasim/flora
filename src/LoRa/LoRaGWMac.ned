@@ -15,13 +15,13 @@
 
 package loranetwork.LoRa;
 
-import inet.linklayer.base.MACProtocolBase;
-import inet.linklayer.contract.IMACProtocol;
+import inet.linklayer.base.MacProtocolBase;
+import inet.linklayer.contract.IMacProtocol;
 
 //
 // TODO auto-generated module
 //
-simple LoRaGWMac extends MACProtocolBase like IMACProtocol
+simple LoRaGWMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value

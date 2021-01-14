@@ -23,7 +23,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaBandListening : public ListeningBase
+class INET_API LoRaBandListening : public BandListening
 {
   protected:
     const Hz LoRaCF;
@@ -31,7 +31,7 @@ class INET_API LoRaBandListening : public ListeningBase
     const Hz LoRaBW;
 
   public:
-    LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz LoRaCF, int LoRaSF, Hz LoRaBW);
+    LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth, int LoRaSF);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

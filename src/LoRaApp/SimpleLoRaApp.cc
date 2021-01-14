@@ -155,7 +155,7 @@ void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
     }
 }
 
-bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 

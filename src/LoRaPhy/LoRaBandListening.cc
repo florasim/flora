@@ -19,11 +19,9 @@ namespace inet {
 
 namespace physicallayer {
 
-LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz LoRaCF, int LoRaSF, Hz LoRaBW) :
-    ListeningBase(radio, startTime, endTime, startPosition, endPosition),
-    LoRaCF(LoRaCF),
-    LoRaSF(LoRaSF),
-    LoRaBW(LoRaBW)
+LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition,  Hz centerFrequency, Hz bandwidth, int LoRaSF) :
+        BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth),
+    LoRaSF(LoRaSF)
 {
 }
 

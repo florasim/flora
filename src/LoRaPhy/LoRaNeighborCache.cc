@@ -41,7 +41,7 @@ void LoRaNeighborCache::initialize(int stage)
         range = par("range");
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
         maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         updateNeighborLists();
         if (maxSpeed != 0)
@@ -59,7 +59,7 @@ std::ostream& LoRaNeighborCache::printToStream(std::ostream& stream, int level) 
     return stream;
 }
 
-void LoRaNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
+void LoRaNeighborCache::sendToNeighbors(IRadio *transmitter, const ISignal *frame, double range) const
 {
     EV << "LoRaMedium->LoRaNeighborCache sendToNeighbors" << endl;
     if (this->range < range)

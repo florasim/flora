@@ -23,14 +23,14 @@ import inet.power.storage.IdealEpEnergyStorage;
 module LoRaRadio extends FlatRadioBase
 {
     parameters:
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("LoRaTransmitter");
-        receiverType = default("LoRaReceiver");
+        antenna.typeName = default("IsotropicAntenna");
+        transmitter.typeName = default("LoRaTransmitter");
+        receiver.typeName = default("LoRaReceiver");
         @signal[droppedPacket](type=long);
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
 
-        carrierFrequency = 868 MHz;
+        centerFrequency = 868 MHz;
         bandwidth = default(0.25 MHz);
 
         // 802.15.4-2006 (page 28)

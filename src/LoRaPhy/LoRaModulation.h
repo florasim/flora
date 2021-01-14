@@ -16,16 +16,16 @@
 #ifndef LORAPHY_LORAMODULATION_H_
 #define LORAPHY_LORAMODULATION_H_
 
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaModulation : public APSKModulationBase
+class INET_API LoRaModulation : public ApskModulationBase
 {
 protected:
-    static const std::vector<APSKSymbol> constellation;
+    static const std::vector<ApskSymbol> constellation;
 
   public:
     LoRaModulation();

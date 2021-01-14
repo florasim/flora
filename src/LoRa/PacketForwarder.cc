@@ -14,11 +14,12 @@
 // 
 
 #include "PacketForwarder.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+//#include "inet/networklayer/ipv4/IPv4Datagram.h"
+//#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "../LoRaPhy/LoRaRadioControlInfo_m.h"
 
 namespace inet {
 
@@ -70,7 +71,7 @@ void PacketForwarder::handleMessage(cMessage *msg)
     if (msg->arrivedOn("lowerLayerIn")) {
         EV << "Received LoRaMAC frame" << endl;
         LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(PK(msg));
-        if(frame->getReceiverAddress() == DevAddr::BROADCAST_ADDRESS)
+        if(frame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS)
             processLoraMACPacket(PK(msg));
         //send(msg, "upperLayerOut");
         //sendPacket();
@@ -87,17 +88,19 @@ void PacketForwarder::handleMessage(cMessage *msg)
 
 void PacketForwarder::processLoraMACPacket(cPacket *pk)
 {
+    auto indication = check_and_cast<const physicallayer::LoRaReceptionIndication *>(pk->getControlInfo());
+
     // FIXME: Change based on new implementation of MAC frame.
     emit(LoRa_GWPacketReceived, 42);
     if (simTime() >= getSimulation()->getWarmupPeriod())
         counterOfReceivedPackets++;
     LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(pk);
-
-    physicallayer::ReceptionIndication *cInfo = check_and_cast<physicallayer::ReceptionIndication *>(pk->getControlInfo());
-    W w_rssi = cInfo->getMinRSSI();
+//    physicallayer::ScalarSnir *cInfo = check_and_cast<physicallayer::ScalarSnir *>(pk->getControlInfo());
+    //W w_rssi = cInfo->getMinRSSI();
+    W w_rssi = indication->getMinRSSI();
     double rssi = w_rssi.get()*1000;
-    frame->setRSSI(math::mW2dBm(rssi));
-    frame->setSNIR(cInfo->getMinSNIR());
+    frame->setRSSI(math::mW2dBmW(rssi));
+    frame->setSNIR(indication->getMinSNIR());
     bool exist = false;
     EV << frame->getTransmitterAddress() << endl;
     //for (std::vector<nodeEntry>::iterator it = knownNodes.begin() ; it != knownNodes.end(); ++it)
@@ -106,28 +109,28 @@ void PacketForwarder::processLoraMACPacket(cPacket *pk)
     L3Address destAddr = destAddresses[0];
     if (frame->getControlInfo())
        delete frame->removeControlInfo();
-
-    socket.sendTo(frame, destAddr, destPort);
+    Packet *envelope = new Packet("EnvelopeForLoRaPacket");
+    envelope->encapsulate(frame);
+    socket.sendTo(envelope, destAddr, destPort);
 
 }
 
 void PacketForwarder::sendPacket()
 {
-
-    /*LoRaAppPacket *mgmtCommand = new LoRaAppPacket("mgmtCommand");
-    mgmtCommand->setMsgType(TXCONFIG);
-    LoRaOptions newOptions;
-    newOptions.setLoRaTP(uniform(0.1, 1));
-    mgmtCommand->setOptions(newOptions);
-
-    LoRaMacFrame *response = new LoRaMacFrame("mgmtCommand");
-    response->encapsulate(mgmtCommand);
-    response->setLoRaTP(pk->getLoRaTP());
-    response->setLoRaCF(pk->getLoRaCF());
-    response->setLoRaSF(pk->getLoRaSF());
-    response->setLoRaBW(pk->getLoRaBW());
-    response->setReceiverAddress(pk->getTransmitterAddress());
-    send(response, "lowerLayerOut");*/
+//    LoRaAppPacket *mgmtCommand = new LoRaAppPacket("mgmtCommand");
+//    mgmtCommand->setMsgType(TXCONFIG);
+//    LoRaOptions newOptions;
+//    newOptions.setLoRaTP(uniform(0.1, 1));
+//    mgmtCommand->setOptions(newOptions);
+//
+//    LoRaMacFrame *response = new LoRaMacFrame("mgmtCommand");
+//    response->encapsulate(mgmtCommand);
+//    response->setLoRaTP(pk->getLoRaTP());
+//    response->setLoRaCF(pk->getLoRaCF());
+//    response->setLoRaSF(pk->getLoRaSF());
+//    response->setLoRaBW(pk->getLoRaBW());
+//    response->setReceiverAddress(pk->getTransmitterAddress());
+//    send(response, "lowerLayerOut");
 
 }
 

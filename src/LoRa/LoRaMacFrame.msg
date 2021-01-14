@@ -20,17 +20,19 @@
 cplusplus {{
 #include "../misc/DevAddr.h"
 #include <inet/common/Units.h>
+#include <inet/linklayer/common/MacAddress.h>
 }}
 
 class noncobject DevAddr;
 class noncobject inet::units::values::W;
 class noncobject inet::units::values::Hz;
+class noncobject inet::linklayer::common::MacAddress;
 
 namespace inet;
 
 packet LoRaMacFrame {
-    DevAddr transmitterAddress;
-    DevAddr receiverAddress;
+    inet::linklayer::common::MacAddress transmitterAddress;
+    inet::linklayer::common::MacAddress receiverAddress;
     
     int sequenceNumber;
     double LoRaTP;

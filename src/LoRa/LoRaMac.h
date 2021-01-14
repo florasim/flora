@@ -2,10 +2,10 @@
 #define __LORAMAC_H
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/contract/IMACProtocol.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/common/FSMA.h"
-#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
 
@@ -19,14 +19,14 @@ using namespace physicallayer;
  * Based on CSMA class
  */
 
-class LoRaMac : public MACProtocolBase
+class LoRaMac : public MacProtocolBase
 {
   protected:
     /**
      * @name Configuration parameters
      */
     //@{
-    DevAddr address;
+    MacAddress address;
     bool useAck = true;
     double bitrate = NaN;
     int headerLength = -1;
@@ -79,7 +79,7 @@ class LoRaMac : public MACProtocolBase
     cPacketQueue transmissionQueue;
 
     /** Passive queue module to request messages from */
-    IPassiveQueue *queueModule = nullptr;
+    cPacketQueue *queueModule = nullptr;
     //@}
 
     /** @name Timer messages */
@@ -128,7 +128,7 @@ class LoRaMac : public MACProtocolBase
     //@{
     virtual ~LoRaMac();
     //@}
-    virtual DevAddr getAddress();
+    virtual MacAddress getAddress();
 
   protected:
     /**
@@ -138,7 +138,7 @@ class LoRaMac : public MACProtocolBase
     /** @brief Initialization of the module and its variables */
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual void configureInterfaceEntry() override;
     //@}
 
     /**
@@ -147,11 +147,11 @@ class LoRaMac : public MACProtocolBase
      */
     //@{
     virtual void handleSelfMessage(cMessage *msg) override;
-    virtual void handleUpperPacket(cPacket *msg) override;
-    virtual void handleLowerPacket(cPacket *msg) override;
+    virtual void handleUpperPacket(Packet *msg) override;
+    virtual void handleLowerPacket(Packet *msg) override;
     virtual void handleWithFsm(cMessage *msg);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details);
 
     virtual LoRaMacFrame *encapsulate(cPacket *msg);
     virtual cPacket *decapsulate(LoRaMacFrame *frame);

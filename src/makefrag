@@ -5,6 +5,7 @@
 ifeq ($(PLATFORM),win32.x86_64)
   LIBS += -lws2_32
   DEFINES += -DINET_EXPORT
+  MSGC:=$(MSGC) --msg4
   ENABLE_AUTO_IMPORT=-Wl,--enable-auto-import
   LDFLAGS := $(filter-out $(ENABLE_AUTO_IMPORT), $(LDFLAGS))
 endif

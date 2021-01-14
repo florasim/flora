@@ -20,16 +20,18 @@
 cplusplus {{
 #include "../misc/DevAddr.h"
 #include <inet/common/Units.h>
+#include <inet/linklayer/common/MacAddress.h>
 }}
 
 class noncobject DevAddr;
 class noncobject inet::units::values::Hz;
+class noncobject inet::linklayer::common::MacAddress;
 
 namespace inet;
 
 class LoRaMacControlInfo {
-    DevAddr src;  // src DevAddr address (can be left empty when sending)
-    DevAddr dest; // dest DevAddr address
+    inet::linklayer::common::MacAddress src;  // src DevAddr address (can be left empty when sending)
+    inet::linklayer::common::MacAddress dest; // dest DevAddr address
 
     double LoRaTP;
     inet::units::values::Hz LoRaCF;
