@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORATRANSMITTER_H_
 #define LORAPHY_LORATRANSMITTER_H_
 
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
 #include "LoRaModulation.h"
 #include "LoRaTransmission.h"
 #include "LoRa/LoRaRadio.h"
@@ -30,7 +30,7 @@ class LoRaTransmitter : public FlatTransmitterBase {
     public:
         LoRaTransmitter();
         virtual void initialize(int stage) override;
-        virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+        virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
         virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
 
     private:

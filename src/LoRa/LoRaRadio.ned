@@ -17,16 +17,38 @@ package loranetwork.LoRa;
 
 import loranetwork.LoRaPhy.LoRaTransmitter;
 import loranetwork.LoRaPhy.LoRaReceiver;
-import inet.physicallayer.common.packetlevel.Radio;
-import inet.physicallayer.base.packetlevel.FlatRadioBase;
+import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 import inet.power.storage.IdealEpEnergyStorage;
 module LoRaRadio extends FlatRadioBase
 {
     parameters:
-        antenna.typeName = default("IsotropicAntenna");
-        transmitter.typeName = default("LoRaTransmitter");
-        receiver.typeName = default("LoRaReceiver");
+        antenna.typename = default("IsotropicAntenna");
+        transmitter.typename = default("LoRaTransmitter");
+        receiver.typename = default("LoRaReceiver");
+
+        
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[radioModeChanged](type=long);
+        @signal[listeningChanged];
+        @signal[receptionStateChanged](type=long);
+        @signal[transmissionStateChanged](type=long);
+        @signal[receivedSignalPartChanged](type=long);
+        @signal[transmittedSignalPartChanged](type=long);
+        @signal[transmissionStarted];
+        @signal[transmissionEnded];
+        @signal[receptionStarted];
+        @signal[receptionEnded];
+        @signal[minSNIR];
+        @signal[packetErrorRate];
+        @signal[bitErrorRate];
+        @signal[symbolErrorRate];
         @signal[droppedPacket](type=long);
+
+        @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="Radio transmission state"; source=transmissionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
 
@@ -62,7 +84,7 @@ module LoRaRadio extends FlatRadioBase
         transmitter.power = default(25.118mW);
         transmitter.preambleDuration = 0.001s;
         //*.energySourceModule = default(absPath(energySourceModule));
-        energySourceModule = default(absPath(energySourceModule));
+        //*.energySourceModule = default(absPath(energySourceModule));
         bool iAmGateway = default(false);
         @class(inet::physicallayer::LoRaRadio); //originally it was @class(Radio);
         @display("bgb=215,413");
@@ -70,5 +92,4 @@ module LoRaRadio extends FlatRadioBase
         IdealEpEnergyStorage: IdealEpEnergyStorage {
             @display("p=178,296");
         }
-
 }

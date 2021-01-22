@@ -17,7 +17,7 @@
 #define __LORANETWORK_PACKETFORWARDER_H_
 
 #include <omnetpp.h>
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include <vector>
 #include "inet/common/INETDefs.h"
 
@@ -41,12 +41,12 @@ class INET_API PacketForwarder : public cSimpleModule, public cListener
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    void processLoraMACPacket(cPacket *pk);
+    void processLoraMACPacket(Packet *pk);
     void startUDP();
     void sendPacket();
     void setSocketOptions();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details);
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
   public:
       simsignal_t LoRa_GWPacketReceived;
       int counterOfSentPacketsFromNodes = 0;

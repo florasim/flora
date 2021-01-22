@@ -14,9 +14,9 @@
 // 
 
 #include "LoRaPhy/LoRaAnalogModel.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 #include "LoRaReception.h"
 #include "LoRaTransmission.h"
 #include "LoRaReceiver.h"
@@ -28,7 +28,7 @@ namespace physicallayer {
 
 Define_Module(LoRaAnalogModel);
 
-std::ostream& LoRaAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "LoRaAnalogModel";
 }

@@ -15,6 +15,7 @@
 
 package loranetwork.LoraNode;
 
+import inet.node.inet.INetworkNode;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
@@ -27,7 +28,7 @@ import inet.applications.contract.IApp;
 import inet.transportlayer.contract.IUdp;
 import inet.networklayer.contract.IRoutingTable;
 
-module LoRaGW
+module LoRaGW like INetworkNode
 {
     parameters:
         @networkNode();
@@ -35,15 +36,26 @@ module LoRaGW
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
         
+        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
+        int numWlanInterfaces = 1;        
+        
+    	bool hasIpv4 = default(true);
         string networkLayerType = default("Ipv4NetworkLayer");
         string routingTableType = default("Ipv4RoutingTable");
         int numUdpApps = default(0);
-        bool hasUdp = true;
-        string udpType = default(firstAvailableOrEmpty("Udp"));
+        bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
+        string udpType = default(firstAvailableOrEmpty("UDP"));
+
+        LoRaGWNic.radio.antenna.mobilityModule = default("^.^.^.mobility");
+        
+        *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
+        
 
         @display("bgb=611,560;i=device/antennatower");
     gates:
-        inout ethg[] @labels(EtherFrame-conn);
+        inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
+        input radioIn[numWlanInterfaces] @directIn;
+        
     submodules:
         interfaceTable: InterfaceTable {
             @display("p=30,26");
@@ -63,10 +75,11 @@ module LoRaGW
         }
         udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             parameters:
-                @display("p=314.712,240.264");
+                @display("p=422.25,177.90799");
         }
-        networkLayer: <networkLayerType> like INetworkLayer {
-            @display("p=340.656,337.272");
+        ipv4: <default("Ipv4NetworkLayer")> like INetworkLayer if hasIpv4 {
+            parameters:
+                @display("p=363.698,284.878;q=queue");
         }
         routingTable: <routingTableType> like IRoutingTable if routingTableType != "" {
             parameters:
@@ -79,9 +92,9 @@ module LoRaGW
         packetForwarder.socketIn <-- udp.appOut;
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> { @display("m=s"); } <--> eth[i].phys;
-            eth[i].upperLayerOut --> networkLayer.ifIn;
-            eth[i].upperLayerIn <-- networkLayer.ifOut;
+            eth[i].upperLayerOut --> ipv4.ifIn;
+            eth[i].upperLayerIn <-- ipv4.ifOut;
         }
-        udp.ipOut --> networkLayer.transportIn;
-        udp.ipIn <-- networkLayer.transportOut;
+        udp.ipOut --> ipv4.transportIn;
+        udp.ipIn <-- ipv4.transportOut;
 }

@@ -17,28 +17,22 @@
 // TODO generated message class
 //
 
-cplusplus {{
-#include "../misc/DevAddr.h"
-#include <inet/common/Units.h>
-#include <inet/linklayer/common/MacAddress.h>
-}}
-
-class noncobject DevAddr;
-class noncobject inet::units::values::W;
-class noncobject inet::units::values::Hz;
-class noncobject inet::linklayer::common::MacAddress;
+import inet.common.INETDefs;
+import inet.common.Units;
+import inet.linklayer.common.MacAddress;
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
-packet LoRaMacFrame {
-    inet::linklayer::common::MacAddress transmitterAddress;
-    inet::linklayer::common::MacAddress receiverAddress;
+class LoRaMacFrame extends FieldsChunk {
+    MacAddress transmitterAddress;
+    MacAddress receiverAddress;
     
     int sequenceNumber;
     double LoRaTP;
-    inet::units::values::Hz LoRaCF;
+    Hz LoRaCF;
     int LoRaSF;
-    inet::units::values::Hz LoRaBW;
+    Hz LoRaBW;
     int LoRaCR;
     bool LoRaUseHeader;
     double RSSI;

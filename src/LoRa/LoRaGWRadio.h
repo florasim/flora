@@ -16,13 +16,13 @@
 #ifndef LORA_LORAGWRADIO_H_
 #define LORA_LORAGWRADIO_H_
 
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
 #include "LoRaPhy/LoRaTransmitter.h"
 #include "LoRaPhy/LoRaReceiver.h"
 #include "LoRaPhy/LoRaTransmission.h"
 #include "LoRaPhy/LoRaReception.h"
 #include "LoRaMacFrame_m.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common//medium/RadioMedium.h"
 #include "LoRaPhy/LoRaMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
 
@@ -38,7 +38,7 @@ protected:
     virtual void finish() override;
     virtual void handleSelfMessage(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
-    void handleLowerPacket(Signal *radioFrame);
+    void handleSignal(WirelessSignal *radioFrame);
 
     bool iAmTransmiting;
     virtual bool isTransmissionTimer(const cMessage *message) const;

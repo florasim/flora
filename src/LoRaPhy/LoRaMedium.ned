@@ -15,7 +15,7 @@
 
 package loranetwork.LoRaPhy;
 
-import inet.physicallayer.common.packetlevel.RadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
 
 module LoRaMedium extends RadioMedium
 {

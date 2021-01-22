@@ -25,14 +25,14 @@ LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, s
 {
 }
 
-std::ostream& LoRaBandListening::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaBandListening::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LoRaBandListening";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", LoRaCF = " << LoRaCF
+        stream << ", LoRaCF = " << centerFrequency
                << ", LoRaSF = " << LoRaSF
-               << ", LoRaBW = " << LoRaBW;
-    return ListeningBase::printToStream(stream, level);
+               << ", LoRaBW = " << bandwidth;
+    return ListeningBase::printToStream(stream, level, evFlags);
 }
 
 } // namespace physicallayer

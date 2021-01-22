@@ -21,6 +21,10 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/csmaca/CsmaCaMac.h"
 #include "LoRaMac.h"
+#include "LoRaTagInfo_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+
 
 namespace inet {
 
@@ -47,7 +51,7 @@ void LoRaMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
 
-//        maxQueueSize = par("maxQueueSize");
+        //maxQueueSize = par("maxQueueSize");
         headerLength = par("headerLength");
         ackLength = par("ackLength");
         ackTimeout = par("ackTimeout");
@@ -67,7 +71,6 @@ void LoRaMac::initialize(int stage)
         }
         else
             address.setAddress(addressString);
-//        registerInterface();
 
         // subscribe for the information of the carrier sense
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -87,7 +90,7 @@ void LoRaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        transmissionQueue.setName("transmissionQueue");
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         // state variables
         fsm.setName("LoRaMac State Machine");
@@ -120,9 +123,8 @@ void LoRaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER)
         radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-    }
 }
 
 void LoRaMac::finish()
@@ -137,20 +139,20 @@ void LoRaMac::finish()
     recordScalar("numReceivedBroadcast", numReceivedBroadcast);
 }
 
-void LoRaMac::configureInterfaceEntry()
+void LoRaMac::configureNetworkInterface()
 {
-    MacAddress address = parseMacAddressParameter(par("address"));
-    // data rate
-    interfaceEntry->setDatarate(bitrate);
+    //NetworkInterface *e = new NetworkInterface(this);
 
-    // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    // data rate
+    networkInterface->setDatarate(bitrate);
+    networkInterface->setMacAddress(address);
 
     // capabilities
-//    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
+    //interfaceEntry->setMtu(par("mtu"));
+    networkInterface->setMtu(std::numeric_limits<int>::quiet_NaN());
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
+    networkInterface->setPointToPoint(false);
 }
 
 /****************************************************************
@@ -162,30 +164,32 @@ void LoRaMac::handleSelfMessage(cMessage *msg)
     handleWithFsm(msg);
 }
 
-void LoRaMac::handleUpperPacket(Packet *msg)
+void LoRaMac::handleUpperMessage(cMessage *msg)
 {
-    if(fsm.getState() != IDLE)
-        {
+    if(fsm.getState() != IDLE) {
             error(fsm.getStateName());
             error("Wrong, it should not happen");
-        }
-    LoRaMacControlInfo *cInfo = check_and_cast<LoRaMacControlInfo *>(msg->getControlInfo());
-    LoRaMacFrame *frame = encapsulate(msg);
-    frame->setLoRaTP(cInfo->getLoRaTP());
-    frame->setLoRaCF(cInfo->getLoRaCF());
-    frame->setLoRaSF(cInfo->getLoRaSF());
-    frame->setLoRaBW(cInfo->getLoRaBW());
-    frame->setLoRaCR(cInfo->getLoRaCR());
-    frame->setSequenceNumber(sequenceNumber);
-    frame->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
-    ++sequenceNumber;
-    frame->setLoRaUseHeader(cInfo->getLoRaUseHeader());
-    EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
-    transmissionQueue.insert(frame);
-    handleWithFsm(frame);
+    }
+    auto pkt = check_and_cast<Packet *>(msg);
+
+//    pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::lora);
+//    LoRaMacControlInfo *cInfo = check_and_cast<LoRaMacControlInfo *>(msg->getControlInfo());
+    auto pktEncap = encapsulate(pkt);
+
+    const auto &frame = pktEncap->peekAtFront<LoRaMacFrame>();
+
+    EV << "frame " << pktEncap << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
+
+    txQueue->enqueuePacket(pktEncap);
+    if (fsm.getState() != IDLE)
+        EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
+    else {
+        popTxQueue();
+        handleWithFsm(currentTxFrame);
+    }
 }
 
-void LoRaMac::handleLowerPacket(Packet *msg)
+void LoRaMac::handleLowerMessage(cMessage *msg)
 {
     if( (fsm.getState() == RECEIVING_1) || (fsm.getState() == RECEIVING_2)) handleWithFsm(msg);
     else delete msg;
@@ -193,7 +197,13 @@ void LoRaMac::handleLowerPacket(Packet *msg)
 
 void LoRaMac::handleWithFsm(cMessage *msg)
 {
-    LoRaMacFrame *frame = dynamic_cast<LoRaMacFrame*>(msg);
+    Ptr<LoRaMacFrame>frame = nullptr;
+
+    auto pkt = dynamic_cast<Packet *>(msg);
+    if (pkt) {
+        const auto &chunk = pkt->peekAtFront<Chunk>();
+        frame = dynamicPtrCast<LoRaMacFrame>(constPtrCast<Chunk>(chunk));
+    }
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
@@ -239,12 +249,11 @@ void LoRaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive-Unicast-Not-For,
                                   isLowerMessage(msg) && !isForUs(frame),
                                   LISTENING_1,
-                delete frame;
             );
             FSMA_Event_Transition(Receive-Unicast,
                                   isLowerMessage(msg) && isForUs(frame),
                                   IDLE,
-                sendUp(decapsulate(check_and_cast<LoRaMacFrame *>(frame)));
+                sendUp(decapsulate(pkt));
                 numReceived++;
                 cancelEvent(endListening_1);
                 cancelEvent(endDelay_2);
@@ -281,12 +290,11 @@ void LoRaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive2-Unicast-Not-For,
                                   isLowerMessage(msg) && !isForUs(frame),
                                   LISTENING_2,
-                delete frame;
             );
             FSMA_Event_Transition(Receive2-Unicast,
                                   isLowerMessage(msg) && isForUs(frame),
                                   IDLE,
-                sendUp(decapsulate(check_and_cast<LoRaMacFrame *>(frame)));
+                sendUp(pkt);
                 numReceived++;
                 cancelEvent(endListening_2);
             );
@@ -297,9 +305,29 @@ void LoRaMac::handleWithFsm(cMessage *msg)
 
         }
     }
+
+    if (fsm.getState() == IDLE) {
+        if (isReceiving())
+            handleWithFsm(mediumStateChange);
+        else if (currentTxFrame != nullptr)
+            handleWithFsm(currentTxFrame);
+        else if (!txQueue->isEmpty()) {
+            popTxQueue();
+            handleWithFsm(currentTxFrame);
+        }
+    }
+    if (endSifs) {
+        if (isLowerMessage(msg) && pkt->getOwner() == this && (endSifs->getContextPointer() != pkt))
+            delete pkt;
+    }
+    else {
+        if (isLowerMessage(msg) && pkt->getOwner() == this)
+            delete pkt;
+    }
+    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
-void LoRaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LoRaMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal) {
@@ -324,54 +352,90 @@ void LoRaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value
     }
 }
 
-LoRaMacFrame *LoRaMac::encapsulate(cPacket *msg)
+Packet *LoRaMac::encapsulate(Packet *msg)
 {
-    LoRaMacFrame *frame = new LoRaMacFrame(msg->getName());
-
-    frame->setByteLength(headerLength);
-    frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
+    auto frame = makeShared<LoRaMacFrame>();
+    frame->setChunkLength(B(headerLength));
+    msg->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
+    auto tag = msg->getTag<LoRaTag>();
 
     frame->setTransmitterAddress(address);
+    frame->setLoRaTP(tag->getPower().get());
+    frame->setLoRaCF(tag->getCenterFrequency());
+    frame->setLoRaSF(tag->getSpreadFactor());
+    frame->setLoRaBW(tag->getBandwidth());
+    frame->setLoRaCR(tag->getCodeRendundance());
+    frame->setSequenceNumber(sequenceNumber);
+    frame->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
 
-    frame->encapsulate(msg);
+    ++sequenceNumber;
+    //frame->setLoRaUseHeader(cInfo->getLoRaUseHeader());
+    frame->setLoRaUseHeader(tag->getUseHeader());
 
-    return frame;
+    msg->insertAtFront(frame);
+
+    return msg;
 }
 
-cPacket *LoRaMac::decapsulate(LoRaMacFrame *frame)
+Packet *LoRaMac::decapsulate(Packet *frame)
 {
-    cPacket *payload = frame->decapsulate();
 
+    auto loraHeader = frame->popAtFront<LoRaMacFrame>();
+    frame->addTagIfAbsent<MacAddressInd>()->setSrcAddress(loraHeader->getTransmitterAddress());
+    frame->addTagIfAbsent<MacAddressInd>()->setDestAddress(loraHeader->getReceiverAddress());
+    frame->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+//    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(loraHeader->getNetworkProtocol());
+//    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+//    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 
-    delete frame;
-    return payload;
+    return frame;
 }
 
 /****************************************************************
  * Frame sender functions.
  */
-void LoRaMac::sendDataFrame(LoRaMacFrame *frameToSend)
+void LoRaMac::sendDataFrame(Packet *frameToSend)
 {
     EV << "sending Data frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 
-    LoRaMacFrame *frameCopy = frameToSend->dup();
+    auto frameCopy = frameToSend->dup();
 
-    LoRaMacControlInfo *ctrl = new LoRaMacControlInfo();
-    ctrl->setSrc(frameCopy->getTransmitterAddress());
-    ctrl->setDest(frameCopy->getReceiverAddress());
-    frameCopy->setControlInfo(ctrl);
+    //LoRaMacControlInfo *ctrl = new LoRaMacControlInfo();
+    //ctrl->setSrc(frameCopy->getTransmitterAddress());
+    //ctrl->setDest(frameCopy->getReceiverAddress());
+//    frameCopy->setControlInfo(ctrl);
+    auto macHeader = frameCopy->peekAtFront<LoRaMacFrame>();
+
+    auto macAddressInd = frameCopy->addTagIfAbsent<MacAddressInd>();
+    macAddressInd->setSrcAddress(macHeader->getTransmitterAddress());
+    macAddressInd->setDestAddress(macHeader->getReceiverAddress());
+
+    //frameCopy->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lora);
 
     sendDown(frameCopy);
 }
 
 void LoRaMac::sendAckFrame()
 {
-//    EV << "sending Ack frame\n";
-//    auto ackFrame = new CsmaCaMacAckHeader("CsmaAck");
-//    ackFrame->setByteLength(ackLength);
-//    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-//    sendDown(ackFrame);
+    auto frameToAck = static_cast<Packet *>(endSifs->getContextPointer());
+    endSifs->setContextPointer(nullptr);
+    auto macHeader = makeShared<CsmaCaMacAckHeader>();
+    macHeader->setReceiverAddress(MacAddress(frameToAck->peekAtFront<LoRaMacFrame>()->getTransmitterAddress().getInt()));
+
+    EV << "sending Ack frame\n";
+    //auto macHeader = makeShared<CsmaCaMacAckHeader>();
+    macHeader->setChunkLength(B(ackLength));
+    auto frame = new Packet("CsmaAck");
+    frame->insertAtFront(macHeader);
+//    frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lora);
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+
+    auto macAddressInd = frame->addTagIfAbsent<MacAddressInd>();
+    macAddressInd->setSrcAddress(macHeader->getTransmitterAddress());
+    macAddressInd->setDestAddress(macHeader->getReceiverAddress());
+
+    sendDown(frame);
 }
 
 /****************************************************************
@@ -383,23 +447,13 @@ void LoRaMac::finishCurrentTransmission()
     scheduleAt(simTime() + waitDelay1Time + listening1Time, endListening_1);
     scheduleAt(simTime() + waitDelay1Time + listening1Time + waitDelay2Time, endDelay_2);
     scheduleAt(simTime() + waitDelay1Time + listening1Time + waitDelay2Time + listening2Time, endListening_2);
-    popTransmissionQueue();
+    deleteCurrentTxFrame();
 }
 
-LoRaMacFrame *LoRaMac::getCurrentTransmission()
+Packet *LoRaMac::getCurrentTransmission()
 {
-    return static_cast<LoRaMacFrame*>(transmissionQueue.front());
-}
-
-void LoRaMac::popTransmissionQueue()
-{
-    EV << "dropping frame from transmission queue\n";
-    delete transmissionQueue.pop();
-//    if (queueModule) {
-//        // tell queue module that we've become idle
-//        EV << "requesting another frame from queue module\n";
-//        queueModule->requestPacket();
-//    }
+    ASSERT(currentTxFrame != nullptr);
+    return currentTxFrame;
 }
 
 bool LoRaMac::isReceiving()
@@ -407,17 +461,17 @@ bool LoRaMac::isReceiving()
     return radio->getReceptionState() == IRadio::RECEPTION_STATE_RECEIVING;
 }
 
-bool LoRaMac::isAck(LoRaMacFrame *frame)
+bool LoRaMac::isAck(const Ptr<const LoRaMacFrame> &frame)
 {
-    return dynamic_cast<LoRaMacFrame *>(frame);
+    return false;//dynamic_cast<LoRaMacFrame *>(frame);
 }
 
-bool LoRaMac::isBroadcast(LoRaMacFrame *frame)
+bool LoRaMac::isBroadcast(const Ptr<const LoRaMacFrame> &frame)
 {
     return frame->getReceiverAddress().isBroadcast();
 }
 
-bool LoRaMac::isForUs(LoRaMacFrame *frame)
+bool LoRaMac::isForUs(const Ptr<const LoRaMacFrame> &frame)
 {
     return frame->getReceiverAddress() == address;
 }

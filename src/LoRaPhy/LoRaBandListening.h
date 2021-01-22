@@ -16,8 +16,8 @@
 #ifndef LORAPHY_LORABANDLISTENING_H_
 #define LORAPHY_LORABANDLISTENING_H_
 
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/base/packetlevel/ListeningBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ListeningBase.h"
 
 namespace inet {
 
@@ -33,7 +33,7 @@ class INET_API LoRaBandListening : public BandListening
   public:
     LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth, int LoRaSF);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     //virtual Hz getCarrierFrequency() const { return LoRaCF; }
     //virtual Hz getBandwidth() const { return LoRaBW; }

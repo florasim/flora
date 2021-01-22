@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORAHATAOKUMURA_H_
 #define LORAPHY_LORAHATAOKUMURA_H_
 
-#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 
@@ -36,7 +36,7 @@ class INET_API LoRaHataOkumura : public FreeSpacePathLoss
 
   public:
     LoRaHataOkumura();
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
 

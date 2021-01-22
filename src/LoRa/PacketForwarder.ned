@@ -29,9 +29,10 @@ simple PacketForwarder like IApp
     int destPort;
 	
     gates:
+        output socketOut @labels(UdpControlInfo/up);
+        input socketIn @labels(UdpControlInfo/down);
+    
 		input lowerLayerIn @labels(PacketForwarder/up);
-        output lowerLayerOut @labels(PacketForwarder/down);
-        input socketIn @labels(PacketForwarder/udpIn);
-        output socketOut @labels(PacketForwarder/udpOut);
+        output lowerLayerOut @labels(PacketForwarder/down);  
 
 }

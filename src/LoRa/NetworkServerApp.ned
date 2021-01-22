@@ -30,7 +30,7 @@ simple NetworkServerApp like IApp
 	double adrDeviceMargin = default(15);
 	
     gates:
-    output socketOut;
-    input socketIn;
+    output socketOut @labels(UdpControlInfo/up);
+    input socketIn @labels(UdpControlInfo/down);
 
 }

@@ -16,9 +16,11 @@
 #ifndef LORA_LORAGWMAC_H_
 #define LORA_LORAGWMAC_H_
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/ModuleAccess.h"
 
 #include "LoRaMacControlInfo_m.h"
@@ -35,15 +37,15 @@ public:
     virtual void initialize(int stage) override;
     virtual void finish() override;
     //virtual InterfaceEntry *createInterfaceEntry();
-    virtual void configureInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
     long GW_forwardedDown;
     long GW_droppedDC;
 
-    virtual void handleUpperPacket(Packet *msg) override;
-    virtual void handleLowerPacket(Packet *msg) override;
+    virtual void handleUpperMessage(cMessage *msg) override;
+    virtual void handleLowerMessage(cMessage *msg) override;
     virtual void handleSelfMessage(cMessage *message) override;
 
-    void sendPacketBack(LoRaMacFrame *receivedFrame);
+    void sendPacketBack(Packet *receivedFrame);
     void createFakeLoRaMacFrame();
     virtual MacAddress getAddress();
 
@@ -53,7 +55,7 @@ protected:
     IRadio *radio = nullptr;
     IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details);
 };
 
 }

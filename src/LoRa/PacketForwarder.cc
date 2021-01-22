@@ -20,6 +20,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "../LoRaPhy/LoRaRadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+
 
 namespace inet {
 
@@ -28,7 +30,6 @@ Define_Module(PacketForwarder);
 
 void PacketForwarder::initialize(int stage)
 {
-
     if (stage == 0) {
         LoRa_GWPacketReceived = registerSignal("LoRa_GWPacketReceived");
         localPort = par("localPort");
@@ -37,15 +38,16 @@ void PacketForwarder::initialize(int stage)
         startUDP();
         getSimulation()->getSystemModule()->subscribe("LoRa_AppPacketSent", this);
     }
-
 }
 
 
 void PacketForwarder::startUDP()
 {
-    socket.setOutputGate(gate("udpOut"));
+    EV << "Wywalamy sie tutaj" << endl;
+    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+    EV << "Dojechalismy za pierwszy resolv" << endl;
     // TODO: is this required?
     //setSocketOptions();
 
@@ -55,14 +57,18 @@ void PacketForwarder::startUDP()
 
     // Create UDP sockets to multiple destination addresses (network servers)
     while ((token = tokenizer.nextToken()) != nullptr) {
+        EV << "Wchodze w petle" << endl;
+        EV << token << endl;
         L3Address result;
         L3AddressResolver().tryResolve(token, result);
+        EV << "Wychodze z petli" << endl;
         if (result.isUnspecified())
             EV_ERROR << "cannot resolve destination address: " << token << endl;
         else
             EV << "Got destination address: " << token << endl;
         destAddresses.push_back(result);
     }
+    EV << "Dojechalismy do konca" << endl;
 }
 
 
@@ -70,49 +76,63 @@ void PacketForwarder::handleMessage(cMessage *msg)
 {
     if (msg->arrivedOn("lowerLayerIn")) {
         EV << "Received LoRaMAC frame" << endl;
-        LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(PK(msg));
+        auto pkt = check_and_cast<Packet*>(msg);
+        const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
         if(frame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS)
-            processLoraMACPacket(PK(msg));
+            processLoraMACPacket(pkt);
         //send(msg, "upperLayerOut");
         //sendPacket();
     } else if (msg->arrivedOn("udpIn")) {
         // FIXME : debug for now to see if LoRaMAC frame received correctly from network server
         EV << "Received UDP packet" << endl;
-        LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(PK(msg));
+        auto pkt = check_and_cast<Packet*>(msg);
+        const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
+        if (frame == nullptr)
+            throw cRuntimeError("Packet type error");
         //EV << frame->getLoRaTP() << endl;
         //delete frame;
-        send(frame, "lowerLayerOut");
+
+       /* auto loraTag = pkt->addTagIfAbsent<LoRaTag>();
+        pkt->setBandwidth(loRaBW);
+        pkt->setCarrierFrequency(loRaCF);
+        pkt->setSpreadFactor(loRaSF);
+        pkt->setCodeRendundance(loRaCR);
+        pkt->setPower(W(loRaTP));*/
+
+        send(pkt, "lowerLayerOut");
         //
     }
 }
 
-void PacketForwarder::processLoraMACPacket(cPacket *pk)
+void PacketForwarder::processLoraMACPacket(Packet *pk)
 {
-    auto indication = check_and_cast<const physicallayer::LoRaReceptionIndication *>(pk->getControlInfo());
-
     // FIXME: Change based on new implementation of MAC frame.
     emit(LoRa_GWPacketReceived, 42);
     if (simTime() >= getSimulation()->getWarmupPeriod())
         counterOfReceivedPackets++;
-    LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(pk);
-//    physicallayer::ScalarSnir *cInfo = check_and_cast<physicallayer::ScalarSnir *>(pk->getControlInfo());
-    //W w_rssi = cInfo->getMinRSSI();
-    W w_rssi = indication->getMinRSSI();
+    pk->trimFront();
+    auto frame = pk->removeAtFront<LoRaMacFrame>();
+
+    auto snirInd = pk->getTag<SnirInd>();
+
+    auto signalPowerInd = pk->getTag<SignalPowerInd>();
+
+    W w_rssi = signalPowerInd->getPower();
     double rssi = w_rssi.get()*1000;
     frame->setRSSI(math::mW2dBmW(rssi));
-    frame->setSNIR(indication->getMinSNIR());
-    bool exist = false;
+    frame->setSNIR(snirInd->getMinimumSnir());
+    pk->insertAtFront(frame);
+
+    //bool exist = false;
     EV << frame->getTransmitterAddress() << endl;
     //for (std::vector<nodeEntry>::iterator it = knownNodes.begin() ; it != knownNodes.end(); ++it)
 
     // FIXME : Identify network server message is destined for.
     L3Address destAddr = destAddresses[0];
-    if (frame->getControlInfo())
-       delete frame->removeControlInfo();
-    Packet *envelope = new Packet("EnvelopeForLoRaPacket");
-    envelope->encapsulate(frame);
-    socket.sendTo(envelope, destAddr, destPort);
+    if (pk->getControlInfo())
+       delete pk->removeControlInfo();
 
+    socket.sendTo(pk, destAddr, destPort);
 }
 
 void PacketForwarder::sendPacket()
@@ -134,7 +154,7 @@ void PacketForwarder::sendPacket()
 
 }
 
-void PacketForwarder::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void PacketForwarder::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     if (simTime() >= getSimulation()->getWarmupPeriod())
         counterOfSentPacketsFromNodes++;

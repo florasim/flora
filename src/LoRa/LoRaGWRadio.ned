@@ -19,8 +19,8 @@ import loranetwork.LoRaPhy.LoRaTransmitter;
 import loranetwork.LoRaPhy.LoRaReceiver;
 
 
-import inet.physicallayer.common.packetlevel.Radio;
-import inet.physicallayer.base.packetlevel.FlatRadioBase;
+import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
+
 
 module LoRaGWRadio extends FlatRadioBase
 {

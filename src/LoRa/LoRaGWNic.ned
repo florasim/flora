@@ -16,7 +16,6 @@
 package loranetwork.LoRa;
 
 import inet.linklayer.contract.IWirelessInterface;
-import inet.physicallayer.contract.packetlevel.IRadio;
 import inet.linklayer.common.WirelessInterface;
 
 import loranetwork.LoRaPhy.LoRaMedium;

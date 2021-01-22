@@ -14,7 +14,7 @@
 // 
 
 #include "LoRaTransmitter.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #include "LoRaModulation.h"
 #include <algorithm>
 
@@ -38,7 +38,6 @@ void LoRaTransmitter::initialize(int stage)
         headerLength = b(par("headerLength"));
         bitrate = bps(par("bitrate"));
         power = W(par("power"));
-        modulation =  new LoRaModulation();
         centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
         LoRaTransmissionCreated = registerSignal("LoRaTransmissionCreated");
@@ -50,14 +49,11 @@ void LoRaTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& LoRaTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LoRaTransmitter";
-    return FlatTransmitterBase::printToStream(stream, level);
+    return FlatTransmitterBase::printToStream(stream, level, evFlags);
 }
-
-
-
 
 const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
 {

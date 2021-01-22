@@ -22,14 +22,8 @@ LoRaTransmission::LoRaTransmission(const IRadio *transmitter, const Packet *macF
 
 }
 
-std::ostream& LoRaTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaTransmission::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    /*if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", carrierFrequency = " << carrierFrequency;
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << ", bandwidth = " << bandwidth
-               << ", modulation = " << printObjectToString(modulation, level + 1) ;
-               */
     return TransmissionBase::printToStream(stream, level);
 }
 

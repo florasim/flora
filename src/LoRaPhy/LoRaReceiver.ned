@@ -15,8 +15,8 @@
 
 package loranetwork.LoRaPhy;
 
-import inet.physicallayer.contract.packetlevel.IReceiver;
-import inet.physicallayer.contract.packetlevel.IErrorModel;
+import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
+import inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel;
 
 //
 // TODO auto-generated module

@@ -17,6 +17,11 @@
 // TODO generated message class
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+
+namespace inet;
+
 enum AppPacketType
 {
     JOIN_REQUEST = 1;
@@ -35,7 +40,7 @@ class LoRaOptions {
     bool ADRACKReq = false;
 }
 
-packet LoRaAppPacket {
+class LoRaAppPacket extends FieldsChunk {
     int msgType @enum(AppPacketType);
     int sampleMeasurement;
     LoRaOptions options;

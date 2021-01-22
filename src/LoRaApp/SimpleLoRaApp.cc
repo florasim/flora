@@ -15,6 +15,10 @@
 
 #include "SimpleLoRaApp.h"
 #include "inet/mobility/static/StationaryMobility.h"
+#include "../LoRa/LoRaTagInfo_m.h"
+#include "inet/common/packet/Packet.h"
+
+
 namespace inet {
 
 Define_Module(SimpleLoRaApp);
@@ -165,29 +169,44 @@ bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, IDoneCal
 
 void SimpleLoRaApp::sendJoinRequest()
 {
-    LoRaAppPacket *request = new LoRaAppPacket("DataFrame");
-    request->setKind(DATA);
+    auto pktRequest = new Packet("DataFrame");
+    pktRequest->setKind(DATA);
+
+    auto payload = makeShared<LoRaAppPacket>();
+    payload->setChunkLength(B(par("dataSize").intValue()));
+
     lastSentMeasurement = rand();
-    request->setSampleMeasurement(lastSentMeasurement);
+    payload->setSampleMeasurement(lastSentMeasurement);
 
     if(evaluateADRinNode && sendNextPacketWithADRACKReq)
     {
-        request->getOptions().setADRACKReq(true);
+        auto opt = payload->getOptions();
+        opt.setADRACKReq(true);
+        payload->setOptions(opt);
+        //request->getOptions().setADRACKReq(true);
         sendNextPacketWithADRACKReq = false;
     }
 
+
+    auto loraTag = pktRequest->addTagIfAbsent<LoRaTag>();
+    loraTag->setBandwidth(loRaBW);
+    loraTag->setCenterFrequency(loRaCF);
+    loraTag->setSpreadFactor(loRaSF);
+    loraTag->setCodeRendundance(loRaCR);
+    loraTag->setPower(W(loRaTP));
     //add LoRa control info
-    LoRaMacControlInfo *cInfo = new LoRaMacControlInfo;
+  /*  LoRaMacControlInfo *cInfo = new LoRaMacControlInfo();
     cInfo->setLoRaTP(loRaTP);
     cInfo->setLoRaCF(loRaCF);
     cInfo->setLoRaSF(loRaSF);
     cInfo->setLoRaBW(loRaBW);
     cInfo->setLoRaCR(loRaCR);
+    pktRequest->setControlInfo(cInfo);*/
 
-    request->setControlInfo(cInfo);
     sfVector.record(loRaSF);
     tpVector.record(loRaTP);
-    send(request, "appOut");
+    pktRequest->insertAtBack(payload);
+    send(pktRequest, "appOut");
     if(evaluateADRinNode)
     {
         ADR_ACK_CNT++;

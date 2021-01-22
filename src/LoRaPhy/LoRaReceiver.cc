@@ -14,7 +14,10 @@
 // 
 
 #include "LoRaReceiver.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
+#include "../LoRaApp/SimpleLoRaApp.h"
+#include "LoRaPhyPreamble_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -54,7 +57,7 @@ bool LoRaReceiver::computeIsReceptionPossible(const IListening *listening, const
 {
     //here we can check compatibility of LoRaTx parameters (or beeing a gateway)
     const LoRaTransmission *loRaTransmission = check_and_cast<const LoRaTransmission *>(transmission);
-    SimpleLoRaApp *loRaApp = check_and_cast<SimpleLoRaApp *>(getParentModule()->getParentModule()->getSubmodule("SimpleLoRaApp"));
+    auto *loRaApp = check_and_cast<SimpleLoRaApp *>(getParentModule()->getParentModule()->getSubmodule("SimpleLoRaApp"));
     if(iAmGateway || (loRaTransmission->getLoRaCF() == loRaApp->loRaCF && loRaTransmission->getLoRaBW() == loRaApp->loRaBW && loRaTransmission->getLoRaSF() == loRaApp->loRaSF))
         return true;
     else
@@ -84,19 +87,26 @@ bool LoRaReceiver::computeIsReceptionAttempted(const IListening *listening, cons
 {
     if(isPacketCollided(reception, part, interference))
     {
-        auto macFrame = const_cast<Packet *>(reception->getTransmission()->getPacket());
-        LoRaMacFrame *loraMacFrame = check_and_cast<LoRaMacFrame *>(macFrame);
+        auto packet = reception->getTransmission()->getPacket();
+        const auto &chunk = packet->peekAtFront<FieldsChunk>();
+        auto loraMac = dynamicPtrCast<const LoRaMacFrame>(chunk);
+        auto loraPreamble = dynamicPtrCast<const LoRaPhyPreamble>(chunk);
+        MacAddress rec;
+        if (loraPreamble)
+            rec = loraPreamble->getReceiverAddress();
+        else if (loraMac)
+            rec = loraMac->getReceiverAddress();
 
         if (iAmGateway == false) {
-            LoRaMac *macLayer = check_and_cast<LoRaMac *>(getParentModule()->getParentModule()->getSubmodule("mac"));
-            if (loraMacFrame->getReceiverAddress() == macLayer->getAddress()) {
+            auto *macLayer = check_and_cast<LoRaMac *>(getParentModule()->getParentModule()->getSubmodule("mac"));
+            if (rec == macLayer->getAddress()) {
                 const_cast<LoRaReceiver* >(this)->numCollisions++;
             }
             //EV << "Node: Extracted macFrame = " << loraMacFrame->getReceiverAddress() << ", node address = " << macLayer->getAddress() << std::endl;
         } else {
-            LoRaGWMac *gwMacLayer = check_and_cast<LoRaGWMac *>(getParentModule()->getParentModule()->getSubmodule("mac"));
-            EV << "GW: Extracted macFrame = " << loraMacFrame->getReceiverAddress() << ", node address = " << gwMacLayer->getAddress() << std::endl;
-            if (loraMacFrame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS) {
+            auto *gwMacLayer = check_and_cast<LoRaGWMac *>(getParentModule()->getParentModule()->getSubmodule("mac"));
+            EV << "GW: Extracted macFrame = " << rec << ", node address = " << gwMacLayer->getAddress() << std::endl;
+            if (rec == MacAddress::BROADCAST_ADDRESS) {
                 const_cast<LoRaReceiver* >(this)->numCollisions++;
             }
         }
@@ -189,22 +199,6 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     return false;
 }
 
-const LoRaReceptionIndication *LoRaReceiver::computeReceptionIndication(const ISnir *snir) const
-{
-    const ScalarSnir *scalarSNIR = check_and_cast<const ScalarSnir *>(snir);
-    auto indication = createReceptionIndication();
-    //indication->setMinSNIR(snir->getMin());
-    indication->setMinSNIR(scalarSNIR->getMin());
-
-    const LoRaReception *loRaReception = check_and_cast<const LoRaReception *>(scalarSNIR->getReception());
-    indication->setMinRSSI(loRaReception->getPower());
-    return indication;
-}
-
-LoRaReceptionIndication *LoRaReceiver::createReceptionIndication() const
-{
-    return new LoRaReceptionIndication();
-}
 const IReceptionDecision *LoRaReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
     auto isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
@@ -213,20 +207,41 @@ const IReceptionDecision *LoRaReceiver::computeReceptionDecision(const IListenin
     return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 
+Packet *LoRaReceiver::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const
+{
+    auto transmittedPacket = snir->getReception()->getTransmission()->getPacket();
+    auto receivedPacket = transmittedPacket->dup();
+    receivedPacket->clearTags();
+//    receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
+    if (!isReceptionSuccessful)
+        receivedPacket->setBitError(true);
+    return receivedPacket;
+}
+
 const IReceptionResult *LoRaReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    auto radio = reception->getReceiver();
-    auto radioMedium = radio->getMedium();
-    auto transmission = reception->getTransmission();
-    //const LoRaReception *loRaReception = check_and_cast<const LoRaReception *>(reception);
-    //W RSSI = loRaReception->computeMinPower(reception->getStartTime(part), reception->getEndTime(part));
-    auto indication = computeReceptionIndication(snir);
-    // TODO: add all cached decisions?
-//    auto decisions = new std::vector<const IReceptionDecision *>();
-//    decisions->push_back(radioMedium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE));
-    auto macFrame = const_cast<Packet *>(reception->getTransmission()->getPacket());
+    bool isReceptionSuccessful = true;
+    for (auto decision : *decisions)
+        isReceptionSuccessful &= decision->isReceptionSuccessful();
+    auto packet = computeReceivedPacket(snir, isReceptionSuccessful);
 
-    return new ReceptionResult(reception, decisions, macFrame);
+    auto signalPower = computeSignalPower(listening, snir, interference);
+    if (!std::isnan(signalPower.get())) {
+        auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
+        signalPowerInd->setPower(signalPower);
+    }
+    auto snirInd = packet->addTagIfAbsent<SnirInd>();
+    snirInd->setMinimumSnir(snir->getMin());
+    snirInd->setMaximumSnir(snir->getMax());
+    auto signalTimeInd = packet->addTagIfAbsent<SignalTimeInd>();
+    signalTimeInd->setStartTime(reception->getStartTime());
+    signalTimeInd->setEndTime(reception->getEndTime());
+    auto errorRateInd = packet->addTagIfAbsent<ErrorRateInd>();
+    errorRateInd->setPacketErrorRate(errorModel ? errorModel->computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+    errorRateInd->setBitErrorRate(errorModel ? errorModel->computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+    errorRateInd->setSymbolErrorRate(errorModel ? errorModel->computeSymbolErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+
+    return new ReceptionResult(reception, decisions, packet);
 }
 
 bool LoRaReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const

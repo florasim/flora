@@ -15,7 +15,7 @@
 
 #include "LoRaGWMac.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 
 namespace inet {
@@ -58,21 +58,34 @@ void LoRaGWMac::finish()
 }
 
 
-void LoRaGWMac::configureInterfaceEntry()
+void LoRaGWMac::configureNetworkInterface()
 {
-    MacAddress address = parseMacAddressParameter(par("address"));
+    //NetworkInterface *e = new NetworkInterface(this);
 
     // data rate
-//    interfaceEntry->setDatarate(bitrate);
+    //e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMacAddress(address);
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    //e->setMACAddress(address);
+    //e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-//    interfaceEntry->setMtu(par("mtu"));
-    interfaceEntry->setMulticast(true);
-    interfaceEntry->setBroadcast(true);
+    //e->setMtu(par("mtu"));
+    //e->setMulticast(true);
+    //e->setBroadcast(true);
+    //e->setPointToPoint(false);
+    MacAddress address = parseMacAddressParameter(par("address"));
+
+    // generate a link-layer address to be used as interface token for IPv6
+    networkInterface->setMacAddress(address);
+    // data rate
+    //interfaceEntry->setDatarate(bitrate);
+
+    // capabilities
+    networkInterface->setMtu(par("mtu"));
+    networkInterface->setMulticast(true);
+    networkInterface->setBroadcast(true);
+    networkInterface->setPointToPoint(false);
 }
 
 void LoRaGWMac::handleSelfMessage(cMessage *msg)
@@ -80,17 +93,26 @@ void LoRaGWMac::handleSelfMessage(cMessage *msg)
     if(msg == dutyCycleTimer) waitingForDC = false;
 }
 
-void LoRaGWMac::handleUpperPacket(Packet *msg)
+void LoRaGWMac::handleUpperMessage(cMessage *msg)
 {
     if(waitingForDC == false)
     {
-        LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
-        frame->removeControlInfo();
-        LoRaMacControlInfo *ctrl = new LoRaMacControlInfo();
-        ctrl->setSrc(address);
-        ctrl->setDest(frame->getReceiverAddress());
-        frame->setControlInfo(ctrl);
-        sendDown(frame);
+//        LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
+//        frame->removeControlInfo();
+        auto pkt = check_and_cast<Packet *>(msg);
+        const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
+        if (pkt->getControlInfo())
+            delete pkt->removeControlInfo();
+
+        auto tag = pkt->addTagIfAbsent<MacAddressReq>();
+        tag->setDestAddress(frame->getReceiverAddress());
+//        LoRaMacControlInfo *ctrl = new LoRaMacControlInfo();
+//        ctrl->setSrc(address);
+//        ctrl->setDest(frame->getReceiverAddress());
+//        frame->setControlInfo(ctrl);
+//        sendDown(frame);
+
+
         waitingForDC = true;
         double delta;
         if(frame->getLoRaSF() == 7) delta = 0.61696;
@@ -109,21 +131,27 @@ void LoRaGWMac::handleUpperPacket(Packet *msg)
     }
 }
 
-void LoRaGWMac::handleLowerPacket(Packet *msg)
+void LoRaGWMac::handleLowerMessage(cMessage *msg)
 {
-    LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
+    auto pkt = check_and_cast<Packet *>(msg);
+    const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
     if(frame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS)
-        sendUp(frame);
+        sendUp(pkt);
     else
-        delete frame;
+        delete pkt;
 }
 
-void LoRaGWMac::sendPacketBack(LoRaMacFrame *receivedFrame)
+void LoRaGWMac::sendPacketBack(Packet *receivedFrame)
 {
+    const auto &frame = receivedFrame->peekAtFront<LoRaMacFrame>();
     EV << "sending Data frame back" << endl;
-    LoRaMacFrame *frameToSend = new LoRaMacFrame("BackPacket");
-    frameToSend->setReceiverAddress(receivedFrame->getTransmitterAddress());
-    sendDown(frameToSend);
+    auto pktBack = new Packet("LoraPacket");
+    auto frameToSend = makeShared<LoRaMacFrame>();
+    frameToSend->setChunkLength(B(par("headerLength").intValue()));
+
+    frameToSend->setReceiverAddress(frame->getTransmitterAddress());
+    pktBack->insertAtFront(frameToSend);
+    sendDown(pktBack);
 }
 
 void LoRaGWMac::createFakeLoRaMacFrame()
@@ -131,7 +159,7 @@ void LoRaGWMac::createFakeLoRaMacFrame()
 
 }
 
-void LoRaGWMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LoRaGWMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

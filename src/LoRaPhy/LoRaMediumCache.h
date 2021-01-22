@@ -18,8 +18,8 @@
 #ifndef LORAPHY_LORAMEDIUMCACHE_H
 #define LORAPHY_LORAMEDIUMCACHE_H
 
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IMediumLimitCache.h"
 #include "LoRaPhy/LoRaMedium.h"
 
 namespace inet {
@@ -128,7 +128,7 @@ class INET_API LoRaMediumCache : public cModule, public IMediumLimitCache
   public:
     LoRaMediumCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override;
 
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
