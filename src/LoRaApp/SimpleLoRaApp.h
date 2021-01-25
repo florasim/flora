@@ -39,7 +39,7 @@ class INET_API SimpleLoRaApp : public cSimpleModule, public ILifecycle
         void finish() override;
         int numInitStages() const override { return NUM_INIT_STAGES; }
         void handleMessage(cMessage *msg) override;
-        virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback);
+        virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
 
         void handleMessageFromLowerLayer(cMessage *msg);
         std::pair<double,double> generateUniformCircleCoordinates(double radius, double gatewayX, double gatewayY);

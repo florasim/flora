@@ -172,7 +172,7 @@ void LoRaMac::handleUpperMessage(cMessage *msg)
     }
     auto pkt = check_and_cast<Packet *>(msg);
 
-//    pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::lora);
+    pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 //    LoRaMacControlInfo *cInfo = check_and_cast<LoRaMacControlInfo *>(msg->getControlInfo());
     auto pktEncap = encapsulate(pkt);
 

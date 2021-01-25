@@ -8,6 +8,7 @@
 #include "inet/queueing/contract/IPacketQueue.h"
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
+#include "inet/common/Protocol.h"
 
 #include "LoRaRadio.h"
 
@@ -163,7 +164,7 @@ class LoRaMac : public MacProtocolBase
     virtual void handleLowerMessage(cMessage *msg) override;
     virtual void handleWithFsm(cMessage *msg);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     virtual Packet *encapsulate(Packet *msg);
     virtual Packet *decapsulate(Packet *frame);

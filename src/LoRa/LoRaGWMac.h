@@ -55,7 +55,7 @@ protected:
     IRadio *radio = nullptr;
     IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 };
 
 }
