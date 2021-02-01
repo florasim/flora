@@ -20,12 +20,13 @@ import inet.physicallayer.wireless.common.medium.RadioMedium;
 module LoRaMedium extends RadioMedium
 {
     parameters:
-        propagation.typeName = default("ConstantSpeedPropagation");
-        analogModel.typeName = default("LoRaAnalogModel");
+        propagation.typename = default("ConstantSpeedPropagation");
+        analogModel.typename = default("LoRaAnalogModel");
         //backgroundNoiseType = default("LoRaBackgroundNoise");
 
         // 802.15.4-2006, page 266
-        pathLoss.typeName = default("LoRaLogNormalShadowing");
+        pathLoss.typename = default("LoRaLogNormalShadowing");
+        backgroundNoise.typename = "DimensionalBackgroundNoise";        
 
         // Reflects the thermal noise for the receiver sensitivity
         // TODO couple with sensitivity

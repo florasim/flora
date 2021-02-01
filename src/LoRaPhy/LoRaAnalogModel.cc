@@ -87,9 +87,9 @@ const W LoRaAnalogModel::getBackgroundNoisePower(const LoRaBandListening *listen
 W LoRaAnalogModel::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const IRadio *transmitterRadio = transmission->getTransmitter();
-    const IAntenna *receiverAntenna = receiverRadio->getAntenna();
-    const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
+//    const IRadio *transmitterRadio = transmission->getTransmitter();
+//    const IAntenna *receiverAntenna = receiverRadio->getAntenna();
+//    const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
     const Coord receptionStartPosition = arrival->getStartPosition();

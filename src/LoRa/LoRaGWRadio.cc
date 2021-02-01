@@ -230,10 +230,12 @@ void LoRaGWRadio::endReception(cMessage *timer)
         EV_INFO << "LoRaGWRadio Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         if(isReceptionSuccessful) {
             auto macFrame = medium->receivePacket(this, radioFrame);
+            take(macFrame);
             emit(packetSentToUpperSignal, macFrame);
             emit(LoRaGWRadioReceptionFinishedCorrect, true);
             if (simTime() >= getSimulation()->getWarmupPeriod())
                 LoRaGWRadioReceptionFinishedCorrect_counter++;
+            EV << macFrame->getCompleteStringRepresentation(evFlags) << endl;
             sendUp(macFrame);
         }
         receptionTimer = nullptr;

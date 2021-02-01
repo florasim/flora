@@ -15,6 +15,8 @@
 
 #include "LoRaGWMac.h"
 #include "inet/common/ModuleAccess.h"
+#include "../LoRaPhy/LoRaPhyPreamble_m.h"
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 
@@ -134,6 +136,7 @@ void LoRaGWMac::handleUpperMessage(cMessage *msg)
 void LoRaGWMac::handleLowerMessage(cMessage *msg)
 {
     auto pkt = check_and_cast<Packet *>(msg);
+    auto header = pkt->popAtFront<LoRaPhyPreamble>();
     const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
     if(frame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS)
         sendUp(pkt);

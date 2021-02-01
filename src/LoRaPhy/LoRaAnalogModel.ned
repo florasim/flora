@@ -25,6 +25,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
 module LoRaAnalogModel like IAnalogModel
 {
     parameters:
+        bool ignorePartialInterference = default(false);
         @display("i=block/tunnel");
         @class(inet::physicallayer::LoRaAnalogModel);
 }
