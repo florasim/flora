@@ -110,10 +110,20 @@ void NetworkServerApp::finish()
 
     receivedRSSI.recordAs("receivedRSSI");
     recordScalar("totalReceivedPackets", totalReceivedPackets);
-    for(uint i=0;i<receivedPackets.size();i++)
-    {
-        delete receivedPackets[i].rcvdPacket;
+
+    while(!receivedPackets.empty()) {
+        delete receivedPackets.back().rcvdPacket;
+        if (receivedPackets.back().endOfWaiting && receivedPackets.back().endOfWaiting->isScheduled()) {
+            cancelAndDelete(receivedPackets.back().endOfWaiting);
+        }
+        else
+            delete receivedPackets.back().endOfWaiting;
+        receivedPackets.pop_back();
     }
+
+    knownNodes.clear();
+    receivedPackets.clear();
+
     recordScalar("counterUniqueReceivedPacketsPerSF SF7", counterUniqueReceivedPacketsPerSF[0]);
     recordScalar("counterUniqueReceivedPacketsPerSF SF8", counterUniqueReceivedPacketsPerSF[1]);
     recordScalar("counterUniqueReceivedPacketsPerSF SF9", counterUniqueReceivedPacketsPerSF[2]);
