@@ -112,6 +112,7 @@ void NetworkServerApp::finish()
     recordScalar("totalReceivedPackets", totalReceivedPackets);
 
     while(!receivedPackets.empty()) {
+        receivedPackets.back().endOfWaiting->removeControlInfo();
         delete receivedPackets.back().rcvdPacket;
         if (receivedPackets.back().endOfWaiting && receivedPackets.back().endOfWaiting->isScheduled()) {
             cancelAndDelete(receivedPackets.back().endOfWaiting);
