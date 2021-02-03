@@ -23,6 +23,7 @@ simple NetworkServerApp like IApp
     @statistic[LoRa_ServerPacketReceived](source=LoRa_ServerPacketReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
     string localAddress = default("");
+    int headerLength @unit(B) = default(8B);
     int destPort = default(-1);
     bool evaluateADRinServer = default(false);
 	

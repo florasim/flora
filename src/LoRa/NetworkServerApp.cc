@@ -420,7 +420,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
 
         socket.sendTo(pktAux, pickedGateway, destPort);
     }
-    delete pkt;
+//    delete pkt;
 }
 
 void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
