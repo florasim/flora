@@ -143,13 +143,13 @@ void LoRaGWRadio::endTransmission(cMessage *timer)
 {
     iAmTransmiting = false;
     auto part = (IRadioSignal::SignalPart)timer->getKind();
-    auto radioFrame = static_cast<IWirelessSignal *>(timer->getContextPointer());
-    auto transmission = radioFrame->getTransmission();
+    auto signal = static_cast<WirelessSignal *>(timer->getContextPointer());
+    auto transmission = signal->getTransmission();
     timer->setContextPointer(nullptr);
-    concurrentTransmissions.remove(timer);
-    EV_INFO << "Transmission ended: " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
+//    concurrentTransmissions.remove(timer);
+    EV_INFO << "Transmission ended: " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
+    emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
     check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
-    //check_and_cast<LoRaMedium *>(medium)->emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
     delete(timer);
 }
 

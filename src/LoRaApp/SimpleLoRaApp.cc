@@ -139,7 +139,9 @@ void SimpleLoRaApp::handleMessage(cMessage *msg)
 
 void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
 {
-    LoRaAppPacket *packet = check_and_cast<LoRaAppPacket *>(msg);
+//    LoRaAppPacket *packet = check_and_cast<LoRaAppPacket *>(msg);
+    auto pkt = check_and_cast<Packet *>(msg);
+    const auto & packet = pkt->peekAtFront<LoRaAppPacket>();
     if (simTime() >= getSimulation()->getWarmupPeriod())
         receivedADRCommands++;
     if(evaluateADRinNode)
