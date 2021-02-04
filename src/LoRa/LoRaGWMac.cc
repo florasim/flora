@@ -16,6 +16,8 @@
 #include "LoRaGWMac.h"
 #include "inet/common/ModuleAccess.h"
 #include "../LoRaPhy/LoRaPhyPreamble_m.h"
+#include "inet/common/ProtocolTag_m.h"
+
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
@@ -125,6 +127,8 @@ void LoRaGWMac::handleUpperMessage(cMessage *msg)
         if(frame->getLoRaSF() == 12) delta = 14.49984;
         scheduleAt(simTime() + delta, dutyCycleTimer);
         GW_forwardedDown++;
+        pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
+        sendDown(pkt);
     }
     else
     {

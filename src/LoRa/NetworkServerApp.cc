@@ -23,6 +23,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
 
+#include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+
 namespace inet {
 
 Define_Module(NetworkServerApp);
@@ -74,6 +77,7 @@ void NetworkServerApp::handleMessage(cMessage *msg)
         }
         updateKnownNodes(pkt);
         processLoraMACPacket(pkt);
+        EV << "Wychodze stad" << endl;
     }
     else if(msg->isSelfMessage()) {
         processScheduledPacket(msg);
@@ -213,14 +217,15 @@ void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
 {
     const auto & frame = pkt->peekAtFront<LoRaMacFrame>();
     bool packetExists = false;
-
     for(auto &elem : receivedPackets)
     {
         const auto &frameAux = elem.rcvdPacket->peekAtFront<LoRaMacFrame>();
         if(frameAux->getTransmitterAddress() == frame->getTransmitterAddress() && frameAux->getSequenceNumber() == frame->getSequenceNumber())
         {
             packetExists = true;
-            elem.possibleGateways.emplace_back(frame->getTransmitterAddress(), math::fraction2dB(frame->getSNIR()), frame->getRSSI());
+            const auto& networkHeader = getNetworkProtocolHeader(pkt);
+            const L3Address& gwAddress = networkHeader->getSourceAddress();
+            elem.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
             delete pkt;
             break;
         }
@@ -231,7 +236,10 @@ void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
         rcvPkt.rcvdPacket = pkt;
         rcvPkt.endOfWaiting = new cMessage("endOfWaitingWindow");
         rcvPkt.endOfWaiting->setControlInfo(pkt);
-        rcvPkt.possibleGateways.emplace_back(frame->getTransmitterAddress(), math::fraction2dB(frame->getSNIR()), frame->getRSSI());
+        const auto& networkHeader = getNetworkProtocolHeader(pkt);
+        const L3Address& gwAddress = networkHeader->getSourceAddress();
+
+        rcvPkt.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
         scheduleAt(simTime() + 1.2, rcvPkt.endOfWaiting);
         receivedPackets.push_back(rcvPkt);
     }
@@ -417,10 +425,9 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
         auto pktAux = new Packet("ADRPacket");
         pktAux->insertAtFront(mgmtPacket);
         pktAux->insertAtFront(frameToSend);
-
         socket.sendTo(pktAux, pickedGateway, destPort);
     }
-//    delete pkt;
+    delete pkt;
 }
 
 void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
