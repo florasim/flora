@@ -25,6 +25,7 @@ simple NetworkServerApp like IApp
     string localAddress = default("");
     int destPort = default(-1);
     bool evaluateADRinServer = default(false);
+    int headerLength @unit(B) = default(8B);
 	
 	string adrMethod = default("max");
 	double adrDeviceMargin = default(15);

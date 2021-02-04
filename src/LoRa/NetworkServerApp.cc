@@ -77,7 +77,6 @@ void NetworkServerApp::handleMessage(cMessage *msg)
         }
         updateKnownNodes(pkt);
         processLoraMACPacket(pkt);
-        EV << "Wychodze stad" << endl;
     }
     else if(msg->isSelfMessage()) {
         processScheduledPacket(msg);
@@ -238,7 +237,6 @@ void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
         rcvPkt.endOfWaiting->setControlInfo(pkt);
         const auto& networkHeader = getNetworkProtocolHeader(pkt);
         const L3Address& gwAddress = networkHeader->getSourceAddress();
-
         rcvPkt.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
         scheduleAt(simTime() + 1.2, rcvPkt.endOfWaiting);
         receivedPackets.push_back(rcvPkt);
@@ -293,7 +291,8 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     {
         evaluateADR(pkt, pickedGateway, SNIRinGW, RSSIinGW);
     }
-    delete receivedPackets[packetNumber].rcvdPacket;
+    EV << packetNumber << endl;
+//    delete receivedPackets[packetNumber].rcvdPacket;
     delete selfMsg;
     receivedPackets.erase(receivedPackets.begin()+packetNumber);
 }
@@ -423,6 +422,8 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
         frameToSend->setLoRaBW(frame->getLoRaBW());
 
         auto pktAux = new Packet("ADRPacket");
+        mgmtPacket->setChunkLength(B(par("headerLength").intValue()));
+
         pktAux->insertAtFront(mgmtPacket);
         pktAux->insertAtFront(frameToSend);
         socket.sendTo(pktAux, pickedGateway, destPort);
