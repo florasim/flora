@@ -74,6 +74,7 @@ void PacketForwarder::startUDP()
 
 void PacketForwarder::handleMessage(cMessage *msg)
 {
+    EV << msg->getArrivalGate() << endl;
     if (msg->arrivedOn("lowerLayerIn")) {
         EV << "Received LoRaMAC frame" << endl;
         auto pkt = check_and_cast<Packet*>(msg);
@@ -82,11 +83,12 @@ void PacketForwarder::handleMessage(cMessage *msg)
             processLoraMACPacket(pkt);
         //send(msg, "upperLayerOut");
         //sendPacket();
-    } else if (msg->arrivedOn("udpIn")) {
+    } else if (msg->arrivedOn("socketIn")) {
         // FIXME : debug for now to see if LoRaMAC frame received correctly from network server
         EV << "Received UDP packet" << endl;
         auto pkt = check_and_cast<Packet*>(msg);
         const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
+
         if (frame == nullptr)
             throw cRuntimeError("Packet type error");
         //EV << frame->getLoRaTP() << endl;

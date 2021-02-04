@@ -291,8 +291,7 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     {
         evaluateADR(pkt, pickedGateway, SNIRinGW, RSSIinGW);
     }
-    EV << packetNumber << endl;
-//    delete receivedPackets[packetNumber].rcvdPacket;
+    delete receivedPackets[packetNumber].rcvdPacket;
     delete selfMsg;
     receivedPackets.erase(receivedPackets.begin()+packetNumber);
 }
@@ -402,7 +401,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
             mgmtPacket->setOptions(newOptions);
         }
 
-        if(simTime() >= getSimulation()->getWarmupPeriod())
+        if(simTime() >= getSimulation()->getWarmupPeriod() && sendADR == true)
         {
             knownNodes[nodeIndex].numberOfSentADRPackets++;
         }
@@ -428,7 +427,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
         pktAux->insertAtFront(frameToSend);
         socket.sendTo(pktAux, pickedGateway, destPort);
     }
-    delete pkt;
+    //delete pkt;
 }
 
 void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
