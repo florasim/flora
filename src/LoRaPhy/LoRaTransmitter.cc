@@ -62,8 +62,8 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
     //W transmissionPower = controlInfo && !std::isnan(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     const_cast<LoRaTransmitter* >(this)->emit(LoRaTransmissionCreated, true);
 //    const LoRaMacFrame *frame = check_and_cast<const LoRaMacFrame *>(macFrame);
+    EV << macFrame->getDetailStringRepresentation(evFlags) << endl;
     const auto &frame = macFrame->peekAtFront<LoRaPhyPreamble>();
-
 
     int nPreamble = 8;
     simtime_t Tsym = (pow(2, frame->getSpreadFactor()))/(frame->getBandwidth().get()/1000);

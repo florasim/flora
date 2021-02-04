@@ -15,6 +15,8 @@
 
 #include "LoRaGWRadio.h"
 #include "LoRaPhy/LoRaMedium.h"
+#include "LoRaPhy/LoRaPhyPreamble_m.h"
+
 
 namespace inet {
 
@@ -77,6 +79,29 @@ void LoRaGWRadio::handleTransmissionTimer(cMessage *message)
 void LoRaGWRadio::handleUpperPacket(Packet *packet)
 {
     emit(packetReceivedFromUpperSignal, packet);
+
+    EV << packet->getDetailStringRepresentation(evFlags) << endl;
+    const auto &frame = packet->peekAtFront<LoRaMacFrame>();
+
+    auto preamble = makeShared<LoRaPhyPreamble>();
+
+    preamble->setBandwidth(frame->getLoRaBW());
+    preamble->setCenterFrequency(frame->getLoRaCF());
+    preamble->setCodeRendundance(frame->getLoRaCR());
+    preamble->setPower(W(25.12));
+    preamble->setSpreadFactor(frame->getLoRaSF());
+    preamble->setUseHeader(frame->getLoRaUseHeader());
+    preamble->setReceiverAddress(frame->getReceiverAddress());
+//    const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
+//    preamble->setReceiverAddress(loraHeader->getReceiverAddress());
+//
+//    auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
+//    signalPowerReq->setPower(tag->getPower());
+//
+    preamble->setChunkLength(b(16));
+    packet->insertAtFront(preamble);
+
+
     if (separateTransmissionParts)
         startTransmission(packet, IRadioSignal::SIGNAL_PART_PREAMBLE);
     else
