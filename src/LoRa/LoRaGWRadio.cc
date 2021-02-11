@@ -88,7 +88,7 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
     preamble->setBandwidth(frame->getLoRaBW());
     preamble->setCenterFrequency(frame->getLoRaCF());
     preamble->setCodeRendundance(frame->getLoRaCR());
-    preamble->setPower(W(25.12));
+    preamble->setPower(mW(25.12));
     preamble->setSpreadFactor(frame->getLoRaSF());
     preamble->setUseHeader(frame->getLoRaUseHeader());
     preamble->setReceiverAddress(frame->getReceiverAddress());

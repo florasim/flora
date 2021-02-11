@@ -75,7 +75,7 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
     else payloadBytes = 20;
     int payloadSymbNb = 8;
     payloadSymbNb += std::ceil((8*payloadBytes - 4*frame->getSpreadFactor() + 28 + 16 - 20*0)/(4*(frame->getSpreadFactor()-2*0)))*(frame->getCodeRendundance() + 4);
-    if(payloadSymbNb < 0) payloadSymbNb = 0;
+    if(payloadSymbNb < 8) payloadSymbNb = 8;
     simtime_t Theader = 0.5 * (8+payloadSymbNb) * Tsym / 1000;
     simtime_t Tpayload = 0.5 * (8+payloadSymbNb) * Tsym / 1000;
 
@@ -87,7 +87,6 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
     W transmissionPower = computeTransmissionPower(macFrame);
-
 
     if(!iAmGateway) {
         LoRaRadio *radio = check_and_cast<LoRaRadio *>(getParentModule());

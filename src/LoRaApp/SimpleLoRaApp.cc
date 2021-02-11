@@ -195,7 +195,8 @@ void SimpleLoRaApp::sendJoinRequest()
     loraTag->setCenterFrequency(loRaCF);
     loraTag->setSpreadFactor(loRaSF);
     loraTag->setCodeRendundance(loRaCR);
-    loraTag->setPower(mW(loRaTP));
+    loraTag->setPower(mW(math::dBmW2mW(loRaTP)));
+
     //add LoRa control info
   /*  LoRaMacControlInfo *cInfo = new LoRaMacControlInfo();
     cInfo->setLoRaTP(loRaTP);
