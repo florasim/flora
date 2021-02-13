@@ -415,7 +415,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
         frameToSend->setReceiverAddress(frame->getTransmitterAddress());
         //FIXME: What value to set for LoRa TP
         //frameToSend->setLoRaTP(pkt->getLoRaTP());
-        frameToSend->setLoRaTP(14);
+        frameToSend->setLoRaTP(math::dBmW2mW(14));
         frameToSend->setLoRaCF(frame->getLoRaCF());
         frameToSend->setLoRaSF(frame->getLoRaSF());
         frameToSend->setLoRaBW(frame->getLoRaBW());
