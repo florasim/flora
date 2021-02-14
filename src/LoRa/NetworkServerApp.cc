@@ -397,7 +397,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
             if(calculatedPowerdBm > 14) calculatedPowerdBm = 14;
 
             newOptions.setLoRaSF(calculatedSF);
-            newOptions.setLoRaTP(calculatedPowerdBm);
+            newOptions.setLoRaTP(math::dBmW2mW(calculatedPowerdBm));
             mgmtPacket->setOptions(newOptions);
         }
 
