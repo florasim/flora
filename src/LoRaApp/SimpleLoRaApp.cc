@@ -157,6 +157,8 @@ void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
             {
                 loRaSF = packet->getOptions().getLoRaSF();
             }
+            EV << "New TP " << loRaTP << endl;
+            EV << "New SF " << loRaSF << endl;
         }
     }
 }
