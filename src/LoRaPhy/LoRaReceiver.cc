@@ -124,10 +124,13 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     const LoRaReception *loRaReception = check_and_cast<const LoRaReception *>(reception);
     simtime_t m_x = (loRaReception->getStartTime() + loRaReception->getEndTime())/2;
     simtime_t d_x = (loRaReception->getEndTime() - loRaReception->getStartTime())/2;
+    EV << "Czas transmisji to " << loRaReception->getEndTime() - loRaReception->getStartTime() << endl;
     double P_threshold = 6;
     W signalRSSI_w = loRaReception->getPower();
     double signalRSSI_mw = signalRSSI_w.get()*1000;
     double signalRSSI_dBm = math::mW2dBmW(signalRSSI_mw);
+    EV << signalRSSI_mw << endl;
+    EV << signalRSSI_dBm << endl;
     int receptionSF = loRaReception->getLoRaSF();
     for (auto interferingReception : *interferingReceptions) {
         bool overlap = false;
@@ -225,11 +228,11 @@ const IReceptionResult *LoRaReceiver::computeReceptionResult(const IListening *l
         isReceptionSuccessful &= decision->isReceptionSuccessful();
     auto packet = computeReceivedPacket(snir, isReceptionSuccessful);
 
-    auto signalPower = computeSignalPower(listening, snir, interference);
-    if (!std::isnan(signalPower.get())) {
-        auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
-        signalPowerInd->setPower(signalPower);
-    }
+    auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
+    const LoRaReception *loRaReception = check_and_cast<const LoRaReception *>(reception);
+    W signalRSSI_w = loRaReception->getPower();
+    signalPowerInd->setPower(signalRSSI_w);
+
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
