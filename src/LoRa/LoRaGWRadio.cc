@@ -16,6 +16,7 @@
 #include "LoRaGWRadio.h"
 #include "LoRaPhy/LoRaMedium.h"
 #include "LoRaPhy/LoRaPhyPreamble_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 
 namespace inet {
@@ -95,11 +96,12 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
 //    const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
 //    preamble->setReceiverAddress(loraHeader->getReceiverAddress());
 //
-//    auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
-//    signalPowerReq->setPower(tag->getPower());
+    auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
+    signalPowerReq->setPower(mW(25.12));
 //
     preamble->setChunkLength(b(16));
     packet->insertAtFront(preamble);
+    EV << "Wysylam " << preamble->getPower() << " " << preamble->getSpreadFactor() << endl;
 
 
     if (separateTransmissionParts)
