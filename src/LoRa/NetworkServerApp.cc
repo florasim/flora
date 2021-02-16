@@ -238,6 +238,7 @@ void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
         const auto& networkHeader = getNetworkProtocolHeader(pkt);
         const L3Address& gwAddress = networkHeader->getSourceAddress();
         rcvPkt.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
+        EV << "Added " << gwAddress << " " << math::fraction2dB(frame->getSNIR()) << " " << frame->getRSSI() << endl;
         scheduleAt(simTime() + 1.2, rcvPkt.endOfWaiting);
         receivedPackets.push_back(rcvPkt);
     }
@@ -380,7 +381,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
             }
 
             // Decrease the Tx power by 3 for each step, until min reached
-            double calculatedPowerdBm = frame->getLoRaTP();
+            double calculatedPowerdBm = math::mW2dBmW(frame->getLoRaTP()) + 30;
             while(Nstep > 0 && calculatedPowerdBm > 2)
             {
                 calculatedPowerdBm-=3;
@@ -398,6 +399,8 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
 
             newOptions.setLoRaSF(calculatedSF);
             newOptions.setLoRaTP(calculatedPowerdBm);
+            EV << calculatedSF << endl;
+            EV << calculatedPowerdBm << endl;
             mgmtPacket->setOptions(newOptions);
         }
 
@@ -426,6 +429,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
         pktAux->insertAtFront(mgmtPacket);
         pktAux->insertAtFront(frameToSend);
         socket.sendTo(pktAux, pickedGateway, destPort);
+
     }
     //delete pkt;
 }
