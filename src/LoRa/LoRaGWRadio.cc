@@ -89,7 +89,7 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
     preamble->setBandwidth(frame->getLoRaBW());
     preamble->setCenterFrequency(frame->getLoRaCF());
     preamble->setCodeRendundance(frame->getLoRaCR());
-    preamble->setPower(mW(25.12));
+    preamble->setPower(mW(frame->getLoRaTP()));
     preamble->setSpreadFactor(frame->getLoRaSF());
     preamble->setUseHeader(frame->getLoRaUseHeader());
     preamble->setReceiverAddress(frame->getReceiverAddress());
@@ -97,7 +97,7 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
 //    preamble->setReceiverAddress(loraHeader->getReceiverAddress());
 //
     auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
-    signalPowerReq->setPower(mW(25.12));
+    signalPowerReq->setPower(mW(frame->getLoRaTP()));
 //
     preamble->setChunkLength(b(16));
     packet->insertAtFront(preamble);
