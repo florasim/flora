@@ -325,7 +325,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
             if(knownNodes[i].adrListSNIR.size() == 20) knownNodes[i].adrListSNIR.pop_front();
             knownNodes[i].framesFromLastADRCommand++;
 
-            if(knownNodes[i].framesFromLastADRCommand == 20)
+            if(knownNodes[i].framesFromLastADRCommand == 20 || sendADRAckRep == true)
             {
                 nodeIndex = i;
                 knownNodes[i].framesFromLastADRCommand = 0;
