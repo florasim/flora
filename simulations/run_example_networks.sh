@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILES=old_networks/*
+FILES=examples/*
 for f in $FILES
 do
   echo "Started network $f:"
