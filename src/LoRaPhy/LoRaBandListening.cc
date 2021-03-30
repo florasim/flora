@@ -19,22 +19,20 @@ namespace inet {
 
 namespace physicallayer {
 
-LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz LoRaCF, int LoRaSF, Hz LoRaBW) :
-    ListeningBase(radio, startTime, endTime, startPosition, endPosition),
-    LoRaCF(LoRaCF),
-    LoRaSF(LoRaSF),
-    LoRaBW(LoRaBW)
+LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition,  Hz centerFrequency, Hz bandwidth, int LoRaSF) :
+        BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth),
+    LoRaSF(LoRaSF)
 {
 }
 
-std::ostream& LoRaBandListening::printToStream(std::ostream& stream, int level) const
+std::ostream& LoRaBandListening::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "LoRaBandListening";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", LoRaCF = " << LoRaCF
+        stream << ", LoRaCF = " << centerFrequency
                << ", LoRaSF = " << LoRaSF
-               << ", LoRaBW = " << LoRaBW;
-    return ListeningBase::printToStream(stream, level);
+               << ", LoRaBW = " << bandwidth;
+    return ListeningBase::printToStream(stream, level, evFlags);
 }
 
 } // namespace physicallayer

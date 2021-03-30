@@ -16,13 +16,13 @@
 #ifndef LORA_LORAGWRADIO_H_
 #define LORA_LORAGWRADIO_H_
 
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
 #include "LoRaPhy/LoRaTransmitter.h"
 #include "LoRaPhy/LoRaReceiver.h"
 #include "LoRaPhy/LoRaTransmission.h"
 #include "LoRaPhy/LoRaReception.h"
 #include "LoRaMacFrame_m.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/wireless/common//medium/RadioMedium.h"
 #include "LoRaPhy/LoRaMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
 
@@ -37,13 +37,13 @@ protected:
     void initialize(int stage) override;
     virtual void finish() override;
     virtual void handleSelfMessage(cMessage *message) override;
-    virtual void handleUpperPacket(cPacket *packet) override;
-    void handleLowerPacket(RadioFrame *radioFrame) override;
+    virtual void handleUpperPacket(Packet *packet) override;
+    void handleSignal(WirelessSignal *radioFrame) override;
 
     bool iAmTransmiting;
     virtual bool isTransmissionTimer(const cMessage *message) const;
     virtual void handleTransmissionTimer(cMessage *message) override;
-    virtual void startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part) override;
+    virtual void startTransmission(Packet *macFrame, IRadioSignal::SignalPart part) override;
     virtual void continueTransmission(cMessage *timer);
     virtual void endTransmission(cMessage *timer);
 

@@ -17,7 +17,7 @@
 #define __LORANETWORK_NETWORKSERVERAPP_H_
 
 #include <omnetpp.h>
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include <vector>
 #include <tuple>
 #include <algorithm>
@@ -26,8 +26,8 @@
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "LoRaApp/LoRaAppPacket_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "../LoRaApp/LoRaAppPacket_m.h"
 #include <list>
 
 namespace inet {
@@ -35,7 +35,7 @@ namespace inet {
 class knownNode
 {
 public:
-    DevAddr srcAddr;
+    MacAddress srcAddr;
     int framesFromLastADRCommand;
     int lastSeqNoProcessed;
     int numberOfSentADRPackets;
@@ -55,8 +55,8 @@ public:
 class receivedPacket
 {
 public:
-    LoRaMacFrame* rcvdPacket;
-    cMessage* endOfWaiting;
+    Packet* rcvdPacket = nullptr;
+    cMessage* endOfWaiting = nullptr;
     std::vector<std::tuple<L3Address, double, double>> possibleGateways; // <address, sinr, rssi>
 };
 
@@ -67,9 +67,9 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     std::vector<knownGW> knownGateways;
     std::vector<receivedPacket> receivedPackets;
     int localPort = -1, destPort = -1;
-    std::vector<std::tuple<DevAddr, int>> recvdPackets;
+    std::vector<std::tuple<MacAddress, int>> recvdPackets;
     // state
-    UDPSocket socket;
+    UdpSocket socket;
     cMessage *selfMsg = nullptr;
     int totalReceivedPackets;
     std::string adrMethod;
@@ -80,16 +80,16 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    void processLoraMACPacket(cPacket *pk);
+    void processLoraMACPacket(Packet *pk);
     void startUDP();
     void setSocketOptions();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    bool isPacketProcessed(LoRaMacFrame* pkt);
-    void updateKnownNodes(LoRaMacFrame* pkt);
-    void addPktToProcessingTable(LoRaMacFrame* pkt);
+    bool isPacketProcessed(const Ptr<const LoRaMacFrame> &);
+    void updateKnownNodes(Packet* pkt);
+    void addPktToProcessingTable(Packet* pkt);
     void processScheduledPacket(cMessage* selfMsg);
-    void evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW);
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void evaluateADR(Packet *pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW);
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
     bool evaluateADRinServer;
 
     cHistogram receivedRSSI;

@@ -18,15 +18,11 @@
 
 
 
-cplusplus {{
-#include <inet/common/Units.h>
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.common.Units;
 
 namespace inet::physicallayer;
-
-class noncobject inet::units::values::bps;
-class noncobject inet::units::values::W;
-class noncobject inet::units::values::Hz;
 
 //
 // Message kinds for sending commands to the radio.
@@ -42,11 +38,11 @@ enum LoRaRadioCommandCode
 class LoRaConfigureRadioCommand
 {
     int radioMode = -1;                  // new radio mode or -1 if not set.
-    inet::units::values::W power;                    // new default transmission power in the range (0, +infinity) or NaN if not set.
-    inet::units::values::bps bitrate;              // new default bitrate in the range (0, +infinity) or NaN if not set.
+    W power;                    // new default transmission power in the range (0, +infinity) or NaN if not set.
+    bps bitrate;              // new default bitrate in the range (0, +infinity) or NaN if not set.
     //IModulationPtr modulation = nullptr; // new default modulation or nullptr if not set.
-    inet::units::values::Hz carrierFrequency;       // new default carrier frequency in the range (0, +infinity) or NaN if not set.
-    inet::units::values::Hz bandwidth;              // new default bandwidth in the rage (0, +infinity) or NaN if not set.
+    Hz carrierFrequency;       // new default carrier frequency in the range (0, +infinity) or NaN if not set.
+    Hz bandwidth;              // new default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 
 //
@@ -54,10 +50,10 @@ class LoRaConfigureRadioCommand
 //
 class LoRaTransmissionRequest
 {
-    inet::units::values::W power;              // override default transmission power in the range (0, +infinity) or NaN if not set.
-    inet::units::values::bps bitrate;        // override default bitrate in the range (0, +infinity) or NaN if not set.
-    inet::units::values::Hz carrierFrequency; // override default carrier frequency in the range (0, +infinity) or NaN if not set.
-    inet::units::values::Hz bandwidth;        // override default bandwidth in the rage (0, +infinity) or NaN if not set.
+    W power;              // override default transmission power in the range (0, +infinity) or NaN if not set.
+    bps bitrate;        // override default bitrate in the range (0, +infinity) or NaN if not set.
+    Hz carrierFrequency; // override default carrier frequency in the range (0, +infinity) or NaN if not set.
+    Hz bandwidth;        // override default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 
 //
@@ -70,11 +66,11 @@ class LoRaReceptionIndication
     //double packetErrorRate = NaN; // packet error rate (probability) in the range [0, 1] or NaN if unknown.
     //double bitErrorRate = NaN;    // bit error rate (probability) in the range [0, 1] or NaN if unknown.
     //double symbolErrorRate = NaN; // symbol error rate (probability) in the range [0, 1] or NaN if unknown.
-    inet::units::values::W minRSSI;           // minimum receive signal strength indication in the range (0, +infinity) or NaN if unknown.
+    W minRSSI;           // minimum receive signal strength indication in the range (0, +infinity) or NaN if unknown.
     double minSNIR;         // minimum signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown.
-    inet::units::values::W LoRaTP;
-    inet::units::values::Hz LoRaCF;
+    W LoRaTP;
+    Hz LoRaCF;
     int LoRaSF;
-    inet::units::values::Hz LoRaBW;
+    Hz LoRaBW;
     int LoRaCR;
 }

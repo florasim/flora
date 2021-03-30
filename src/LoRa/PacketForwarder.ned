@@ -16,9 +16,9 @@
 package loranetwork.LoRa;
 
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
-simple PacketForwarder like IUDPApp
+simple PacketForwarder like IApp
 {
     @class(inet::PacketForwarder);
     @signal[LoRa_GWPacketReceived](type=long); // optional
@@ -29,9 +29,10 @@ simple PacketForwarder like IUDPApp
     int destPort;
 	
     gates:
+        output socketOut @labels(UdpControlInfo/up);
+        input socketIn @labels(UdpControlInfo/down);
+    
 		input lowerLayerIn @labels(PacketForwarder/up);
-        output lowerLayerOut @labels(PacketForwarder/down);
-        input udpIn @labels(PacketForwarder/udpIn);
-        output udpOut @labels(PacketForwarder/udpOut);
+        output lowerLayerOut @labels(PacketForwarder/down);  
 
 }

@@ -8,8 +8,8 @@
 #ifndef LORATRANSMISSION_H_
 #define LORATRANSMISSION_H_
 
-#include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 namespace physicallayer {
@@ -23,9 +23,9 @@ protected:
     const Hz LoRaBW;
     const int LoRaCR;
 public:
-    LoRaTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, W LoRaTP, Hz LoRaCF, int LoRaSF, Hz LoRaBW, int LoRaCR);
+    LoRaTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, W LoRaTP, Hz LoRaCF, int LoRaSF, Hz LoRaBW, int LoRaCR);
 
-    virtual Hz getCarrierFrequency() const override { return LoRaCF; }
+    virtual Hz getCenterFrequency() const override { return LoRaCF; }
     virtual Hz getBandwidth() const override { return LoRaBW; }
     virtual W getPower() const override { return LoRaTP; }
     virtual W computeMinPower(const simtime_t startTime, const simtime_t endTime) const override { return LoRaTP; }
@@ -36,7 +36,7 @@ public:
     Hz getLoRaBW() const { return LoRaBW; }
     int getLoRaCR() const { return LoRaCR; }
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 } /* namespace physicallayer */

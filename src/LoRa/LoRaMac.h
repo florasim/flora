@@ -1,13 +1,14 @@
 #ifndef __LORAMAC_H
 #define __LORAMAC_H
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/contract/IMACProtocol.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/common/FSMA.h"
-#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
+#include "inet/common/Protocol.h"
 
 #include "LoRaRadio.h"
 
@@ -19,14 +20,14 @@ using namespace physicallayer;
  * Based on CSMA class
  */
 
-class LoRaMac : public MACProtocolBase
+class LoRaMac : public MacProtocolBase
 {
   protected:
     /**
      * @name Configuration parameters
      */
     //@{
-    DevAddr address;
+    MacAddress address;
     bool useAck = true;
     double bitrate = NaN;
     int headerLength = -1;
@@ -46,6 +47,18 @@ class LoRaMac : public MACProtocolBase
     int cwMulticast = -1;
     int sequenceNumber = 0;
     //@}
+
+    /** End of the Short Inter-Frame Time period */
+    cMessage *endSifs = nullptr;
+
+    /** End of the Data Inter-Frame Time period */
+    cMessage *endDifs = nullptr;
+
+    /** End of the backoff period */
+    cMessage *endBackoff = nullptr;
+
+    /** End of the ack timeout */
+    cMessage *endAckTimeout = nullptr;
 
     /**
      * @name CsmaCaMac state variables
@@ -79,7 +92,7 @@ class LoRaMac : public MACProtocolBase
     cPacketQueue transmissionQueue;
 
     /** Passive queue module to request messages from */
-    IPassiveQueue *queueModule = nullptr;
+    cPacketQueue *queueModule = nullptr;
     //@}
 
     /** @name Timer messages */
@@ -128,7 +141,7 @@ class LoRaMac : public MACProtocolBase
     //@{
     virtual ~LoRaMac();
     //@}
-    virtual DevAddr getAddress();
+    virtual MacAddress getAddress();
 
   protected:
     /**
@@ -138,7 +151,7 @@ class LoRaMac : public MACProtocolBase
     /** @brief Initialization of the module and its variables */
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual void configureNetworkInterface() override;
     //@}
 
     /**
@@ -147,14 +160,14 @@ class LoRaMac : public MACProtocolBase
      */
     //@{
     virtual void handleSelfMessage(cMessage *msg) override;
-    virtual void handleUpperPacket(cPacket *msg) override;
-    virtual void handleLowerPacket(cPacket *msg) override;
+    virtual void handleUpperMessage(cMessage *msg) override;
+    virtual void handleLowerMessage(cMessage *msg) override;
     virtual void handleWithFsm(cMessage *msg);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
-    virtual LoRaMacFrame *encapsulate(cPacket *msg);
-    virtual cPacket *decapsulate(LoRaMacFrame *frame);
+    virtual Packet *encapsulate(Packet *msg);
+    virtual Packet *decapsulate(Packet *frame);
     //@}
 
 
@@ -162,7 +175,7 @@ class LoRaMac : public MACProtocolBase
      * @name Frame transmission functions
      */
     //@{
-    virtual void sendDataFrame(LoRaMacFrame *frameToSend);
+    virtual void sendDataFrame(Packet *frameToSend);
     virtual void sendAckFrame();
     //virtual void sendJoinFrame();
     //@}
@@ -172,13 +185,12 @@ class LoRaMac : public MACProtocolBase
      */
     //@{
     virtual void finishCurrentTransmission();
-    virtual LoRaMacFrame *getCurrentTransmission();
-    virtual void popTransmissionQueue();
+    virtual Packet *getCurrentTransmission();
 
     virtual bool isReceiving();
-    virtual bool isAck(LoRaMacFrame *frame);
-    virtual bool isBroadcast(LoRaMacFrame *msg);
-    virtual bool isForUs(LoRaMacFrame *msg);
+    virtual bool isAck(const Ptr<const LoRaMacFrame> &frame);
+    virtual bool isBroadcast(const Ptr<const LoRaMacFrame> & msg);
+    virtual bool isForUs(const Ptr<const LoRaMacFrame> &msg);
 
     void turnOnReceiver(void);
     void turnOffReceiver(void);

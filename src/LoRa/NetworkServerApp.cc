@@ -14,11 +14,17 @@
 // 
 
 #include "NetworkServerApp.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+//#include "inet/networklayer/ipv4/IPv4Datagram.h"
+//#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
+
+#include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
 
@@ -51,7 +57,7 @@ void NetworkServerApp::initialize(int stage)
 
 void NetworkServerApp::startUDP()
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
 }
@@ -59,29 +65,33 @@ void NetworkServerApp::startUDP()
 
 void NetworkServerApp::handleMessage(cMessage *msg)
 {
-    if (msg->arrivedOn("udpIn")) {
-        LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
+    if (msg->arrivedOn("socketIn")) {
+        auto pkt = check_and_cast<Packet *>(msg);
+        const auto &frame  = pkt->peekAtFront<LoRaMacFrame>();
+        if (frame == nullptr)
+            throw cRuntimeError("Header error type");
+        //LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
         if (simTime() >= getSimulation()->getWarmupPeriod())
         {
             totalReceivedPackets++;
         }
-        updateKnownNodes(frame);
-        processLoraMACPacket(PK(msg));
-    } else if(msg->isSelfMessage())
-    {
+        updateKnownNodes(pkt);
+        processLoraMACPacket(pkt);
+    }
+    else if(msg->isSelfMessage()) {
         processScheduledPacket(msg);
     }
 }
 
-void NetworkServerApp::processLoraMACPacket(cPacket *pk)
+void NetworkServerApp::processLoraMACPacket(Packet *pk)
 {
-    LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(pk);
+    const auto & frame = pk->peekAtFront<LoRaMacFrame>();
     if(isPacketProcessed(frame))
     {
         delete pk;
         return;
     }
-    addPktToProcessingTable(frame);
+    addPktToProcessingTable(pk);
 }
 
 void NetworkServerApp::finish()
@@ -103,10 +113,21 @@ void NetworkServerApp::finish()
 
     receivedRSSI.recordAs("receivedRSSI");
     recordScalar("totalReceivedPackets", totalReceivedPackets);
-    for(uint i=0;i<receivedPackets.size();i++)
-    {
-        delete receivedPackets[i].rcvdPacket;
+
+    while(!receivedPackets.empty()) {
+        receivedPackets.back().endOfWaiting->removeControlInfo();
+        delete receivedPackets.back().rcvdPacket;
+        if (receivedPackets.back().endOfWaiting && receivedPackets.back().endOfWaiting->isScheduled()) {
+            cancelAndDelete(receivedPackets.back().endOfWaiting);
+        }
+        else
+            delete receivedPackets.back().endOfWaiting;
+        receivedPackets.pop_back();
     }
+
+    knownNodes.clear();
+    receivedPackets.clear();
+
     recordScalar("counterUniqueReceivedPacketsPerSF SF7", counterUniqueReceivedPacketsPerSF[0]);
     recordScalar("counterUniqueReceivedPacketsPerSF SF8", counterUniqueReceivedPacketsPerSF[1]);
     recordScalar("counterUniqueReceivedPacketsPerSF SF9", counterUniqueReceivedPacketsPerSF[2]);
@@ -144,47 +165,45 @@ void NetworkServerApp::finish()
         recordScalar("DER SF12", 0);
 }
 
-bool NetworkServerApp::isPacketProcessed(LoRaMacFrame* pkt)
+bool NetworkServerApp::isPacketProcessed(const Ptr<const LoRaMacFrame> &pkt)
 {
-    for(uint i=0;i<knownNodes.size();i++)
-    {
-        if(knownNodes[i].srcAddr == pkt->getTransmitterAddress())
-        {
-            if(knownNodes[i].lastSeqNoProcessed > pkt->getSequenceNumber()) return true;
+    for(const auto & elem : knownNodes) {
+        if(elem.srcAddr == pkt->getTransmitterAddress()) {
+            if(elem.lastSeqNoProcessed > pkt->getSequenceNumber()) return true;
         }
     }
     return false;
 }
 
-void NetworkServerApp::updateKnownNodes(LoRaMacFrame* pkt)
+void NetworkServerApp::updateKnownNodes(Packet* pkt)
 {
+    const auto & frame = pkt->peekAtFront<LoRaMacFrame>();
     bool nodeExist = false;
-    for(uint i=0;i<knownNodes.size();i++)
+    for(auto &elem : knownNodes)
     {
-        if(knownNodes[i].srcAddr == pkt->getTransmitterAddress())
-        {
+        if(elem.srcAddr == frame->getTransmitterAddress()) {
             nodeExist = true;
-            if(knownNodes[i].lastSeqNoProcessed < pkt->getSequenceNumber())
-            {
-                knownNodes[i].lastSeqNoProcessed = pkt->getSequenceNumber();
+            if(elem.lastSeqNoProcessed < frame->getSequenceNumber()) {
+                elem.lastSeqNoProcessed = frame->getSequenceNumber();
             }
             break;
         }
     }
+
     if(nodeExist == false)
     {
         knownNode newNode;
-        newNode.srcAddr= pkt->getTransmitterAddress();
-        newNode.lastSeqNoProcessed = pkt->getSequenceNumber();
+        newNode.srcAddr= frame->getTransmitterAddress();
+        newNode.lastSeqNoProcessed = frame->getSequenceNumber();
         newNode.framesFromLastADRCommand = 0;
         newNode.numberOfSentADRPackets = 0;
         newNode.historyAllSNIR = new cOutVector;
         newNode.historyAllSNIR->setName("Vector of SNIR per node");
         //newNode.historyAllSNIR->record(pkt->getSNIR());
-        newNode.historyAllSNIR->record(math::fraction2dB(pkt->getSNIR()));
+        newNode.historyAllSNIR->record(math::fraction2dB(frame->getSNIR()));
         newNode.historyAllRSSI = new cOutVector;
         newNode.historyAllRSSI->setName("Vector of RSSI per node");
-        newNode.historyAllRSSI->record(pkt->getRSSI());
+        newNode.historyAllRSSI->record(frame->getRSSI());
         newNode.receivedSeqNumber = new cOutVector;
         newNode.receivedSeqNumber->setName("Received Sequence number");
         newNode.calculatedSNRmargin = new cOutVector;
@@ -193,16 +212,19 @@ void NetworkServerApp::updateKnownNodes(LoRaMacFrame* pkt)
     }
 }
 
-void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
+void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
 {
+    const auto & frame = pkt->peekAtFront<LoRaMacFrame>();
     bool packetExists = false;
-    UDPDataIndication *cInfo = check_and_cast<UDPDataIndication*>(pkt->getControlInfo());
-    for(uint i=0;i<receivedPackets.size();i++)
+    for(auto &elem : receivedPackets)
     {
-        if(receivedPackets[i].rcvdPacket->getTransmitterAddress() == pkt->getTransmitterAddress() && receivedPackets[i].rcvdPacket->getSequenceNumber() == pkt->getSequenceNumber())
+        const auto &frameAux = elem.rcvdPacket->peekAtFront<LoRaMacFrame>();
+        if(frameAux->getTransmitterAddress() == frame->getTransmitterAddress() && frameAux->getSequenceNumber() == frame->getSequenceNumber())
         {
             packetExists = true;
-            receivedPackets[i].possibleGateways.emplace_back(cInfo->getSrcAddr(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
+            const auto& networkHeader = getNetworkProtocolHeader(pkt);
+            const L3Address& gwAddress = networkHeader->getSourceAddress();
+            elem.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
             delete pkt;
             break;
         }
@@ -212,8 +234,11 @@ void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
         receivedPacket rcvPkt;
         rcvPkt.rcvdPacket = pkt;
         rcvPkt.endOfWaiting = new cMessage("endOfWaitingWindow");
-        rcvPkt.endOfWaiting->setContextPointer(pkt);
-        rcvPkt.possibleGateways.emplace_back(cInfo->getSrcAddr(), math::fraction2dB(pkt->getSNIR()), pkt->getRSSI());
+        rcvPkt.endOfWaiting->setControlInfo(pkt);
+        const auto& networkHeader = getNetworkProtocolHeader(pkt);
+        const L3Address& gwAddress = networkHeader->getSourceAddress();
+        rcvPkt.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
+        EV << "Added " << gwAddress << " " << math::fraction2dB(frame->getSNIR()) << " " << frame->getRSSI() << endl;
         scheduleAt(simTime() + 1.2, rcvPkt.endOfWaiting);
         receivedPackets.push_back(rcvPkt);
     }
@@ -221,7 +246,9 @@ void NetworkServerApp::addPktToProcessingTable(LoRaMacFrame* pkt)
 
 void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
 {
-    LoRaMacFrame *frame = static_cast<LoRaMacFrame *>(selfMsg->getContextPointer());
+    auto pkt = check_and_cast<Packet *>(selfMsg->removeControlInfo());
+    const auto & frame = pkt->peekAtFront<LoRaMacFrame>();
+
     if (simTime() >= getSimulation()->getWarmupPeriod())
     {
         counterUniqueReceivedPacketsPerSF[frame->getLoRaSF()-7]++;
@@ -233,8 +260,8 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     int nodeNumber;
     for(uint i=0;i<receivedPackets.size();i++)
     {
-        if(receivedPackets[i].rcvdPacket->getTransmitterAddress() == frame->getTransmitterAddress() && receivedPackets[i].rcvdPacket->getSequenceNumber() == frame->getSequenceNumber())
-        {
+        const auto &frameAux = receivedPackets[i].rcvdPacket->peekAtFront<LoRaMacFrame>();
+        if(frameAux->getTransmitterAddress() == frame->getTransmitterAddress() && frameAux->getSequenceNumber() == frame->getSequenceNumber())        {
             packetNumber = i;
             nodeNumber = frame->getTransmitterAddress().getInt();
             if (numReceivedPerNode.count(nodeNumber-1)>0)
@@ -263,21 +290,25 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     receivedRSSI.collect(frame->getRSSI());
     if(evaluateADRinServer)
     {
-        evaluateADR(frame, pickedGateway, SNIRinGW, RSSIinGW);
+        evaluateADR(pkt, pickedGateway, SNIRinGW, RSSIinGW);
     }
     delete receivedPackets[packetNumber].rcvdPacket;
     delete selfMsg;
     receivedPackets.erase(receivedPackets.begin()+packetNumber);
 }
 
-void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW)
+void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW)
 {
     bool sendADR = false;
     bool sendADRAckRep = false;
     double SNRm; //needed for ADR
     int nodeIndex;
 
-    LoRaAppPacket *rcvAppPacket = check_and_cast<LoRaAppPacket*>(pkt->decapsulate());
+    pkt->trimFront();
+    auto frame = pkt->removeAtFront<LoRaMacFrame>();
+
+    const auto & rcvAppPacket = pkt->peekAtFront<LoRaAppPacket>();
+
     if(rcvAppPacket->getOptions().getADRACKReq())
     {
         sendADRAckRep = true;
@@ -285,12 +316,12 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
 
     for(uint i=0;i<knownNodes.size();i++)
     {
-        if(knownNodes[i].srcAddr == pkt->getTransmitterAddress())
+        if(knownNodes[i].srcAddr == frame->getTransmitterAddress())
         {
             knownNodes[i].adrListSNIR.push_back(SNIRinGW);
             knownNodes[i].historyAllSNIR->record(SNIRinGW);
             knownNodes[i].historyAllRSSI->record(RSSIinGW);
-            knownNodes[i].receivedSeqNumber->record(pkt->getSequenceNumber());
+            knownNodes[i].receivedSeqNumber->record(frame->getSequenceNumber());
             if(knownNodes[i].adrListSNIR.size() == 20) knownNodes[i].adrListSNIR.pop_front();
             knownNodes[i].framesFromLastADRCommand++;
 
@@ -322,19 +353,19 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
 
     if(sendADR || sendADRAckRep)
     {
-        LoRaAppPacket *mgmtPacket = new LoRaAppPacket("ADRcommand");
+        auto mgmtPacket = makeShared<LoRaAppPacket>();
         mgmtPacket->setMsgType(TXCONFIG);
 
         if(sendADR)
         {
             double SNRmargin;
             double requiredSNR;
-            if(pkt->getLoRaSF() == 7) requiredSNR = -7.5;
-            if(pkt->getLoRaSF() == 8) requiredSNR = -10;
-            if(pkt->getLoRaSF() == 9) requiredSNR = -12.5;
-            if(pkt->getLoRaSF() == 10) requiredSNR = -15;
-            if(pkt->getLoRaSF() == 11) requiredSNR = -17.5;
-            if(pkt->getLoRaSF() == 12) requiredSNR = -20;
+            if(frame->getLoRaSF() == 7) requiredSNR = -7.5;
+            if(frame->getLoRaSF() == 8) requiredSNR = -10;
+            if(frame->getLoRaSF() == 9) requiredSNR = -12.5;
+            if(frame->getLoRaSF() == 10) requiredSNR = -15;
+            if(frame->getLoRaSF() == 11) requiredSNR = -17.5;
+            if(frame->getLoRaSF() == 12) requiredSNR = -20;
 
             SNRmargin = SNRm - requiredSNR - adrDeviceMargin;
             knownNodes[nodeIndex].calculatedSNRmargin->record(SNRmargin);
@@ -342,7 +373,7 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
             LoRaOptions newOptions;
 
             // Increase the data rate with each step
-            int calculatedSF = pkt->getLoRaSF();
+            int calculatedSF = frame->getLoRaSF();
             while(Nstep > 0 && calculatedSF > 7)
             {
                 calculatedSF--;
@@ -350,7 +381,7 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
             }
 
             // Decrease the Tx power by 3 for each step, until min reached
-            double calculatedPowerdBm = pkt->getLoRaTP();
+            double calculatedPowerdBm = math::mW2dBmW(frame->getLoRaTP()) + 30;
             while(Nstep > 0 && calculatedPowerdBm > 2)
             {
                 calculatedPowerdBm-=3;
@@ -368,29 +399,42 @@ void NetworkServerApp::evaluateADR(LoRaMacFrame* pkt, L3Address pickedGateway, d
 
             newOptions.setLoRaSF(calculatedSF);
             newOptions.setLoRaTP(calculatedPowerdBm);
+            EV << calculatedSF << endl;
+            EV << calculatedPowerdBm << endl;
             mgmtPacket->setOptions(newOptions);
         }
 
-        if(simTime() >= getSimulation()->getWarmupPeriod())
+        if(simTime() >= getSimulation()->getWarmupPeriod() && sendADR == true)
         {
             knownNodes[nodeIndex].numberOfSentADRPackets++;
         }
 
-        LoRaMacFrame *frameToSend = new LoRaMacFrame("ADRPacket");
-        frameToSend->encapsulate(mgmtPacket);
-        frameToSend->setReceiverAddress(pkt->getTransmitterAddress());
+        auto frameToSend = makeShared<LoRaMacFrame>();
+        frameToSend->setChunkLength(B(par("headerLength").intValue()));
+
+      //  LoRaMacFrame *frameToSend = new LoRaMacFrame("ADRPacket");
+
+        //frameToSend->encapsulate(mgmtPacket);
+        frameToSend->setReceiverAddress(frame->getTransmitterAddress());
         //FIXME: What value to set for LoRa TP
         //frameToSend->setLoRaTP(pkt->getLoRaTP());
-        frameToSend->setLoRaTP(14);
-        frameToSend->setLoRaCF(pkt->getLoRaCF());
-        frameToSend->setLoRaSF(pkt->getLoRaSF());
-        frameToSend->setLoRaBW(pkt->getLoRaBW());
-        socket.sendTo(frameToSend, pickedGateway, destPort);
+        frameToSend->setLoRaTP(math::dBmW2mW(14));
+        frameToSend->setLoRaCF(frame->getLoRaCF());
+        frameToSend->setLoRaSF(frame->getLoRaSF());
+        frameToSend->setLoRaBW(frame->getLoRaBW());
+
+        auto pktAux = new Packet("ADRPacket");
+        mgmtPacket->setChunkLength(B(par("headerLength").intValue()));
+
+        pktAux->insertAtFront(mgmtPacket);
+        pktAux->insertAtFront(frameToSend);
+        socket.sendTo(pktAux, pickedGateway, destPort);
+
     }
-    delete rcvAppPacket;
+    //delete pkt;
 }
 
-void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void NetworkServerApp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     if (simTime() >= getSimulation()->getWarmupPeriod())
     {

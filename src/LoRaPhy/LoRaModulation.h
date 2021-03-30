@@ -16,19 +16,28 @@
 #ifndef LORAPHY_LORAMODULATION_H_
 #define LORAPHY_LORAMODULATION_H_
 
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaModulation : public APSKModulationBase
+class INET_API LoRaModulation : public ApskModulationBase
 {
-protected:
-    static const std::vector<APSKSymbol> constellation;
-
+  protected:
+    static const std::vector<ApskSymbol> constellation;
+    int spreadFactor;
+    Hz bandwith;
+    bps bitRate;
+    int notHeader = 1;
+    double codeRate;
   public:
-    LoRaModulation();
+    LoRaModulation(int spreadFactor,Hz bandwith,bps bitRate, int notHeader, double codeRate);
+    virtual Hz getBandwith() const {return  bandwith;}
+    virtual bps getbitRate() const {return  bitRate;}
+    virtual int getSpreadFactor() const {return  spreadFactor;}
+    virtual void setHeaderEnable(const bool &p){notHeader = 1; if (p) notHeader = 0;}
+    virtual bool getHeaderEnable() {return notHeader == 0;}
 
     double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
     double calculateSER(double snir, Hz bandwidth, bps bitrate) const;

@@ -16,7 +16,7 @@
 #ifndef LORAENERGYMODULES_LORAENERGYCONSUMER_H_
 #define LORAENERGYMODULES_LORAENERGYCONSUMER_H_
 
-#include "inet/physicallayer/energyconsumer/StateBasedEpEnergyConsumer.h"
+#include "inet/physicallayer/wireless/common/energyconsumer/StateBasedEpEnergyConsumer.h"
 #include "inet/power/storage/IdealEpEnergyStorage.h"
 #include <map>
 #include "inet/common/ModuleAccess.h"
@@ -31,7 +31,7 @@ public:
     void finish() override;
     virtual W getPowerConsumption() const override;
     bool readConfigurationFile();
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override;
 
 protected:
     int energyConsumerId;

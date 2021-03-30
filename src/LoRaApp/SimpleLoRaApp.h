@@ -35,11 +35,11 @@ namespace inet {
 class INET_API SimpleLoRaApp : public cSimpleModule, public ILifecycle
 {
     protected:
-        virtual void initialize(int stage) override;
+        void initialize(int stage) override;
         void finish() override;
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg) override;
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+        int numInitStages() const override { return NUM_INIT_STAGES; }
+        void handleMessage(cMessage *msg) override;
+        virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
 
         void handleMessageFromLowerLayer(cMessage *msg);
         std::pair<double,double> generateUniformCircleCoordinates(double radius, double gatewayX, double gatewayY);

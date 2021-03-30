@@ -15,7 +15,7 @@
 
 #include "LoRaEnergyConsumer.h"
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "LoRaPhy/LoRaTransmitter.h"
 namespace inet {
 
@@ -63,10 +63,11 @@ void LoRaEnergyConsumer::initialize(int stage)
         if (!energySource)
             throw cRuntimeError("Cannot find power source");
         //energyConsumerId = energySource->addEnergyConsumer(this);
-        energySource->addEnergyConsumer(this);
         totalEnergyConsumed = 0;
         energyBalance = J(0);
     }
+    else if (stage == INITSTAGE_POWER)
+        energySource->addEnergyConsumer(this);
 }
 
 void LoRaEnergyConsumer::finish()
@@ -135,12 +136,12 @@ bool LoRaEnergyConsumer::readConfigurationFile()
             supplyCurrent = (*aComb)->getAttribute("supplyCurrent");
         else
             supplyCurrent = "";
-        transmitterTransmittingSupplyCurrent[strtod(txPower, nullptr)] = strtod(supplyCurrent, nullptr);
+        transmitterTransmittingSupplyCurrent[math::dBmW2mW(strtod(txPower, nullptr))/1000] = strtod(supplyCurrent, nullptr);
     }
     return true;
 }
 
-void LoRaEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void LoRaEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal ||
         signal == IRadio::receptionStateChangedSignal ||
@@ -192,7 +193,6 @@ W LoRaEnergyConsumer::getPowerConsumption() const
             powerConsumption += receiverBusyPowerConsumption;
         else if (receptionState != IRadio::RECEPTION_STATE_UNDEFINED)
             throw cRuntimeError("Unknown radio reception state");
-        //EV << "*** EnergyConsumer: Power consumption Receiver mode, radioMode = " << radioMode << ", receptionState = " << receptionState << ", power = " << powerConsumption << std::endl;
     }
 
     if (radioMode == IRadio::RADIO_MODE_TRANSMITTER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
@@ -206,7 +206,6 @@ W LoRaEnergyConsumer::getPowerConsumption() const
             else if (part == IRadioSignal::SIGNAL_PART_WHOLE || part == IRadioSignal::SIGNAL_PART_PREAMBLE || part == IRadioSignal::SIGNAL_PART_HEADER || part == IRadioSignal::SIGNAL_PART_DATA)
             {
                 auto current = transmitterTransmittingSupplyCurrent.find(radio->getCurrentTxPower());
-                //EV << "*** EnergyConsumer: Transmission power = " << radio->getCurrentTxPower() << ", supply current = " << current->second << " power consumption = " << supplyVoltage*current->second << std::endl;
                 powerConsumption += mW(supplyVoltage*current->second);
             }
             else

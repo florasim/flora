@@ -43,7 +43,6 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="simulations"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -88,10 +87,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="org.omnetpp.cdt.gnu.config.release.796292328.749355655" name="loRaNetworkTest.ini" rcbsApplicability="disable" resourcePath="simulations/loRaNetworkTest.ini" toolsToInvoke=""/>
+					<fileInfo id="org.omnetpp.cdt.gnu.config.release.796292328.749355655" name="loRaNetworkTest.ini" rcbsApplicability="disable" resourcePath="simulations/SimpleLoRaNetwork.ini" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="simulations"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
@@ -118,4 +116,8 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.omnetpp.cdt.OmnetppGCCPerProjectProfile"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
+<<<<<<< HEAD
+=======
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+>>>>>>> inet3to4
 </cproject>

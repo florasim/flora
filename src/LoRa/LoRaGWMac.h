@@ -16,9 +16,11 @@
 #ifndef LORA_LORAGWMAC_H_
 #define LORA_LORAGWMAC_H_
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/contract/IMACProtocol.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/ModuleAccess.h"
 
 #include "LoRaMacControlInfo_m.h"
@@ -28,31 +30,32 @@ namespace inet {
 
 using namespace physicallayer;
 
-class LoRaGWMac: public MACProtocolBase {
+class LoRaGWMac: public MacProtocolBase {
 public:
     bool waitingForDC;
     cMessage *dutyCycleTimer;
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    //virtual InterfaceEntry *createInterfaceEntry();
+    virtual void configureNetworkInterface() override;
     long GW_forwardedDown;
     long GW_droppedDC;
 
-    virtual void handleUpperPacket(cPacket *msg) override;
-    virtual void handleLowerPacket(cPacket *msg) override;
+    virtual void handleUpperMessage(cMessage *msg) override;
+    virtual void handleLowerMessage(cMessage *msg) override;
     virtual void handleSelfMessage(cMessage *message) override;
 
-    void sendPacketBack(LoRaMacFrame *receivedFrame);
+    void sendPacketBack(Packet *receivedFrame);
     void createFakeLoRaMacFrame();
-    virtual DevAddr getAddress();
+    virtual MacAddress getAddress();
 
 protected:
-    DevAddr address;
+    MacAddress address;
 
     IRadio *radio = nullptr;
     IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 };
 
 }

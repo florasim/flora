@@ -16,31 +16,30 @@
 #ifndef LORAPHY_LORABANDLISTENING_H_
 #define LORAPHY_LORABANDLISTENING_H_
 
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/base/packetlevel/ListeningBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ListeningBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaBandListening : public ListeningBase
+class INET_API LoRaBandListening : public BandListening
 {
   protected:
-    const Hz LoRaCF;
     const int LoRaSF;
-    const Hz LoRaBW;
+
 
   public:
-    LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz LoRaCF, int LoRaSF, Hz LoRaBW);
+    LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth, int LoRaSF);
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     //virtual Hz getCarrierFrequency() const { return LoRaCF; }
     //virtual Hz getBandwidth() const { return LoRaBW; }
 
-    virtual Hz getLoRaCF() const { return LoRaCF; }
+    virtual Hz getLoRaCF() const { return centerFrequency; }
     virtual int getLoRaSF() const { return LoRaSF; }
-    virtual Hz getLoRaBW() const { return LoRaBW; }
+    virtual Hz getLoRaBW() const { return bandwidth; }
 };
 
 } // namespace physicallayer

@@ -8,7 +8,7 @@
 #ifndef LORAPHY_LORARECEPTION_H_
 #define LORAPHY_LORARECEPTION_H_
 
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 
 namespace inet {
 
@@ -23,7 +23,7 @@ protected:
     const double LoRaCR;
     const W receivedPower;
   public:
-    LoRaReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz LoRaCF, Hz LoRaBW, W receivedPower, int LoRaSF, int LoRaCR);
+    LoRaReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz LoRaCF, Hz LoRaBW, W receivedPower, int LoRaSF, int LoRaCR);
 
     Hz getLoRaCF() const { return LoRaCF; }
     int getLoRaSF() const { return LoRaSF; }

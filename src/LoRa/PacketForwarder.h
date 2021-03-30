@@ -17,14 +17,14 @@
 #define __LORANETWORK_PACKETFORWARDER_H_
 
 #include <omnetpp.h>
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include <vector>
 #include "inet/common/INETDefs.h"
 
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
@@ -34,19 +34,19 @@ class INET_API PacketForwarder : public cSimpleModule, public cListener
     std::vector<L3Address> destAddresses;
     int localPort = -1, destPort = -1;
     // state
-    UDPSocket socket;
+    UdpSocket socket;
     cMessage *selfMsg = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    void processLoraMACPacket(cPacket *pk);
+    void processLoraMACPacket(Packet *pk);
     void startUDP();
     void sendPacket();
     void setSocketOptions();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
   public:
       simsignal_t LoRa_GWPacketReceived;
       int counterOfSentPacketsFromNodes = 0;

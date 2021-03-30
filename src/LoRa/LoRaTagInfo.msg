@@ -13,16 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+import inet.common.INETDefs;
+import inet.common.TagBase;
+import inet.common.Units;
+import inet.linklayer.common.MacAddress;
 
-import inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss;
+namespace inet;
 
-module LoRaLogNormalShadowing extends FreeSpacePathLoss
+class LoRaTag extends TagBase
 {
-    parameters:
-        //parameters taken from paper LoRaSim
-        double d0 = default(40m) @unit(m);
-        double gamma = default(2.08);
-        double sigma = default(3.57);
-        @class(inet::physicallayer::LoRaLogNormalShadowing);
+    Hz centerFrequency = MHz(812);
+    Hz bandwidth = kHz(125);
+    int spreadFactor = 12;
+    W power = mW(100);
+    bool UseHeader = true;
+    int codeRendundance = 1;    
 }

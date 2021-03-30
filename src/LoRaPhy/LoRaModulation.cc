@@ -19,10 +19,16 @@ namespace inet {
 
 namespace physicallayer {
 
-const std::vector<APSKSymbol> LoRaModulation::constellation = {};
+const std::vector<ApskSymbol> LoRaModulation::constellation = {};
 
-LoRaModulation::LoRaModulation() :
-    APSKModulationBase(&constellation)
+LoRaModulation::LoRaModulation(int spreadFactor,Hz bandwith,bps bitRate, int notHeader, double codeRate) :
+        ApskModulationBase(&constellation),
+        spreadFactor(spreadFactor),
+        bandwith(bandwith),
+        bitRate(bitRate),
+        notHeader(notHeader),
+        codeRate(codeRate)
+
 {
 }
 

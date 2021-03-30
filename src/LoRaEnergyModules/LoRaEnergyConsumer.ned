@@ -15,7 +15,7 @@
 
 package loranetwork.LoRaEnergyModules;
 
-import inet.physicallayer.energyconsumer.StateBasedEpEnergyConsumer;
+import inet.physicallayer.wireless.common.energyconsumer.StateBasedEpEnergyConsumer;
 
 
 simple LoRaEnergyConsumer extends StateBasedEpEnergyConsumer

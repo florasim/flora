@@ -15,6 +15,10 @@
 
 #include "SimpleLoRaApp.h"
 #include "inet/mobility/static/StationaryMobility.h"
+#include "../LoRa/LoRaTagInfo_m.h"
+#include "inet/common/packet/Packet.h"
+
+
 namespace inet {
 
 Define_Module(SimpleLoRaApp);
@@ -135,7 +139,9 @@ void SimpleLoRaApp::handleMessage(cMessage *msg)
 
 void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
 {
-    LoRaAppPacket *packet = check_and_cast<LoRaAppPacket *>(msg);
+//    LoRaAppPacket *packet = check_and_cast<LoRaAppPacket *>(msg);
+    auto pkt = check_and_cast<Packet *>(msg);
+    const auto & packet = pkt->peekAtFront<LoRaAppPacket>();
     if (simTime() >= getSimulation()->getWarmupPeriod())
         receivedADRCommands++;
     if(evaluateADRinNode)
@@ -151,11 +157,13 @@ void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
             {
                 loRaSF = packet->getOptions().getLoRaSF();
             }
+            EV << "New TP " << loRaTP << endl;
+            EV << "New SF " << loRaSF << endl;
         }
     }
 }
 
-bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -165,29 +173,45 @@ bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, int stag
 
 void SimpleLoRaApp::sendJoinRequest()
 {
-    LoRaAppPacket *request = new LoRaAppPacket("DataFrame");
-    request->setKind(DATA);
+    auto pktRequest = new Packet("DataFrame");
+    pktRequest->setKind(DATA);
+
+    auto payload = makeShared<LoRaAppPacket>();
+    payload->setChunkLength(B(par("dataSize").intValue()));
+
     lastSentMeasurement = rand();
-    request->setSampleMeasurement(lastSentMeasurement);
+    payload->setSampleMeasurement(lastSentMeasurement);
 
     if(evaluateADRinNode && sendNextPacketWithADRACKReq)
     {
-        request->getOptions().setADRACKReq(true);
+        auto opt = payload->getOptions();
+        opt.setADRACKReq(true);
+        payload->setOptions(opt);
+        //request->getOptions().setADRACKReq(true);
         sendNextPacketWithADRACKReq = false;
     }
 
+
+    auto loraTag = pktRequest->addTagIfAbsent<LoRaTag>();
+    loraTag->setBandwidth(loRaBW);
+    loraTag->setCenterFrequency(loRaCF);
+    loraTag->setSpreadFactor(loRaSF);
+    loraTag->setCodeRendundance(loRaCR);
+    loraTag->setPower(mW(math::dBmW2mW(loRaTP)));
+
     //add LoRa control info
-    LoRaMacControlInfo *cInfo = new LoRaMacControlInfo;
+  /*  LoRaMacControlInfo *cInfo = new LoRaMacControlInfo();
     cInfo->setLoRaTP(loRaTP);
     cInfo->setLoRaCF(loRaCF);
     cInfo->setLoRaSF(loRaSF);
     cInfo->setLoRaBW(loRaBW);
     cInfo->setLoRaCR(loRaCR);
+    pktRequest->setControlInfo(cInfo);*/
 
-    request->setControlInfo(cInfo);
     sfVector.record(loRaSF);
     tpVector.record(loRaTP);
-    send(request, "appOut");
+    pktRequest->insertAtBack(payload);
+    send(pktRequest, "appOut");
     if(evaluateADRinNode)
     {
         ADR_ACK_CNT++;

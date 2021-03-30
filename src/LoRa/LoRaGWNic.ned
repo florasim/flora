@@ -15,41 +15,20 @@
 
 package loranetwork.LoRa;
 
-import inet.linklayer.contract.IWirelessNic;
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.linklayer.contract.IWirelessInterface;
+import inet.linklayer.common.WirelessInterface;
+
 import loranetwork.LoRaPhy.LoRaMedium;
 
-module LoRaGWNic like IWirelessNic 
+module LoRaGWNic extends WirelessInterface 
 {
     parameters:
-        string interfaceTableModule;
         @display("i=block/ifcard");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input upperMgmtIn;
-        output upperMgmtOut;
-        input radioIn @labels(IRadioFrame);
-    submodules:
-        mac: LoRaGWMac {
-            parameters:
-                @display("p=100,150");
-            gates:
-                upperMgmtIn;
-                upperMgmtOut;    
-        }
-        radio: LoRaGWRadio {
-            parameters:
-                @display("p=100,250");
-        }
-    connections:
-        upperLayerIn --> mac.upperLayerIn;
-        mac.lowerLayerOut --> radio.upperLayerIn;
-        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        radioIn --> { @display("m=s"); } --> radio.radioIn;
-        radio.upperLayerOut --> mac.lowerLayerIn;
-        
-        upperMgmtIn --> mac.upperMgmtIn;
-        mac.upperMgmtOut --> upperMgmtOut;
+        radio.typename = default("LoRaGWRadio");
+        radio.antenna.mobilityModule = "^.^.^.mobility";
+        radio.transmitter.typename = "LoRaTransmitter";
+        radio.transmitter.headerLength = 0B;
+        radio.receiver.typename = "LoRaReceiver";
+        mac.typename = "LoRaGWMac";
 }

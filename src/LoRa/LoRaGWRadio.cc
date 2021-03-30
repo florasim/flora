@@ -15,6 +15,9 @@
 
 #include "LoRaGWRadio.h"
 #include "LoRaPhy/LoRaMedium.h"
+#include "LoRaPhy/LoRaPhyPreamble_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+
 
 namespace inet {
 
@@ -74,29 +77,54 @@ void LoRaGWRadio::handleTransmissionTimer(cMessage *message)
         throw cRuntimeError("Unknown self message");
 }
 
-void LoRaGWRadio::handleUpperPacket(cPacket *packet)
+void LoRaGWRadio::handleUpperPacket(Packet *packet)
 {
-    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
+    emit(packetReceivedFromUpperSignal, packet);
+
+    EV << packet->getDetailStringRepresentation(evFlags) << endl;
+    const auto &frame = packet->peekAtFront<LoRaMacFrame>();
+
+    auto preamble = makeShared<LoRaPhyPreamble>();
+
+    preamble->setBandwidth(frame->getLoRaBW());
+    preamble->setCenterFrequency(frame->getLoRaCF());
+    preamble->setCodeRendundance(frame->getLoRaCR());
+    preamble->setPower(mW(frame->getLoRaTP()));
+    preamble->setSpreadFactor(frame->getLoRaSF());
+    preamble->setUseHeader(frame->getLoRaUseHeader());
+    preamble->setReceiverAddress(frame->getReceiverAddress());
+//    const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
+//    preamble->setReceiverAddress(loraHeader->getReceiverAddress());
+//
+    auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
+    signalPowerReq->setPower(mW(frame->getLoRaTP()));
+//
+    preamble->setChunkLength(b(16));
+    packet->insertAtFront(preamble);
+    EV << "Wysylam " << preamble->getPower() << " " << preamble->getSpreadFactor() << endl;
+
+
     if (separateTransmissionParts)
         startTransmission(packet, IRadioSignal::SIGNAL_PART_PREAMBLE);
     else
         startTransmission(packet, IRadioSignal::SIGNAL_PART_WHOLE);
 }
 
-void LoRaGWRadio::startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part)
+void LoRaGWRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)
 {
     if(iAmTransmiting == false)
     {
         iAmTransmiting = true;
-        auto radioFrame = createRadioFrame(macFrame);
+        auto radioFrame = createSignal(macFrame);
         auto transmission = radioFrame->getTransmission();
 
         cMessage *txTimer = new cMessage("transmissionTimer");
         txTimer->setKind(part);
-        txTimer->setContextPointer(const_cast<RadioFrame *>(radioFrame));
+        txTimer->setContextPointer(radioFrame);
         scheduleAt(transmission->getEndTime(part), txTimer);
-        EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
-        check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
+        emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
+        EV_INFO << "Transmission started: " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
+        check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureStartedSignal, check_and_cast<const cObject *>(transmission));
     }
     else delete macFrame;
 }
@@ -105,28 +133,29 @@ void LoRaGWRadio::continueTransmission(cMessage *timer)
 {
     auto previousPart = (IRadioSignal::SignalPart)timer->getKind();
     auto nextPart = (IRadioSignal::SignalPart)(previousPart + 1);
-    auto radioFrame = static_cast<RadioFrame *>(timer->getContextPointer());
+    auto radioFrame = static_cast<IWirelessSignal *>(timer->getContextPointer());
     auto transmission = radioFrame->getTransmission();
-    EV_INFO << "Transmission ended: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << radioFrame->getTransmission() << endl;
+    EV_INFO << "Transmission ended: " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << radioFrame->getTransmission() << endl;
     timer->setKind(nextPart);
     scheduleAt(transmission->getEndTime(nextPart), timer);
-    EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << transmission << endl;
+    EV_INFO << "Transmission started: " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << transmission << endl;
 }
 
 void LoRaGWRadio::endTransmission(cMessage *timer)
 {
     iAmTransmiting = false;
     auto part = (IRadioSignal::SignalPart)timer->getKind();
-    auto radioFrame = static_cast<RadioFrame *>(timer->getContextPointer());
-    auto transmission = radioFrame->getTransmission();
+    auto signal = static_cast<WirelessSignal *>(timer->getContextPointer());
+    auto transmission = signal->getTransmission();
     timer->setContextPointer(nullptr);
-    concurrentTransmissions.remove(timer);
-    EV_INFO << "Transmission ended: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
-    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
+//    concurrentTransmissions.remove(timer);
+    EV_INFO << "Transmission ended: " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
+    emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
     delete(timer);
 }
 
-void LoRaGWRadio::handleLowerPacket(RadioFrame *radioFrame)
+void LoRaGWRadio::handleSignal(WirelessSignal *radioFrame)
 {
     auto receptionTimer = createReceptionTimer(radioFrame);
     if (separateReceptionParts)
@@ -142,7 +171,7 @@ bool LoRaGWRadio::isReceptionTimer(const cMessage *message) const
 
 void LoRaGWRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
 {
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto arrival = radioFrame->getArrival();
     auto reception = radioFrame->getReception();
     emit(LoRaGWRadioReceptionStarted, true);
@@ -151,7 +180,7 @@ void LoRaGWRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     if (isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime() && iAmTransmiting == false) {
         auto transmission = radioFrame->getTransmission();
         auto isReceptionAttempted = medium->isReceptionAttempted(this, transmission, part);
-        EV_INFO << "LoRaGWRadio Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (WirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         if (isReceptionAttempted) {
             if(iAmGateway) {
                 concurrentReceptions.push_back(timer);
@@ -160,13 +189,13 @@ void LoRaGWRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
         }
     }
     else
-        EV_INFO << "LoRaGWRadio Reception started: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception started: ignoring " << (WirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     timer->setKind(part);
     scheduleAt(arrival->getEndTime(part), timer);
     //updateTransceiverState();
     //updateTransceiverPart();
     radioMode = RADIO_MODE_TRANSCEIVER;
-    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::receptionStartedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalStartedSignal, check_and_cast<const cObject *>(reception));
     if(iAmGateway) EV << "[MSDebug] start reception, size : " << concurrentReceptions.size() << endl;
 }
 
@@ -174,7 +203,7 @@ void LoRaGWRadio::continueReception(cMessage *timer)
 {
     auto previousPart = (IRadioSignal::SignalPart)timer->getKind();
     auto nextPart = (IRadioSignal::SignalPart)(previousPart + 1);
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto arrival = radioFrame->getArrival();
     auto reception = radioFrame->getReception();
     if(iAmGateway) {
@@ -186,21 +215,21 @@ void LoRaGWRadio::continueReception(cMessage *timer)
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime(previousPart) == simTime() && iAmTransmiting == false) {
         auto transmission = radioFrame->getTransmission();
         bool isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, previousPart);
-        EV_INFO << "LoRaGWRadio Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
         if (!isReceptionSuccessful) {
             receptionTimer = nullptr;
             if(iAmGateway) concurrentReceptions.remove(timer);
         }
         auto isReceptionAttempted = medium->isReceptionAttempted(this, transmission, nextPart);
-        EV_INFO << "LoRaGWRadio Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
         if (!isReceptionAttempted) {
             receptionTimer = nullptr;
             if(iAmGateway) concurrentReceptions.remove(timer);
         }
     }
     else {
-        EV_INFO << "LoRaGWRadio Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
-        EV_INFO << "LoRaGWRadio Reception started: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception ended: ignoring " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception started: ignoring " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
     }
     timer->setKind(nextPart);
     scheduleAt(arrival->getEndTime(nextPart), timer);
@@ -212,7 +241,7 @@ void LoRaGWRadio::continueReception(cMessage *timer)
 void LoRaGWRadio::endReception(cMessage *timer)
 {
     auto part = (IRadioSignal::SignalPart)timer->getKind();
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto arrival = radioFrame->getArrival();
     auto reception = radioFrame->getReception();
     std::list<cMessage *>::iterator it;
@@ -225,33 +254,35 @@ void LoRaGWRadio::endReception(cMessage *timer)
         auto transmission = radioFrame->getTransmission();
 // TODO: this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
         auto isReceptionSuccessful = medium->getReceptionDecision(this, radioFrame->getListening(), transmission, part)->isReceptionSuccessful();
-        EV_INFO << "LoRaGWRadio Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         if(isReceptionSuccessful) {
             auto macFrame = medium->receivePacket(this, radioFrame);
-            emit(LayeredProtocolBase::packetSentToUpperSignal, macFrame);
+            take(macFrame);
+            emit(packetSentToUpperSignal, macFrame);
             emit(LoRaGWRadioReceptionFinishedCorrect, true);
             if (simTime() >= getSimulation()->getWarmupPeriod())
                 LoRaGWRadioReceptionFinishedCorrect_counter++;
+            EV << macFrame->getCompleteStringRepresentation(evFlags) << endl;
             sendUp(macFrame);
         }
         receptionTimer = nullptr;
         if(iAmGateway) concurrentReceptions.remove(timer);
     }
     else
-        EV_INFO << "LoRaGWRadio Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception ended: ignoring " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     //updateTransceiverState();
     //updateTransceiverPart();
     radioMode = RADIO_MODE_TRANSCEIVER;
-    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::receptionEndedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
     delete timer;
 }
 
 void LoRaGWRadio::abortReception(cMessage *timer)
 {
-    auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto radioFrame = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto part = (IRadioSignal::SignalPart)timer->getKind();
     auto reception = radioFrame->getReception();
-    EV_INFO << "LoRaGWRadio Reception aborted: for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+    EV_INFO << "LoRaGWRadio Reception aborted: for " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     if (timer == receptionTimer) {
         if(iAmGateway) concurrentReceptions.remove(timer);
         receptionTimer = nullptr;

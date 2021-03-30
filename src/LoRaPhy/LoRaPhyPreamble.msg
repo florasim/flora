@@ -11,18 +11,22 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-package loranetwork.LoRaPhy;
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.common.Units;
+import inet.linklayer.common.MacAddress;
 
-import inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss;
 
-module LoRaLogNormalShadowing extends FreeSpacePathLoss
-{
-    parameters:
-        //parameters taken from paper LoRaSim
-        double d0 = default(40m) @unit(m);
-        double gamma = default(2.08);
-        double sigma = default(3.57);
-        @class(inet::physicallayer::LoRaLogNormalShadowing);
+namespace inet;
+
+class LoRaPhyPreamble extends FieldsChunk {
+    Hz centerFrequency;
+    Hz bandwidth;
+    int spreadFactor;
+    W power;
+    bool UseHeader;
+    int codeRendundance;
+    MacAddress receiverAddress;
 }

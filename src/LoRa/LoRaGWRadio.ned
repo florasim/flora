@@ -19,25 +19,55 @@ import loranetwork.LoRaPhy.LoRaTransmitter;
 import loranetwork.LoRaPhy.LoRaReceiver;
 
 
-import inet.physicallayer.common.packetlevel.Radio;
-import inet.physicallayer.base.packetlevel.FlatRadioBase;
+import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
+
 
 module LoRaGWRadio extends FlatRadioBase
 {
-    parameters:
+     parameters:
         @signal[LoRaGWRadioReceptionStarted](type=bool); // optional
         @statistic[LoRaGWRadioReceptionStarted](source=LoRaGWRadioReceptionStarted; record=count);
         @signal[LoRaGWRadioReceptionFinishedCorrect](type=bool); // optional
         @statistic[LoRaGWRadioReceptionFinishedCorrect](source=LoRaGWRadioReceptionFinishedCorrect; record=count);
         
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("LoRaTransmitter");
-        receiverType = default("LoRaReceiver");
+        
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[radioModeChanged](type=long);
+        @signal[listeningChanged];
+        @signal[receptionStateChanged](type=long);
+        @signal[transmissionStateChanged](type=long);
+        @signal[receivedSignalPartChanged](type=long);
+        @signal[transmittedSignalPartChanged](type=long);
+        @signal[transmissionStarted];
+        @signal[transmissionEnded];
+        @signal[receptionStarted];
+        @signal[receptionEnded];
+        @signal[minSNIR];
+        @signal[packetErrorRate];
+        @signal[bitErrorRate];
+        @signal[symbolErrorRate];
+        @signal[droppedPacket];
+               
+        
+
+        @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="Radio transmission state"; source=transmissionStateChanged; record=count,vector; interpolationmode=sample-hold);
+
+        @statistic[minSnir](title="Min SNIR"; source=minimumSnir(packetSentToUpper); record=histogram);
+        @statistic[packetErrorRate](title="Packet error rate"; source=packetErrorRate(packetSentToUpper); record=histogram);
+        @statistic[bitErrorRate](title="Bit error rate"; source=bitErrorRate(packetSentToUpper); record=histogram);
+        @statistic[symbolErrorRate](title="Symbol error rate"; source=symbolErrorRate(packetSentToUpper); record=histogram);
+        
+        antenna.typename = default("IsotropicAntenna");
+        transmitter.typename  = default("LoRaTransmitter");
+        receiver.typename = default("LoRaReceiver");
         
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
                 
-        carrierFrequency = 2450 MHz;
+        centerFrequency = 2450 MHz;
        
 
         // B_20dB ATmega256RFR2 (page 564)

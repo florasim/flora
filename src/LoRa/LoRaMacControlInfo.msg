@@ -17,24 +17,20 @@
 // TODO generated message class
 //
 
-cplusplus {{
-#include "../misc/DevAddr.h"
-#include <inet/common/Units.h>
-}}
-
-class noncobject DevAddr;
-class noncobject inet::units::values::Hz;
+import inet.common.INETDefs;
+import inet.common.Units;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
 class LoRaMacControlInfo {
-    DevAddr src;  // src DevAddr address (can be left empty when sending)
-    DevAddr dest; // dest DevAddr address
+    MacAddress src;  // src DevAddr address (can be left empty when sending)
+    MacAddress dest; // dest DevAddr address
 
     double LoRaTP;
-    inet::units::values::Hz LoRaCF;
+    Hz LoRaCF;
     int LoRaSF;
-    inet::units::values::Hz LoRaBW;
+    Hz LoRaBW;
     int LoRaCR;
     bool LoRaUseHeader;
 }

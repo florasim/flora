@@ -16,13 +16,14 @@
 #ifndef LORAPHY_LORARECEIVER_H_
 #define LORAPHY_LORARECEIVER_H_
 
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionResult.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 #include "LoRaModulation.h"
 #include "LoRaTransmission.h"
 #include "LoRaReception.h"
@@ -41,7 +42,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaReceiver : public cModule, public virtual IReceiver
+class INET_API LoRaReceiver : public FlatReceiverBase
 
 {
 private:
@@ -85,18 +86,15 @@ public:
   virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
   virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const override;
 
-  virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
-  virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
+  virtual Packet * computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const override;
 
-  virtual ReceptionIndication *createReceptionIndication() const;
+  virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
+  virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 
-  virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
+  virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 
-  virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
-
-  virtual double getSNIRThreshold() const { return snirThreshold; }
-
-  virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
+  virtual double getSNIRThreshold() const override { return snirThreshold; }
+  virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const override;
 
   virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
 

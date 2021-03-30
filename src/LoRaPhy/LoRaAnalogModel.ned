@@ -15,7 +15,7 @@
 
 package loranetwork.LoRaPhy;
 
-import inet.physicallayer.contract.packetlevel.IAnalogModel;
+import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
 
 //
 // This analog model computes with scalar analog power representation. In other
@@ -25,6 +25,7 @@ import inet.physicallayer.contract.packetlevel.IAnalogModel;
 module LoRaAnalogModel like IAnalogModel
 {
     parameters:
+        bool ignorePartialInterference = default(false);
         @display("i=block/tunnel");
         @class(inet::physicallayer::LoRaAnalogModel);
 }

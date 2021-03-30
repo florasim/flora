@@ -19,7 +19,7 @@ package loranetwork.LoRa;
 
 import inet.linklayer.csmaca.CsmaCaMac; 
 
-simple LoRaMac extends CsmaCaMac
+module LoRaMac extends CsmaCaMac
 {
     parameters:
         bitrate = 250bps;
