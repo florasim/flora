@@ -1,4 +1,6 @@
 # FLoRa
+<a href="https://www.buymeacoffee.com/mariuszslabicki" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-red.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
 FLoRa (Framework for LoRa) is a simulation framework for carrying out end-to-end simulations for LoRa networks. 
 It is based on the [OMNeT++](https://omnetpp.org/) network simulator and uses components from the [INET framework](https://inet.omnetpp.org/) as well.
 
