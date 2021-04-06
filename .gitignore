@@ -22,22 +22,15 @@
 src/flora
 src/flora_dbg
 
-src/*.so
 src/**/*_m.h
 src/**/*_m.cc
 src/Makefile
 
-/run
-/debug
-/memcheck
-
 /out
 
 .settings/*
-simulations/*
 simulations/**/results
 simulations/**/.tkenvrc
+simulations/**/.qtenvrc
 simulations/**/valgrind.out
 simulations/**/log.txt
-
-
