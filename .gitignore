@@ -32,5 +32,6 @@ src/Makefile
 simulations/**/results
 simulations/**/.tkenvrc
 simulations/**/.qtenvrc
+simulations/**/.cmdenv-log
 simulations/**/valgrind.out
 simulations/**/log.txt
