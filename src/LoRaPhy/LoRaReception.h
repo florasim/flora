@@ -14,8 +14,6 @@ using namespace inet;
 using namespace inet::physicallayer;
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaReception : public ScalarReception
 {
 protected:
@@ -35,8 +33,6 @@ protected:
     virtual W getPower() const override { return receivedPower; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

@@ -24,8 +24,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaTransmitter : public FlatTransmitterBase {
     public:
         LoRaTransmitter();
@@ -40,8 +38,6 @@ class LoRaTransmitter : public FlatTransmitterBase {
         simsignal_t LoRaTransmissionCreated;
 
 };
-
-}
 
 }
 

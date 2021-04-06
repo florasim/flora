@@ -24,8 +24,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaAnalogModel);
 
 std::ostream& LoRaAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
@@ -191,8 +189,6 @@ const ISnir *LoRaAnalogModel::computeSNIR(const IReception *reception, const INo
 {
     return new ScalarSnir(reception, noise);
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 

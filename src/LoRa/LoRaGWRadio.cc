@@ -21,8 +21,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaGWRadio);
 
 void LoRaGWRadio::initialize(int stage)
@@ -289,7 +287,6 @@ void LoRaGWRadio::abortReception(cMessage *timer)
     }
     updateTransceiverState();
     updateTransceiverPart();
-}
 }
 
 }

@@ -40,8 +40,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaReceiver : public FlatReceiverBase
 
 {
@@ -111,8 +109,6 @@ public:
 
 
 };
-
-}
 
 }
 

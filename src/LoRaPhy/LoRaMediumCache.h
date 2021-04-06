@@ -24,8 +24,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaMediumCache : public cModule, public IMediumLimitCache
 {
   protected:
@@ -156,8 +154,6 @@ class LoRaMediumCache : public cModule, public IMediumLimitCache
     virtual m getMaxInterferenceRange(const IRadio *radio) const override;
     //@}
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

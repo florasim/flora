@@ -24,8 +24,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaAnalogModel : public ScalarAnalogModelBase
 {
   public:
@@ -36,8 +34,6 @@ class LoRaAnalogModel : public ScalarAnalogModelBase
     const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
     virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

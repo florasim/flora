@@ -17,8 +17,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaHataOkumura);
 
 LoRaHataOkumura::LoRaHataOkumura()
@@ -45,8 +43,6 @@ double LoRaHataOkumura::computePathLoss(mps propagationSpeed, Hz frequency, m di
     // build based on documentation from Actility
     double PL_db = K1 + K2 * log10(distance.get()/1000);
     return math::dB2fraction(-PL_db);
-}
-
 }
 
 }

@@ -23,8 +23,6 @@ using namespace inet;
 using namespace inet::physicallayer;
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaBandListening : public BandListening
 {
   protected:
@@ -43,8 +41,6 @@ class LoRaBandListening : public BandListening
     virtual int getLoRaSF() const { return LoRaSF; }
     virtual Hz getLoRaBW() const { return bandwidth; }
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

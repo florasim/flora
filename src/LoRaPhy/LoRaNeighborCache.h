@@ -24,8 +24,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaNeighborCache : public cSimpleModule, public INeighborCache
 {
   public:
@@ -69,8 +67,6 @@ class LoRaNeighborCache : public cSimpleModule, public INeighborCache
     virtual void removeRadio(const IRadio *radio) override;
     virtual void sendToNeighbors(IRadio *transmitter, const IWirelessSignal *frame, double range) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

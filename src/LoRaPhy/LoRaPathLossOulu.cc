@@ -17,8 +17,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaPathLossOulu);
 
 LoRaPathLossOulu::LoRaPathLossOulu()
@@ -44,8 +42,6 @@ double LoRaPathLossOulu::computePathLoss(mps propagationSpeed, Hz frequency, m d
     //double PL_db = PL_d0_db + 10 * gamma * log10(unit(distance / d0).get()) + normal(0.0, sigma);
     double PL_db = B + 10 * n * log10(unit(distance/d0).get()) - antennaGain + normal(0.0, sigma);
     return math::dB2fraction(-PL_db);
-}
-
 }
 
 }

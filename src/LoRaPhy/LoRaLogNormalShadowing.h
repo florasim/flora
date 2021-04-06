@@ -22,8 +22,6 @@ using namespace inet;
 using namespace inet::physicallayer;
 namespace flora {
 
-namespace physicallayer {
-
 /**
  * This class implements the log normal shadowing model.
  */
@@ -44,8 +42,6 @@ class LoRaLogNormalShadowing : public FreeSpacePathLoss
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
     m computeRange(W transmissionPower) const;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

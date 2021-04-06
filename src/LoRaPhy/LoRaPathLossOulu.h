@@ -22,8 +22,6 @@ using namespace inet;
 using namespace inet::physicallayer;
 namespace flora {
 
-namespace physicallayer {
-
 /**
  * This class implements the log normal shadowing model.
  */
@@ -43,8 +41,6 @@ class LoRaPathLossOulu : public FreeSpacePathLoss
     LoRaPathLossOulu();
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

@@ -25,8 +25,6 @@ using namespace inet;
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaEnergyConsumer: public inet::physicallayer::StateBasedEpEnergyConsumer {
 public:
     void initialize(int stage) override;
@@ -54,6 +52,5 @@ protected:
 
 };
 
-}
 }
 #endif /* LORAENERGYMODULES_LORAENERGYCONSUMER_H_ */

@@ -111,5 +111,5 @@ module LoRaGWRadio extends FlatRadioBase
         
         bool iAmGateway = default(true);
 
-        @class(physicallayer::LoRaGWRadio); //originally it was @class(Radio);
+        @class(LoRaGWRadio); //originally it was @class(Radio);
 }

@@ -14,8 +14,6 @@
 
 namespace flora {
 
-using namespace physicallayer;
-
 /**
  * Based on CSMA class
  */

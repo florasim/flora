@@ -20,8 +20,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 using namespace inet;
 using namespace inet::physicallayer;
 
@@ -45,8 +43,6 @@ class LoRaModulation : public ApskModulationBase
     double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
     double calculateSER(double snir, Hz bandwidth, bps bitrate) const;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

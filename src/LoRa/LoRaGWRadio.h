@@ -28,8 +28,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaGWRadio : public FlatRadioBase {
 private:
     void completeRadioModeSwitch(RadioMode newRadioMode);
@@ -65,8 +63,6 @@ public:
     simsignal_t LoRaGWRadioReceptionStarted;
     simsignal_t LoRaGWRadioReceptionFinishedCorrect;
 };
-
-}
 
 }
 

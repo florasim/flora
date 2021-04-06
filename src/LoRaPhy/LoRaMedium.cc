@@ -29,9 +29,9 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
 
 namespace flora {
-namespace physicallayer {
 
 Define_Module(LoRaMedium);
+
 LoRaMedium::LoRaMedium() : RadioMedium()
 {
 }
@@ -92,6 +92,4 @@ const IReceptionResult *LoRaMedium::getReceptionResult(const IRadio *radio, cons
     return result;
 }
 
-
-}
 }

@@ -19,8 +19,6 @@
 #include "LoRaPhy/LoRaTransmitter.h"
 namespace flora {
 
-namespace physicallayer {
-
 using namespace inet::power;
 
 Define_Module(LoRaEnergyConsumer);
@@ -215,6 +213,5 @@ W LoRaEnergyConsumer::getPowerConsumption() const
             throw cRuntimeError("Unknown radio transmission state");
     }
     return powerConsumption;
-}
 }
 }

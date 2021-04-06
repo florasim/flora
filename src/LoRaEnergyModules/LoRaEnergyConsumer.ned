@@ -22,5 +22,5 @@ simple LoRaEnergyConsumer extends StateBasedEpEnergyConsumer
 {
     parameters:
         xml configFile;
-        @class(physicallayer::LoRaEnergyConsumer);
+        @class(LoRaEnergyConsumer);
 }

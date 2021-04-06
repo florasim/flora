@@ -22,8 +22,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaMediumCache);
 
 template<typename T> inline T minIgnoreNaN(T a, T b)
@@ -255,8 +253,6 @@ m LoRaMediumCache::getMaxCommunicationRange(const IRadio* radio) const
     }
     throw cRuntimeError("Unknown pathLossType. Only LoRaLogNormalShadowing is supported by the LoRaMediumCache.");
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 

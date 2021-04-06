@@ -26,7 +26,7 @@ cplusplus {{
 using namespace inet;
 }}
 
-namespace fflora::physicallayer;
+namespace flora;
 
 //
 // Message kinds for sending commands to the radio.

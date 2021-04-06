@@ -31,7 +31,6 @@
 #include <algorithm>
 
 namespace flora {
-namespace physicallayer {
 class LoRaMedium : public RadioMedium
 {
     friend class LoRaGWRadio;
@@ -46,6 +45,5 @@ protected:
       //virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
       virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
 };
-}
 }
 #endif /* LORAPHY_LORAMEDIUM_H_ */

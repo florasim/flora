@@ -31,8 +31,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaRadio);
 
 simsignal_t LoRaRadio::minSNIRSignal = cComponent::registerSignal("minSNIR");
@@ -528,7 +526,5 @@ void LoRaRadio::setCurrentTxPower(double txPower)
 {
     currentTxPower = txPower;
 }
-
-} // namespace physicallayer
 
 } // namespace inet

@@ -21,8 +21,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaReceiver);
 
 LoRaReceiver::LoRaReceiver() :
@@ -35,7 +33,7 @@ void LoRaReceiver::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         snirThreshold = math::dB2fraction(par("snirThreshold"));
-        if(strcmp(getParentModule()->getClassName(), "flora::physicallayer::LoRaGWRadio") == 0)
+        if(strcmp(getParentModule()->getClassName(), "flora::LoRaGWRadio") == 0)
         {
             iAmGateway = true;
         } else iAmGateway = false;
@@ -330,5 +328,4 @@ W LoRaReceiver::getSensitivity(const LoRaReception *reception) const
     return sensitivity;
 }
 
-}
 }

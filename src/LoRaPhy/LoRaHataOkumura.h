@@ -22,8 +22,6 @@ using namespace inet;
 using namespace inet::physicallayer;
 namespace flora {
 
-namespace physicallayer {
-
 /**
  * This class implements the LoRaHataOkumura.
  */
@@ -41,8 +39,6 @@ class LoRaHataOkumura : public FreeSpacePathLoss
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

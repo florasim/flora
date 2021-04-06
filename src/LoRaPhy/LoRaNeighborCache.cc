@@ -20,8 +20,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaNeighborCache);
 
 LoRaNeighborCache::LoRaNeighborCache() :
@@ -154,8 +152,6 @@ LoRaNeighborCache::~LoRaNeighborCache()
 
     cancelAndDelete(updateNeighborListsTimer);
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 

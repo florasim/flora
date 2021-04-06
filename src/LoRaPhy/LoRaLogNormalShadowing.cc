@@ -18,8 +18,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaLogNormalShadowing);
 
 LoRaLogNormalShadowing::LoRaLogNormalShadowing()
@@ -64,9 +62,6 @@ m LoRaLogNormalShadowing::computeRange(W transmissionPower) const
     double rhs = (trans_power_db - PL_d0_db - max_sensitivity)/(10 * gamma);
     double distance = d0.get() * pow(10, rhs);
     return m(distance);
-}
-
-
 }
 
 }

@@ -22,8 +22,6 @@
 
 namespace flora {
 
-namespace physicallayer {
-
 Define_Module(LoRaTransmitter);
 
 LoRaTransmitter::LoRaTransmitter() :
@@ -43,7 +41,7 @@ void LoRaTransmitter::initialize(int stage)
         bandwidth = Hz(par("bandwidth"));
         LoRaTransmissionCreated = registerSignal("LoRaTransmissionCreated");
 
-        if(strcmp(getParentModule()->getClassName(), "flora::physicallayer::LoRaGWRadio") == 0)
+        if(strcmp(getParentModule()->getClassName(), "flora::LoRaGWRadio") == 0)
         {
             iAmGateway = true;
         } else iAmGateway = false;
@@ -108,7 +106,5 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
             frame->getSpreadFactor(),
             frame->getBandwidth(),
             frame->getCodeRendundance());}
-
-}
 
 }

@@ -28,8 +28,6 @@ using namespace inet::physicallayer;
 
 namespace flora {
 
-namespace physicallayer {
-
 class LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, public virtual IRadio
 {
 public:
@@ -121,8 +119,6 @@ public:
 
   virtual void decapsulate(Packet *packet) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 
