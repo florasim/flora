@@ -32,7 +32,6 @@ simple SimpleLoRaApp
         double initialLoRaBW @unit(Hz) = default(125kHz);
         int initialLoRaCR = default(4);
         bool initialUseHeader = default(true);
-    	@class(flora::SimpleLoRaApp);
     	bool evaluateADRinNode = default(false);
 	    int dataSize @unit(B) = default(10B);
     gates:

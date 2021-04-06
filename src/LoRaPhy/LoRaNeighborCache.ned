@@ -28,5 +28,5 @@ module LoRaNeighborCache like INeighborCache
         double range @unit(m);
         double refillPeriod @unit(s);
         @display("i=block/table2");
-        @class(flora::physicallayer::LoRaNeighborCache);
+        @class(physicallayer::LoRaNeighborCache);
 }

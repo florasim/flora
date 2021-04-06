@@ -27,5 +27,5 @@ module LoRaAnalogModel like IAnalogModel
     parameters:
         bool ignorePartialInterference = default(false);
         @display("i=block/tunnel");
-        @class(flora::physicallayer::LoRaAnalogModel);
+        @class(physicallayer::LoRaAnalogModel);
 }

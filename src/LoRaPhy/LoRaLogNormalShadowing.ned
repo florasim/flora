@@ -24,5 +24,5 @@ module LoRaLogNormalShadowing extends FreeSpacePathLoss
         double d0 = default(40m) @unit(m);
         double gamma = default(2.08);
         double sigma = default(3.57);
-        @class(flora::physicallayer::LoRaLogNormalShadowing);
+        @class(physicallayer::LoRaLogNormalShadowing);
 }

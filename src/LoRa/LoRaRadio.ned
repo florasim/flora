@@ -86,7 +86,7 @@ module LoRaRadio extends FlatRadioBase
         //*.energySourceModule = default(absPath(energySourceModule));
         //*.energySourceModule = default(absPath(energySourceModule));
         bool iAmGateway = default(false);
-        @class(flora::physicallayer::LoRaRadio); //originally it was @class(Radio);
+        @class(physicallayer::LoRaRadio); //originally it was @class(Radio);
         @display("bgb=215,413");
     submodules:
         IdealEpEnergyStorage: IdealEpEnergyStorage {

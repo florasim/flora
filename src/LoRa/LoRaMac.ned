@@ -23,7 +23,7 @@ module LoRaMac extends CsmaCaMac
 {
     parameters:
         bitrate = 250bps;
-        @class(flora::LoRaMac);
+        @class(LoRaMac);
         gates:
         	input upperMgmtIn;
         	output upperMgmtOut;

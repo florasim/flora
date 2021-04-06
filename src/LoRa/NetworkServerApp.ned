@@ -18,7 +18,6 @@ import inet.applications.contract.IApp;
 
 simple NetworkServerApp like IApp
 {
-    @class(flora::NetworkServerApp);
     @signal[LoRa_ServerPacketReceived](type=bool); // optional
     @statistic[LoRa_ServerPacketReceived](source=LoRa_ServerPacketReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
