@@ -252,8 +252,8 @@ m LoRaMediumCache::getMaxCommunicationRange(const IRadio* radio) const
         LoRaLogNormalShadowing *loraLogNormalShadowing;
         loraLogNormalShadowing = check_and_cast<LoRaLogNormalShadowing *>(radioMedium->getSubmodule("pathLoss"));
         return(loraLogNormalShadowing->computeRange(maxTransmissionPower));
-
     }
+    throw cRuntimeError("Unknown pathLossType. Only LoRaLogNormalShadowing is supported by the LoRaMediumCache.");
 }
 
 } // namespace physicallayer
