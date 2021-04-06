@@ -1,3 +1,3 @@
-package loranetwork;
+package flora;
 
 @license(LGPL);

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaApp;
+package flora.LoRaApp;
 
 //
 // TODO auto-generated module

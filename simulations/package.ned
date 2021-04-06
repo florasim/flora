@@ -1,11 +1,11 @@
-package loranetwork.simulations;
+package flora.simulations;
 
 import inet.applications.udpapp.UdpBasicApp;
 import inet.node.inet.Router;
 import inet.node.internetcloud.InternetCloud;
-import loranetwork.LoRaPhy.LoRaMedium;
-import loranetwork.LoraNode.LoRaNode;
-import loranetwork.LoraNode.LoRaGW;
+import flora.LoRaPhy.LoRaMedium;
+import flora.LoraNode.LoRaNode;
+import flora.LoraNode.LoRaGW;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;

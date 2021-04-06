@@ -15,7 +15,7 @@
 
 //based on Ieee802154NarrowbandMac
 
-package loranetwork.LoRa;
+package flora.LoRa;
 
 import inet.linklayer.csmaca.CsmaCaMac; 
 
