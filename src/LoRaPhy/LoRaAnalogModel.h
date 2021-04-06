@@ -22,7 +22,7 @@
 
 #include "LoRaBandListening.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

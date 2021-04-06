@@ -7,7 +7,7 @@
 
 #include "LoRaReception.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

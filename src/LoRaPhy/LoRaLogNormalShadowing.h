@@ -18,7 +18,9 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 
 namespace physicallayer {
 

@@ -10,7 +10,9 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 
 namespace physicallayer {
 

@@ -19,7 +19,9 @@
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ListeningBase.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 
 namespace physicallayer {
 

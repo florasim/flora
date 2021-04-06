@@ -22,7 +22,7 @@
 #include "LoRa/LoRaRadio.h"
 #include "LoRa/LoRaMacFrame_m.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

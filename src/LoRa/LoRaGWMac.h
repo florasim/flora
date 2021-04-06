@@ -26,9 +26,10 @@
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
 
-namespace inet {
+namespace flora {
 
-using namespace physicallayer;
+using namespace inet;
+using namespace inet::physicallayer;
 
 class LoRaGWMac: public MacProtocolBase {
 public:

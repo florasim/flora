@@ -21,16 +21,20 @@ import inet.common.INETDefs;
 import inet.common.Units;
 import inet.linklayer.common.MacAddress;
 
-namespace inet;
+namespace flora;
+
+cplusplus {{
+using namespace inet;
+}}
 
 class LoRaMacControlInfo {
-    MacAddress src;  // src DevAddr address (can be left empty when sending)
-    MacAddress dest; // dest DevAddr address
+    inet::MacAddress src;  // src DevAddr address (can be left empty when sending)
+    inet::MacAddress dest; // dest DevAddr address
 
     double LoRaTP;
-    Hz LoRaCF;
+    inet::Hz LoRaCF;
     int LoRaSF;
-    Hz LoRaBW;
+    inet::Hz LoRaBW;
     int LoRaCR;
     bool LoRaUseHeader;
 }

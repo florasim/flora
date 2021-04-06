@@ -26,8 +26,9 @@
 #include "LoRa/LoRaMacControlInfo_m.h"
 
 using namespace omnetpp;
+using namespace inet;
 
-namespace inet {
+namespace flora {
 
 /**
  * TODO - Generated class

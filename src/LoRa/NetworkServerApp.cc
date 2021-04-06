@@ -26,7 +26,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
-namespace inet {
+namespace flora {
 
 Define_Module(NetworkServerApp);
 

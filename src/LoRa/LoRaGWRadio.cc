@@ -19,7 +19,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

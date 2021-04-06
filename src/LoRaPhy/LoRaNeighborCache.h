@@ -22,7 +22,7 @@
 #include <set>
 #include <vector>
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

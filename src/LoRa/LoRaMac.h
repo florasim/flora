@@ -12,7 +12,7 @@
 
 #include "LoRaRadio.h"
 
-namespace inet {
+namespace flora {
 
 using namespace physicallayer;
 

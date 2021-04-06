@@ -26,7 +26,7 @@
 #include "LoRaPhy/LoRaMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

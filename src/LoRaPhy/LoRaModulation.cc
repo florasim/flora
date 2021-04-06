@@ -15,7 +15,7 @@
 
 #include "LoRaModulation.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

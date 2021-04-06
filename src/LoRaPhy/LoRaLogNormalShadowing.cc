@@ -16,7 +16,7 @@
 #include "LoRaLogNormalShadowing.h"
 #include "inet/common/INETMath.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

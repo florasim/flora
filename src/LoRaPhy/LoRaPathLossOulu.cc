@@ -15,7 +15,7 @@
 
 #include "LoRaPathLossOulu.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

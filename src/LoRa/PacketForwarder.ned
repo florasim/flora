@@ -20,7 +20,7 @@ import inet.applications.contract.IApp;
 
 simple PacketForwarder like IApp
 {
-    @class(inet::PacketForwarder);
+    @class(flora::PacketForwarder);
     @signal[LoRa_GWPacketReceived](type=long); // optional
     @statistic[LoRa_GWPacketReceived](source=LoRa_GWPacketReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)

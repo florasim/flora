@@ -22,17 +22,21 @@ import inet.common.Units;
 import inet.linklayer.common.MacAddress;
 import inet.common.packet.chunk.Chunk;
 
-namespace inet;
+cplusplus {{
+using namespace inet;
+}}
 
-class LoRaMacFrame extends FieldsChunk {
-    MacAddress transmitterAddress;
-    MacAddress receiverAddress;
+namespace flora;
+
+class LoRaMacFrame extends inet::FieldsChunk {
+    inet::MacAddress transmitterAddress;
+    inet::MacAddress receiverAddress;
     
     int sequenceNumber;
     double LoRaTP;
-    Hz LoRaCF;
+    inet::Hz LoRaCF;
     int LoRaSF;
-    Hz LoRaBW;
+    inet::Hz LoRaBW;
     int LoRaCR;
     bool LoRaUseHeader;
     double RSSI;

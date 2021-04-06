@@ -18,7 +18,7 @@
 #include "LoRaPhy/LoRaNeighborCache.h"
 #include "inet/common/ModuleAccess.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

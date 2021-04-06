@@ -21,7 +21,9 @@
 #include <map>
 #include "inet/common/ModuleAccess.h"
 
-namespace inet {
+using namespace inet;
+
+namespace flora {
 
 namespace physicallayer {
 

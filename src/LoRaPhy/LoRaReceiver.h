@@ -38,7 +38,7 @@
 
 //based on Ieee802154UWBIRReceiver
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

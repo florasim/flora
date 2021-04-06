@@ -22,7 +22,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IMediumLimitCache.h"
 #include "LoRaPhy/LoRaMedium.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

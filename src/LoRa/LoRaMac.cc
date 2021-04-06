@@ -26,7 +26,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 
-namespace inet {
+namespace flora {
 
 Define_Module(LoRaMac);
 

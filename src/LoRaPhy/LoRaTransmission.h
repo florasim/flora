@@ -11,7 +11,9 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 namespace physicallayer {
 
 class LoRaTransmission : public TransmissionBase, public virtual INarrowbandSignal, public virtual IScalarSignal

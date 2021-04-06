@@ -20,7 +20,7 @@
 #include "LoRaPhy/LoRaMedium.h"
 #include "LoRaPhy/LoRaLogNormalShadowing.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

@@ -23,7 +23,10 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace flora {
 
 namespace physicallayer {
 

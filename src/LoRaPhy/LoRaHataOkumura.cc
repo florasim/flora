@@ -15,7 +15,7 @@
 
 #include "LoRaHataOkumura.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

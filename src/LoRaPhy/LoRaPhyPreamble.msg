@@ -18,15 +18,18 @@ import inet.common.packet.chunk.Chunk;
 import inet.common.Units;
 import inet.linklayer.common.MacAddress;
 
+cplusplus {{
+using namespace inet;
+}}
 
-namespace inet;
+namespace flora;
 
-class LoRaPhyPreamble extends FieldsChunk {
-    Hz centerFrequency;
-    Hz bandwidth;
+class LoRaPhyPreamble extends inet::FieldsChunk {
+    inet::Hz centerFrequency;
+    inet::Hz bandwidth;
     int spreadFactor;
-    W power;
+    inet::W power;
     bool UseHeader;
     int codeRendundance;
-    MacAddress receiverAddress;
+    inet::MacAddress receiverAddress;
 }

@@ -19,7 +19,7 @@
 #include "LoRaPhyPreamble_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 
@@ -35,7 +35,7 @@ void LoRaReceiver::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         snirThreshold = math::dB2fraction(par("snirThreshold"));
-        if(strcmp(getParentModule()->getClassName(), "inet::physicallayer::LoRaGWRadio") == 0)
+        if(strcmp(getParentModule()->getClassName(), "flora::physicallayer::LoRaGWRadio") == 0)
         {
             iAmGateway = true;
         } else iAmGateway = false;

@@ -28,7 +28,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
 
-namespace inet {
+namespace flora {
 namespace physicallayer {
 
 Define_Module(LoRaMedium);

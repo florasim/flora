@@ -26,7 +26,7 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
-namespace inet {
+namespace flora {
 
 class PacketForwarder : public cSimpleModule, public cListener
 {

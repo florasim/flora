@@ -17,7 +17,7 @@
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "LoRaPhy/LoRaTransmitter.h"
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 

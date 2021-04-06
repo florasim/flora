@@ -20,7 +20,7 @@
 #include <algorithm>
 
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
 
@@ -43,7 +43,7 @@ void LoRaTransmitter::initialize(int stage)
         bandwidth = Hz(par("bandwidth"));
         LoRaTransmissionCreated = registerSignal("LoRaTransmissionCreated");
 
-        if(strcmp(getParentModule()->getClassName(), "inet::physicallayer::LoRaGWRadio") == 0)
+        if(strcmp(getParentModule()->getClassName(), "flora::physicallayer::LoRaGWRadio") == 0)
         {
             iAmGateway = true;
         } else iAmGateway = false;

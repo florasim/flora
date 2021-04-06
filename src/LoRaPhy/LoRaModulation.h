@@ -18,9 +18,12 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
-namespace inet {
+namespace flora {
 
 namespace physicallayer {
+
+using namespace inet;
+using namespace inet::physicallayer;
 
 class LoRaModulation : public ApskModulationBase
 {
