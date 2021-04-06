@@ -26,7 +26,6 @@ module LoRaRadio extends FlatRadioBase
         transmitter.typename = default("LoRaTransmitter");
         receiver.typename = default("LoRaReceiver");
 
-        
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[radioModeChanged](type=long);
@@ -48,7 +47,7 @@ module LoRaRadio extends FlatRadioBase
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[transmissionState](title="Radio transmission state"; source=transmissionStateChanged; record=count,vector; interpolationmode=sample-hold);
-        
+
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
 
@@ -68,7 +67,7 @@ module LoRaRadio extends FlatRadioBase
         // RSSI sensitivity (ATmega256RFR2, page 566)
         receiver.energyDetection = default(-90dBm);
 
-        // Lowest receiver sensitivity at SF 12, 
+        // Lowest receiver sensitivity at SF 12,
         receiver.sensitivity = default(-137dBm);
 
         // There is no fixed boundary, because of the

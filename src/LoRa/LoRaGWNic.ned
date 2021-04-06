@@ -20,7 +20,7 @@ import inet.linklayer.common.WirelessInterface;
 
 import flora.LoRaPhy.LoRaMedium;
 
-module LoRaGWNic extends WirelessInterface 
+module LoRaGWNic extends WirelessInterface
 {
     parameters:
         @display("i=block/ifcard");

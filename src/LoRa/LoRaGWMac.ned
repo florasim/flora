@@ -25,7 +25,7 @@ simple LoRaGWMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
-        string address = default("auto"); 
+        string address = default("auto");
         string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(-1); // maximum queue length in frames; only used if queueModule==""
         bool prioritizeByUP = default(false); // use priority queueing, based on IEEE 802.1d User Priority (UP)
@@ -41,8 +41,8 @@ simple LoRaGWMac extends MacProtocolBase like IMacProtocol
         int cwMulticast = default(cwMin); // multicast contention window
         int retryLimit = default(7); // maximum number of retries
         @class(LoRaGWMac);
-        
+
     gates:
-    	input upperMgmtIn;
-    	output upperMgmtOut;
+        input upperMgmtIn;
+        output upperMgmtOut;
 }

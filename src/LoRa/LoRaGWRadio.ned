@@ -29,8 +29,7 @@ module LoRaGWRadio extends FlatRadioBase
         @statistic[LoRaGWRadioReceptionStarted](source=LoRaGWRadioReceptionStarted; record=count);
         @signal[LoRaGWRadioReceptionFinishedCorrect](type=bool); // optional
         @statistic[LoRaGWRadioReceptionFinishedCorrect](source=LoRaGWRadioReceptionFinishedCorrect; record=count);
-        
-        
+
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[radioModeChanged](type=long);
@@ -48,8 +47,6 @@ module LoRaGWRadio extends FlatRadioBase
         @signal[bitErrorRate];
         @signal[symbolErrorRate];
         @signal[droppedPacket];
-               
-        
 
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
@@ -59,16 +56,15 @@ module LoRaGWRadio extends FlatRadioBase
         @statistic[packetErrorRate](title="Packet error rate"; source=packetErrorRate(packetSentToUpper); record=histogram);
         @statistic[bitErrorRate](title="Bit error rate"; source=bitErrorRate(packetSentToUpper); record=histogram);
         @statistic[symbolErrorRate](title="Symbol error rate"; source=symbolErrorRate(packetSentToUpper); record=histogram);
-        
+
         antenna.typename = default("IsotropicAntenna");
         transmitter.typename  = default("LoRaTransmitter");
         receiver.typename = default("LoRaReceiver");
-        
+
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
-                
+
         centerFrequency = 2450 MHz;
-       
 
         // B_20dB ATmega256RFR2 (page 564)
         // *.bandwidth = default(2.8 MHz);
@@ -108,7 +104,7 @@ module LoRaGWRadio extends FlatRadioBase
         // TX Output power (typ. 3.5 dBm, ATmega256RFR2, page 564)
         transmitter.power = default(2.24mW);
         transmitter.preambleDuration = 0.001s;
-        
+
         bool iAmGateway = default(true);
 
         @class(LoRaGWRadio); //originally it was @class(Radio);

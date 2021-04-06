@@ -26,12 +26,12 @@ simple PacketForwarder like IApp
     string destAddresses = default(""); // list of IP addresses, separated by spaces ("": don't send)
     string localAddress = default("");
     int destPort;
-	
+
     gates:
         output socketOut @labels(UdpControlInfo/up);
         input socketIn @labels(UdpControlInfo/down);
-    
-		input lowerLayerIn @labels(PacketForwarder/up);
+
+        input lowerLayerIn @labels(PacketForwarder/up);
         output lowerLayerOut @labels(PacketForwarder/down);  
 
 }

@@ -35,11 +35,11 @@ module LoRaGW like INetworkNode
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
-        
+
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        int numWlanInterfaces = 1;        
-        
-    	bool hasIpv4 = default(true);
+        int numWlanInterfaces = 1;
+
+        bool hasIpv4 = default(true);
         string networkLayerType = default("Ipv4NetworkLayer");
         string routingTableType = default("Ipv4RoutingTable");
         int numUdpApps = default(0);
@@ -47,15 +47,14 @@ module LoRaGW like INetworkNode
         string udpType = default(firstAvailableOrEmpty("UDP"));
 
         LoRaGWNic.radio.antenna.mobilityModule = default("^.^.^.mobility");
-        
+
         *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
-        
 
         @display("bgb=611,560;i=device/antennatower");
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
         input radioIn[numWlanInterfaces] @directIn;
-        
+
     submodules:
         interfaceTable: InterfaceTable {
             @display("p=30,26");

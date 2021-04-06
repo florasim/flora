@@ -17,14 +17,14 @@
 
 package flora.LoRa;
 
-import inet.linklayer.csmaca.CsmaCaMac; 
+import inet.linklayer.csmaca.CsmaCaMac;
 
 module LoRaMac extends CsmaCaMac
 {
     parameters:
         bitrate = 250bps;
         @class(LoRaMac);
-        gates:
-        	input upperMgmtIn;
-        	output upperMgmtOut;
+    gates:
+        input upperMgmtIn;
+        output upperMgmtOut;
 }

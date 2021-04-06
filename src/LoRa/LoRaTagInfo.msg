@@ -31,5 +31,5 @@ class LoRaTag extends inet::TagBase
     int spreadFactor = 12;
     inet::W power = mW(100);
     bool UseHeader = true;
-    int codeRendundance = 1;    
+    int codeRendundance = 1;
 }

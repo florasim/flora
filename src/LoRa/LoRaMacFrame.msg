@@ -31,7 +31,7 @@ namespace flora;
 class LoRaMacFrame extends inet::FieldsChunk {
     inet::MacAddress transmitterAddress;
     inet::MacAddress receiverAddress;
-    
+
     int sequenceNumber;
     double LoRaTP;
     inet::Hz LoRaCF;
