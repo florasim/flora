@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaAnalogModel : public ScalarAnalogModelBase
+class LoRaAnalogModel : public ScalarAnalogModelBase
 {
   public:
     const W getBackgroundNoisePower(const LoRaBandListening *listening) const;

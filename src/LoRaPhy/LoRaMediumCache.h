@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaMediumCache : public cModule, public IMediumLimitCache
+class LoRaMediumCache : public cModule, public IMediumLimitCache
 {
   protected:
     /**

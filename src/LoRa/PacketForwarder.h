@@ -28,7 +28,7 @@
 
 namespace inet {
 
-class INET_API PacketForwarder : public cSimpleModule, public cListener
+class PacketForwarder : public cSimpleModule, public cListener
 {
   protected:
     std::vector<L3Address> destAddresses;

@@ -25,7 +25,7 @@ namespace physicallayer {
 /**
  * This class implements the LoRaHataOkumura.
  */
-class INET_API LoRaHataOkumura : public FreeSpacePathLoss
+class LoRaHataOkumura : public FreeSpacePathLoss
 {
   protected:
     double K1;

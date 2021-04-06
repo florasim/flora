@@ -25,7 +25,7 @@ namespace physicallayer {
 /**
  * This class implements the log normal shadowing model.
  */
-class INET_API LoRaPathLossOulu : public FreeSpacePathLoss
+class LoRaPathLossOulu : public FreeSpacePathLoss
 {
   protected:
     m d0;

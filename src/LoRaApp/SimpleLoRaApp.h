@@ -32,7 +32,7 @@ namespace inet {
 /**
  * TODO - Generated class
  */
-class INET_API SimpleLoRaApp : public cSimpleModule, public ILifecycle
+class SimpleLoRaApp : public cSimpleModule, public ILifecycle
 {
     protected:
         void initialize(int stage) override;

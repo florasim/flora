@@ -22,7 +22,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaModulation : public ApskModulationBase
+class LoRaModulation : public ApskModulationBase
 {
   protected:
     static const std::vector<ApskSymbol> constellation;

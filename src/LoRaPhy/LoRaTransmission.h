@@ -14,7 +14,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API LoRaTransmission : public TransmissionBase, public virtual INarrowbandSignal, public virtual IScalarSignal
+class LoRaTransmission : public TransmissionBase, public virtual INarrowbandSignal, public virtual IScalarSignal
 {
 protected:
     const W LoRaTP;

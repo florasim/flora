@@ -14,7 +14,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaReception : public ScalarReception
+class LoRaReception : public ScalarReception
 {
 protected:
     const Hz LoRaCF;

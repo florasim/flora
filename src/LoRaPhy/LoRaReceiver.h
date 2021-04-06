@@ -42,7 +42,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaReceiver : public FlatReceiverBase
+class LoRaReceiver : public FlatReceiverBase
 
 {
 private:

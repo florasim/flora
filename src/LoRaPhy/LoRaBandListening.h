@@ -23,7 +23,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaBandListening : public BandListening
+class LoRaBandListening : public BandListening
 {
   protected:
     const int LoRaSF;

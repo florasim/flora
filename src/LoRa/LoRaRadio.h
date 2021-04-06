@@ -27,7 +27,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, public virtual IRadio
+class LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, public virtual IRadio
 {
 public:
   static simsignal_t minSNIRSignal;

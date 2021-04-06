@@ -60,7 +60,7 @@ public:
     std::vector<std::tuple<L3Address, double, double>> possibleGateways; // <address, sinr, rssi>
 };
 
-class INET_API NetworkServerApp : public cSimpleModule, cListener
+class NetworkServerApp : public cSimpleModule, cListener
 {
   protected:
     std::vector<knownNode> knownNodes;

@@ -32,7 +32,7 @@
 
 namespace inet {
 namespace physicallayer {
-class INET_API LoRaMedium : public RadioMedium
+class LoRaMedium : public RadioMedium
 {
     friend class LoRaGWRadio;
     friend class LoRaRadio;
