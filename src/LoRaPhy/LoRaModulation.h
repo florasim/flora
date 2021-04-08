@@ -18,11 +18,12 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
-namespace inet {
+namespace flora {
 
-namespace physicallayer {
+using namespace inet;
+using namespace inet::physicallayer;
 
-class INET_API LoRaModulation : public ApskModulationBase
+class LoRaModulation : public ApskModulationBase
 {
   protected:
     static const std::vector<ApskSymbol> constellation;
@@ -42,8 +43,6 @@ class INET_API LoRaModulation : public ApskModulationBase
     double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
     double calculateSER(double snir, Hz bandwidth, bps bitrate) const;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

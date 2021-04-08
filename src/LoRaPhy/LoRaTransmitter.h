@@ -22,9 +22,7 @@
 #include "LoRa/LoRaRadio.h"
 #include "LoRa/LoRaMacFrame_m.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 class LoRaTransmitter : public FlatTransmitterBase {
     public:
@@ -40,8 +38,6 @@ class LoRaTransmitter : public FlatTransmitterBase {
         simsignal_t LoRaTransmissionCreated;
 
 };
-
-}
 
 }
 

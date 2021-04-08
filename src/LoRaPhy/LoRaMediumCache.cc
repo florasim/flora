@@ -20,9 +20,7 @@
 #include "LoRaPhy/LoRaMedium.h"
 #include "LoRaPhy/LoRaLogNormalShadowing.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 Define_Module(LoRaMediumCache);
 
@@ -252,11 +250,9 @@ m LoRaMediumCache::getMaxCommunicationRange(const IRadio* radio) const
         LoRaLogNormalShadowing *loraLogNormalShadowing;
         loraLogNormalShadowing = check_and_cast<LoRaLogNormalShadowing *>(radioMedium->getSubmodule("pathLoss"));
         return(loraLogNormalShadowing->computeRange(maxTransmissionPower));
-
     }
+    throw cRuntimeError("Unknown pathLossType. Only LoRaLogNormalShadowing is supported by the LoRaMediumCache.");
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 

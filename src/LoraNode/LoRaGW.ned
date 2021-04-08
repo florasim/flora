@@ -13,16 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoraNode;
+package flora.LoraNode;
 
 import inet.node.inet.INetworkNode;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
 import inet.linklayer.loopback.LoopbackInterface;
-import loranetwork.LoRa.LoRaGWNic;
-import loranetwork.LoRaApp.SimpleLoRaApp;
-import loranetwork.LoRa.PacketForwarder;
+import flora.LoRa.LoRaGWNic;
+import flora.LoRaApp.SimpleLoRaApp;
+import flora.LoRa.PacketForwarder;
 import inet.linklayer.contract.IWiredInterface;
 import inet.applications.contract.IApp;
 import inet.transportlayer.contract.IUdp;
@@ -35,11 +35,11 @@ module LoRaGW like INetworkNode
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
-        
+
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        int numWlanInterfaces = 1;        
-        
-    	bool hasIpv4 = default(true);
+        int numWlanInterfaces = 1;
+
+        bool hasIpv4 = default(true);
         string networkLayerType = default("Ipv4NetworkLayer");
         string routingTableType = default("Ipv4RoutingTable");
         int numUdpApps = default(0);
@@ -47,15 +47,14 @@ module LoRaGW like INetworkNode
         string udpType = default(firstAvailableOrEmpty("UDP"));
 
         LoRaGWNic.radio.antenna.mobilityModule = default("^.^.^.mobility");
-        
+
         *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
-        
 
         @display("bgb=611,560;i=device/antennatower");
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
         input radioIn[numWlanInterfaces] @directIn;
-        
+
     submodules:
         interfaceTable: InterfaceTable {
             @display("p=30,26");

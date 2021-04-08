@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss;
 
@@ -26,5 +26,5 @@ module LoRaPathLossOulu extends FreeSpacePathLoss
         double B = default(128.95);
         double sigma = default(7.8);
         double antennaGain = default(2);
-        @class(inet::physicallayer::LoRaPathLossOulu);
+        @class(LoRaPathLossOulu);
 }

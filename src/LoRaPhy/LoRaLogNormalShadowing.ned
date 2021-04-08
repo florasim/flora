@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss;
 
@@ -24,5 +24,5 @@ module LoRaLogNormalShadowing extends FreeSpacePathLoss
         double d0 = default(40m) @unit(m);
         double gamma = default(2.08);
         double sigma = default(3.57);
-        @class(inet::physicallayer::LoRaLogNormalShadowing);
+        @class(LoRaLogNormalShadowing);
 }

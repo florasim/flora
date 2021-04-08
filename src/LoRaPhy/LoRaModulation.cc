@@ -15,9 +15,7 @@
 
 #include "LoRaModulation.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 const std::vector<ApskSymbol> LoRaModulation::constellation = {};
 
@@ -78,7 +76,5 @@ double LoRaModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) cons
     return NaN;
 //    throw cRuntimeError("Not yet implemented");
 }
-
-} // namespace physicallayer
 
 } // namespace inet

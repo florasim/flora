@@ -18,9 +18,7 @@
 #include "LoRaPhy/LoRaNeighborCache.h"
 #include "inet/common/ModuleAccess.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 Define_Module(LoRaNeighborCache);
 
@@ -154,8 +152,6 @@ LoRaNeighborCache::~LoRaNeighborCache()
 
     cancelAndDelete(updateNeighborListsTimer);
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
 
@@ -33,5 +33,5 @@ module LoRaMediumCache like IMediumLimitCache
         double maxCommunicationRange @unit(m) = default(0m/0);    // maximum communication range on the medium, NaN means medium computes using transmitter and receiver models
         double maxInterferenceRange @unit(m) = default(0m/0);     // maximum interference range on the medium, NaN means medium computes using transmitter and receiver models
         @display("i=block/table2");
-        @class(inet::physicallayer::LoRaMediumCache);
+        @class(LoRaMediumCache);
 }

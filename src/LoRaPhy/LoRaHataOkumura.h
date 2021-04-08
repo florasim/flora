@@ -18,14 +18,14 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
-namespace inet {
-
-namespace physicallayer {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 
 /**
  * This class implements the LoRaHataOkumura.
  */
-class INET_API LoRaHataOkumura : public FreeSpacePathLoss
+class LoRaHataOkumura : public FreeSpacePathLoss
 {
   protected:
     double K1;
@@ -39,8 +39,6 @@ class INET_API LoRaHataOkumura : public FreeSpacePathLoss
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

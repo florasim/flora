@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.medium.RadioMedium;
 
@@ -26,11 +26,11 @@ module LoRaMedium extends RadioMedium
 
         // 802.15.4-2006, page 266
         pathLoss.typename = default("LoRaLogNormalShadowing");
-        backgroundNoise.typename = "DimensionalBackgroundNoise";        
+        backgroundNoise.typename = "DimensionalBackgroundNoise";
 
         // Reflects the thermal noise for the receiver sensitivity
         // TODO couple with sensitivity
         backgroundNoise.power = default(-96.616dBm);
         backgroundNoise.dimensions = default("time");
-        @class(inet::physicallayer::LoRaMedium);
+        @class(LoRaMedium);
 }

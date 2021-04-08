@@ -16,9 +16,7 @@
 #include "LoRaLogNormalShadowing.h"
 #include "inet/common/INETMath.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 Define_Module(LoRaLogNormalShadowing);
 
@@ -64,9 +62,6 @@ m LoRaLogNormalShadowing::computeRange(W transmissionPower) const
     double rhs = (trans_power_db - PL_d0_db - max_sensitivity)/(10 * gamma);
     double distance = d0.get() * pow(10, rhs);
     return m(distance);
-}
-
-
 }
 
 }

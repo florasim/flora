@@ -15,16 +15,16 @@
 
 //based on Ieee802154NarrowbandMac
 
-package loranetwork.LoRa;
+package flora.LoRa;
 
-import inet.linklayer.csmaca.CsmaCaMac; 
+import inet.linklayer.csmaca.CsmaCaMac;
 
 module LoRaMac extends CsmaCaMac
 {
     parameters:
         bitrate = 250bps;
-        @class(inet::LoRaMac);
-        gates:
-        	input upperMgmtIn;
-        	output upperMgmtOut;
+        @class(LoRaMac);
+    gates:
+        input upperMgmtIn;
+        output upperMgmtOut;
 }

@@ -19,11 +19,11 @@
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ListeningBase.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 
-namespace physicallayer {
-
-class INET_API LoRaBandListening : public BandListening
+class LoRaBandListening : public BandListening
 {
   protected:
     const int LoRaSF;
@@ -41,8 +41,6 @@ class INET_API LoRaBandListening : public BandListening
     virtual int getLoRaSF() const { return LoRaSF; }
     virtual Hz getLoRaBW() const { return bandwidth; }
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

@@ -26,13 +26,14 @@
 #include "LoRa/LoRaMacControlInfo_m.h"
 
 using namespace omnetpp;
+using namespace inet;
 
-namespace inet {
+namespace flora {
 
 /**
  * TODO - Generated class
  */
-class INET_API SimpleLoRaApp : public cSimpleModule, public ILifecycle
+class SimpleLoRaApp : public cSimpleModule, public ILifecycle
 {
     protected:
         void initialize(int stage) override;

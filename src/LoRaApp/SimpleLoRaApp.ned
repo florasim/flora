@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaApp;
+package flora.LoRaApp;
 
 //
 // TODO auto-generated module
@@ -32,9 +32,8 @@ simple SimpleLoRaApp
         double initialLoRaBW @unit(Hz) = default(125kHz);
         int initialLoRaCR = default(4);
         bool initialUseHeader = default(true);
-    	@class(inet::SimpleLoRaApp);
-    	bool evaluateADRinNode = default(false);
-	    int dataSize @unit(B) = default(10B);
+        bool evaluateADRinNode = default(false);
+        int dataSize @unit(B) = default(10B);
     gates:
         output appOut @labels(LoRaAppPacket/down);
         input appIn @labels(LoRaAppPacket/up);

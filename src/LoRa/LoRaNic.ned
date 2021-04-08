@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRa;
+package flora.LoRa;
 
 import inet.linklayer.common.WirelessInterface;
 
@@ -24,8 +24,8 @@ module LoRaNic extends WirelessInterface
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         radio.typename = default("LoRaRadio");
         radio.antenna.mobilityModule = "^.^.^.mobility";
-		radio.transmitter.typename = "LoRaTransmitter";
-		radio.transmitter.headerLength = 0B;
-		radio.receiver.typename = "LoRaReceiver";
+        radio.transmitter.typename = "LoRaTransmitter";
+        radio.transmitter.headerLength = 0B;
+        radio.receiver.typename = "LoRaReceiver";
         mac.typename = "LoRaMac";
 }

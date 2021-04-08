@@ -30,9 +30,8 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include <algorithm>
 
-namespace inet {
-namespace physicallayer {
-class INET_API LoRaMedium : public RadioMedium
+namespace flora {
+class LoRaMedium : public RadioMedium
 {
     friend class LoRaGWRadio;
     friend class LoRaRadio;
@@ -46,6 +45,5 @@ protected:
       //virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
       virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
 };
-}
 }
 #endif /* LORAPHY_LORAMEDIUM_H_ */

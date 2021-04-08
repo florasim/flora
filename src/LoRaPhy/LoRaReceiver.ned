@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 import inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel;
@@ -33,7 +33,7 @@ module LoRaReceiver like IReceiver
         double bandwidth @unit(Hz);        // bandwidth of the band where this receiver listens on the medium
         bool alohaChannelModel = default(false);
         string errorModelType = default("");             // NED type of the error model
-        @class(inet::physicallayer::LoRaReceiver);
+        @class(LoRaReceiver);
         @display("i=block/wrx");
 
     submodules:

@@ -28,10 +28,10 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
 
-namespace inet {
-namespace physicallayer {
+namespace flora {
 
 Define_Module(LoRaMedium);
+
 LoRaMedium::LoRaMedium() : RadioMedium()
 {
 }
@@ -92,6 +92,4 @@ const IReceptionResult *LoRaMedium::getReceptionResult(const IRadio *radio, cons
     return result;
 }
 
-
-}
 }

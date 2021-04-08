@@ -22,11 +22,9 @@
 
 #include "LoRaBandListening.h"
 
-namespace inet {
+namespace flora {
 
-namespace physicallayer {
-
-class INET_API LoRaAnalogModel : public ScalarAnalogModelBase
+class LoRaAnalogModel : public ScalarAnalogModelBase
 {
   public:
     const W getBackgroundNoisePower(const LoRaBandListening *listening) const;
@@ -36,8 +34,6 @@ class INET_API LoRaAnalogModel : public ScalarAnalogModelBase
     const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
     virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

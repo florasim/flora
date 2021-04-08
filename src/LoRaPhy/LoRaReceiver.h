@@ -38,11 +38,9 @@
 
 //based on Ieee802154UWBIRReceiver
 
-namespace inet {
+namespace flora {
 
-namespace physicallayer {
-
-class INET_API LoRaReceiver : public FlatReceiverBase
+class LoRaReceiver : public FlatReceiverBase
 
 {
 private:
@@ -111,8 +109,6 @@ public:
 
 
 };
-
-}
 
 }
 

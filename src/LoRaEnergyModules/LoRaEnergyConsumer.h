@@ -21,9 +21,9 @@
 #include <map>
 #include "inet/common/ModuleAccess.h"
 
-namespace inet {
+using namespace inet;
 
-namespace physicallayer {
+namespace flora {
 
 class LoRaEnergyConsumer: public inet::physicallayer::StateBasedEpEnergyConsumer {
 public:
@@ -52,6 +52,5 @@ protected:
 
 };
 
-}
 }
 #endif /* LORAENERGYMODULES_LORAENERGYCONSUMER_H_ */

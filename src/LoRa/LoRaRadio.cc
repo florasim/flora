@@ -29,9 +29,7 @@
 
 
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 Define_Module(LoRaRadio);
 
@@ -444,7 +442,7 @@ void LoRaRadio::endReception(cMessage *timer)
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
-        auto tag = macFrame->addTag<lora::LoRaTag>();
+        auto tag = macFrame->addTag<flora::LoRaTag>();
         auto preamble = macFrame->popAtFront<LoRaPhyPreamble>();
         tag->setBandwidth(preamble->getBandwidth());
         tag->setCenterFrequency(preamble->getCenterFrequency());
@@ -528,7 +526,5 @@ void LoRaRadio::setCurrentTxPower(double txPower)
 {
     currentTxPower = txPower;
 }
-
-} // namespace physicallayer
 
 } // namespace inet

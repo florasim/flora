@@ -13,12 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRa;
+package flora.LoRa;
 import inet.applications.contract.IApp;
 
 simple NetworkServerApp like IApp
 {
-    @class(inet::NetworkServerApp);
     @signal[LoRa_ServerPacketReceived](type=bool); // optional
     @statistic[LoRa_ServerPacketReceived](source=LoRa_ServerPacketReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
@@ -26,10 +25,10 @@ simple NetworkServerApp like IApp
     int destPort = default(-1);
     bool evaluateADRinServer = default(false);
     int headerLength @unit(B) = default(8B);
-	
-	string adrMethod = default("max");
-	double adrDeviceMargin = default(15);
-	
+
+    string adrMethod = default("max");
+    double adrDeviceMargin = default(15);
+
     gates:
     output socketOut @labels(UdpControlInfo/up);
     input socketIn @labels(UdpControlInfo/down);

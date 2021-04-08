@@ -11,10 +11,10 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
-namespace inet {
-namespace physicallayer {
-
-class INET_API LoRaTransmission : public TransmissionBase, public virtual INarrowbandSignal, public virtual IScalarSignal
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
+class LoRaTransmission : public TransmissionBase, public virtual INarrowbandSignal, public virtual IScalarSignal
 {
 protected:
     const W LoRaTP;
@@ -39,7 +39,6 @@ public:
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
-} /* namespace physicallayer */
 } /* namespace inet */
 
 #endif /* LORATRANSMISSION_H_ */

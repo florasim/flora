@@ -20,7 +20,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 
-namespace inet;
+namespace flora;
 
 enum AppPacketType
 {
@@ -40,7 +40,7 @@ class LoRaOptions {
     bool ADRACKReq = false;
 }
 
-class LoRaAppPacket extends FieldsChunk {
+class LoRaAppPacket extends inet::FieldsChunk {
     int msgType @enum(AppPacketType);
     int sampleMeasurement;
     LoRaOptions options;

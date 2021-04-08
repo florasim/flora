@@ -18,14 +18,18 @@ import inet.common.TagBase;
 import inet.common.Units;
 import inet.linklayer.common.MacAddress;
 
-namespace inet;
+cplusplus {{
+using namespace inet;
+}}
 
-class LoRaTag extends TagBase
+namespace flora;
+
+class LoRaTag extends inet::TagBase
 {
-    Hz centerFrequency = MHz(812);
-    Hz bandwidth = kHz(125);
+    inet::Hz centerFrequency = MHz(812);
+    inet::Hz bandwidth = kHz(125);
     int spreadFactor = 12;
-    W power = mW(100);
+    inet::W power = mW(100);
     bool UseHeader = true;
-    int codeRendundance = 1;    
+    int codeRendundance = 1;
 }

@@ -26,9 +26,7 @@
 #include "LoRaPhy/LoRaMedium.h"
 #include "inet/common/LayeredProtocolBase.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 class LoRaGWRadio : public FlatRadioBase {
 private:
@@ -65,8 +63,6 @@ public:
     simsignal_t LoRaGWRadioReceptionStarted;
     simsignal_t LoRaGWRadioReceptionFinishedCorrect;
 };
-
-}
 
 }
 

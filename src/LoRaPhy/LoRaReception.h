@@ -10,11 +10,11 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 
-namespace physicallayer {
-
-class INET_API LoRaReception : public ScalarReception
+class LoRaReception : public ScalarReception
 {
 protected:
     const Hz LoRaCF;
@@ -33,8 +33,6 @@ protected:
     virtual W getPower() const override { return receivedPower; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

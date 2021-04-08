@@ -16,6 +16,7 @@
 #ifndef LORA_LORAGWMAC_H_
 #define LORA_LORAGWMAC_H_
 
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
@@ -26,9 +27,13 @@
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
 
-namespace inet {
+#if INET_VERSION < 0x0403 || ( INET_VERSION == 0x0403 && INET_PATCH_LEVEL == 0x00 )
+#  error At least INET 4.3.1 is required. Please update your INET dependency and fully rebuild the project.
+#endif
+namespace flora {
 
-using namespace physicallayer;
+using namespace inet;
+using namespace inet::physicallayer;
 
 class LoRaGWMac: public MacProtocolBase {
 public:

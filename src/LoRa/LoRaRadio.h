@@ -23,11 +23,12 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
 
-namespace inet {
+using namespace inet;
+using namespace inet::physicallayer;
 
-namespace physicallayer {
+namespace flora {
 
-class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, public virtual IRadio
+class LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, public virtual IRadio
 {
 public:
   static simsignal_t minSNIRSignal;
@@ -118,8 +119,6 @@ public:
 
   virtual void decapsulate(Packet *packet) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

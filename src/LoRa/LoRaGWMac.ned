@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRa;
+package flora.LoRa;
 
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
@@ -25,7 +25,7 @@ simple LoRaGWMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
-        string address = default("auto"); 
+        string address = default("auto");
         string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(-1); // maximum queue length in frames; only used if queueModule==""
         bool prioritizeByUP = default(false); // use priority queueing, based on IEEE 802.1d User Priority (UP)
@@ -40,9 +40,9 @@ simple LoRaGWMac extends MacProtocolBase like IMacProtocol
         int cwMax = default(1023); // maximum contention window
         int cwMulticast = default(cwMin); // multicast contention window
         int retryLimit = default(7); // maximum number of retries
-        @class(inet::LoRaGWMac);
-        
+        @class(LoRaGWMac);
+
     gates:
-    	input upperMgmtIn;
-    	output upperMgmtOut;
+        input upperMgmtIn;
+        output upperMgmtOut;
 }

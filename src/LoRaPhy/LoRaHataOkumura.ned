@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss;
 
@@ -23,5 +23,5 @@ module LoRaHataOkumura extends FreeSpacePathLoss
         //parameters taken from paper LoRaSim
         double K1 = default(127.5);
         double K2 = default(35.2);
-        @class(inet::physicallayer::LoRaHataOkumura);
+        @class(LoRaHataOkumura);
 }

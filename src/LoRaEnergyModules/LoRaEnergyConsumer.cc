@@ -17,9 +17,7 @@
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "LoRaPhy/LoRaTransmitter.h"
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 using namespace inet::power;
 
@@ -215,6 +213,5 @@ W LoRaEnergyConsumer::getPowerConsumption() const
             throw cRuntimeError("Unknown radio transmission state");
     }
     return powerConsumption;
-}
 }
 }

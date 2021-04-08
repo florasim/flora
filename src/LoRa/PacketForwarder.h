@@ -26,9 +26,9 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
-namespace inet {
+namespace flora {
 
-class INET_API PacketForwarder : public cSimpleModule, public cListener
+class PacketForwarder : public cSimpleModule, public cListener
 {
   protected:
     std::vector<L3Address> destAddresses;

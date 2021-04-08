@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
 
@@ -28,5 +28,5 @@ module LoRaNeighborCache like INeighborCache
         double range @unit(m);
         double refillPeriod @unit(s);
         @display("i=block/table2");
-        @class(inet::physicallayer::LoRaNeighborCache);
+        @class(LoRaNeighborCache);
 }

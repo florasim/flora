@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaEnergyModules;
+package flora.LoRaEnergyModules;
 
 import inet.physicallayer.wireless.common.energyconsumer.StateBasedEpEnergyConsumer;
 
@@ -22,5 +22,5 @@ simple LoRaEnergyConsumer extends StateBasedEpEnergyConsumer
 {
     parameters:
         xml configFile;
-        @class(inet::physicallayer::LoRaEnergyConsumer);
+        @class(LoRaEnergyConsumer);
 }

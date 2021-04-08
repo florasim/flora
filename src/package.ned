@@ -1,3 +1,5 @@
-package loranetwork;
+package flora;
+
+@namespace(flora);
 
 @license(LGPL);

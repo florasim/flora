@@ -18,14 +18,14 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
-namespace inet {
-
-namespace physicallayer {
+using namespace inet;
+using namespace inet::physicallayer;
+namespace flora {
 
 /**
  * This class implements the log normal shadowing model.
  */
-class INET_API LoRaPathLossOulu : public FreeSpacePathLoss
+class LoRaPathLossOulu : public FreeSpacePathLoss
 {
   protected:
     m d0;
@@ -41,8 +41,6 @@ class INET_API LoRaPathLossOulu : public FreeSpacePathLoss
     LoRaPathLossOulu();
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

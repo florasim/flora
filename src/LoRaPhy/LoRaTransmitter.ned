@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRaPhy;
+package flora.LoRaPhy;
 
 import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase;
 
@@ -23,5 +23,5 @@ module LoRaTransmitter extends NarrowbandTransmitterBase
         @signal[LoRaTransmissionCreated](type=bool); // optional
         @statistic[LoRaTransmissionCreated](source=LoRaTransmissionCreated; record=count);
         modulation = default("LoRaModulation");
-        @class(inet::physicallayer::LoRaTransmitter);
+        @class(LoRaTransmitter);
 }

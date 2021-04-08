@@ -12,9 +12,7 @@
 
 #include "LoRaRadio.h"
 
-namespace inet {
-
-using namespace physicallayer;
+namespace flora {
 
 /**
  * Based on CSMA class

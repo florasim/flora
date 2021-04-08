@@ -19,9 +19,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 Define_Module(LoRaGWRadio);
 
@@ -289,7 +287,6 @@ void LoRaGWRadio::abortReception(cMessage *timer)
     }
     updateTransceiverState();
     updateTransceiverPart();
-}
 }
 
 }

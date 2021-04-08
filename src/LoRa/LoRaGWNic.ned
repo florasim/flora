@@ -13,14 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package loranetwork.LoRa;
+package flora.LoRa;
 
 import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.common.WirelessInterface;
 
-import loranetwork.LoRaPhy.LoRaMedium;
+import flora.LoRaPhy.LoRaMedium;
 
-module LoRaGWNic extends WirelessInterface 
+module LoRaGWNic extends WirelessInterface
 {
     parameters:
         @display("i=block/ifcard");

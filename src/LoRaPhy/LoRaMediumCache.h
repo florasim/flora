@@ -22,11 +22,9 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IMediumLimitCache.h"
 #include "LoRaPhy/LoRaMedium.h"
 
-namespace inet {
+namespace flora {
 
-namespace physicallayer {
-
-class INET_API LoRaMediumCache : public cModule, public IMediumLimitCache
+class LoRaMediumCache : public cModule, public IMediumLimitCache
 {
   protected:
     /**
@@ -156,8 +154,6 @@ class INET_API LoRaMediumCache : public cModule, public IMediumLimitCache
     virtual m getMaxInterferenceRange(const IRadio *radio) const override;
     //@}
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 

@@ -22,9 +22,7 @@
 #include "LoRaReceiver.h"
 #include "LoRa/LoRaRadio.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 Define_Module(LoRaAnalogModel);
 
@@ -191,8 +189,6 @@ const ISnir *LoRaAnalogModel::computeSNIR(const IReception *reception, const INo
 {
     return new ScalarSnir(reception, noise);
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 

@@ -15,9 +15,7 @@
 
 #include "LoRaBandListening.h"
 
-namespace inet {
-
-namespace physicallayer {
+namespace flora {
 
 LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition,  Hz centerFrequency, Hz bandwidth, int LoRaSF) :
         BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth),
@@ -34,7 +32,5 @@ std::ostream& LoRaBandListening::printToStream(std::ostream& stream, int level, 
                << ", LoRaBW = " << bandwidth;
     return ListeningBase::printToStream(stream, level, evFlags);
 }
-
-} // namespace physicallayer
 
 } // namespace inet
