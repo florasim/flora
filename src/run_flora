@@ -1,7 +1,6 @@
 #!/bin/bash
 if [ "$INET_ROOT" = "" ]; then
-  echo "INET version not selected. Please run 'source setenv' in the root folder of the INET installation you want to use."
-  exit 1
+  INET_ROOT=$(dirname $0)/../../inet4.3
 fi
 
 PATH=$INET_ROOT/src:$PATH
