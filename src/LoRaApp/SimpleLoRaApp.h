@@ -68,7 +68,7 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle
         int ADR_ACK_LIMIT = 64; //64;
         int ADR_ACK_DELAY = 32; //32;
         bool sendNextPacketWithADRACKReq = false;
-        void increaseSFIfPossible();
+        void increaseTPOrSFIfPossible();
 
     public:
         SimpleLoRaApp() {}
