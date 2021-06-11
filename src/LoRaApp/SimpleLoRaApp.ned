@@ -15,10 +15,12 @@
 
 package flora.LoRaApp;
 
+import inet.applications.contract.IApp;
+
 //
 // TODO auto-generated module
 //
-simple SimpleLoRaApp
+simple SimpleLoRaApp like IApp
 {
     parameters:
         @signal[LoRa_AppPacketSent](type=long); // optional
@@ -35,6 +37,6 @@ simple SimpleLoRaApp
         bool evaluateADRinNode = default(false);
         int dataSize @unit(B) = default(10B);
     gates:
-        output appOut @labels(LoRaAppPacket/down);
-        input appIn @labels(LoRaAppPacket/up);
+        input socketIn @labels(LoRaAppPacket/up);
+        output socketOut @labels(LoRaAppPacket/down);        
 }

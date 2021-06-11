@@ -60,12 +60,19 @@ void SimpleLoRaApp::initialize(int stage)
         LoRa_AppPacketSent = registerSignal("LoRa_AppPacketSent");
 
         //LoRa physical layer parameters
-        loRaTP = par("initialLoRaTP").doubleValue();
-        loRaCF = units::values::Hz(par("initialLoRaCF").doubleValue());
-        loRaSF = par("initialLoRaSF");
-        loRaBW = inet::units::values::Hz(par("initialLoRaBW").doubleValue());
-        loRaCR = par("initialLoRaCR");
-        loRaUseHeader = par("initialUseHeader");
+//        loRaTP = par("initialLoRaTP").doubleValue();
+        loRaRadio->loRaTP = par("initialLoRaTP").doubleValue();
+        setTP(par("initialLoRaTP").doubleValue());
+//        loRaCF = units::values::Hz(par("initialLoRaCF").doubleValue());
+        loRaRadio->loRaCF = units::values::Hz(par("initialLoRaCF").doubleValue());
+//        loRaSF = par("initialLoRaSF");
+        loRaRadio->loRaSF = par("initialLoRaSF");
+//        loRaBW = inet::units::values::Hz(par("initialLoRaBW").doubleValue());
+        loRaRadio->loRaBW = inet::units::values::Hz(par("initialLoRaBW").doubleValue());
+//        loRaCR = par("initialLoRaCR");
+        loRaRadio->loRaCR = par("initialLoRaCR");
+//        loRaUseHeader = par("initialUseHeader");
+        loRaRadio->loRaUseHeader = par("initialUseHeader");
         evaluateADRinNode = par("evaluateADRinNode");
         sfVector.setName("SF Vector");
         tpVector.setName("TP Vector");
@@ -94,8 +101,8 @@ void SimpleLoRaApp::finish()
     Coord coord = mobility->getCurrentPosition();
     recordScalar("positionX", coord.x);
     recordScalar("positionY", coord.y);
-    recordScalar("finalTP", loRaTP);
-    recordScalar("finalSF", loRaSF);
+    recordScalar("finalTP", getTP());
+    recordScalar("finalSF", getSF());
     recordScalar("sentPackets", sentPackets);
     recordScalar("receivedADRCommands", receivedADRCommands);
 }
@@ -112,6 +119,7 @@ void SimpleLoRaApp::handleMessage(cMessage *msg)
             if(numberOfPacketsToSend == 0 || sentPackets < numberOfPacketsToSend)
             {
                 double time;
+                int loRaSF = getSF();
                 if(loRaSF == 7) time = 7.808;
                 if(loRaSF == 8) time = 13.9776;
                 if(loRaSF == 9) time = 24.6784;
@@ -151,14 +159,14 @@ void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
         {
             if(packet->getOptions().getLoRaTP() != -1)
             {
-                loRaTP = packet->getOptions().getLoRaTP();
+                setTP(packet->getOptions().getLoRaTP());
             }
             if(packet->getOptions().getLoRaSF() != -1)
             {
-                loRaSF = packet->getOptions().getLoRaSF();
+                setSF(packet->getOptions().getLoRaSF());
             }
-            EV << "New TP " << loRaTP << endl;
-            EV << "New SF " << loRaSF << endl;
+            EV << "New TP " << getTP() << endl;
+            EV << "New SF " << getSF() << endl;
         }
     }
 }
@@ -192,12 +200,12 @@ void SimpleLoRaApp::sendJoinRequest()
     }
 
 
-    auto loraTag = pktRequest->addTagIfAbsent<LoRaTag>();
-    loraTag->setBandwidth(loRaBW);
-    loraTag->setCenterFrequency(loRaCF);
-    loraTag->setSpreadFactor(loRaSF);
-    loraTag->setCodeRendundance(loRaCR);
-    loraTag->setPower(mW(math::dBmW2mW(loRaTP)));
+//    auto loraTag = pktRequest->addTagIfAbsent<LoRaTag>();
+//    loraTag->setBandwidth(loRaBW);
+//    loraTag->setCenterFrequency(loRaCF);
+//    loraTag->setSpreadFactor(loRaSF);
+//    loraTag->setCodeRendundance(loRaCR);
+//    loraTag->setPower(mW(math::dBmW2mW(loRaTP)));
 
     //add LoRa control info
   /*  LoRaMacControlInfo *cInfo = new LoRaMacControlInfo();
@@ -208,10 +216,10 @@ void SimpleLoRaApp::sendJoinRequest()
     cInfo->setLoRaCR(loRaCR);
     pktRequest->setControlInfo(cInfo);*/
 
-    sfVector.record(loRaSF);
-    tpVector.record(loRaTP);
+    sfVector.record(getSF());
+    tpVector.record(getTP());
     pktRequest->insertAtBack(payload);
-    send(pktRequest, "appOut");
+    send(pktRequest, "socketOut");
     if(evaluateADRinNode)
     {
         ADR_ACK_CNT++;
@@ -222,12 +230,45 @@ void SimpleLoRaApp::sendJoinRequest()
             increaseSFIfPossible();
         }
     }
-    emit(LoRa_AppPacketSent, loRaSF);
+    emit(LoRa_AppPacketSent, getSF());
 }
 
 void SimpleLoRaApp::increaseSFIfPossible()
 {
-    if(loRaSF < 12) loRaSF++;
+//    if(loRaSF < 12) loRaSF++;
+    if(getSF() < 12) setSF(getSF() + 1);
+}
+
+void SimpleLoRaApp::setSF(int SF) {
+    loRaRadio->loRaSF = SF;
+}
+
+int SimpleLoRaApp::getSF() {
+    return loRaRadio->loRaSF;
+}
+
+void SimpleLoRaApp::setTP(int TP) {
+    loRaRadio->loRaTP = TP;
+}
+
+double SimpleLoRaApp::getTP() {
+    return loRaRadio->loRaTP;
+}
+
+void SimpleLoRaApp::setCF(units::values::Hz CF) {
+    loRaRadio->loRaCF = CF;
+}
+
+units::values::Hz SimpleLoRaApp::getCF() {
+    return loRaRadio->loRaCF;
+}
+
+void SimpleLoRaApp::setBW(units::values::Hz BW) {
+    loRaRadio->loRaBW = BW;
+}
+
+units::values::Hz SimpleLoRaApp::getBW() {
+    return loRaRadio->loRaBW;
 }
 
 } //end namespace inet

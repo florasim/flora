@@ -357,20 +357,20 @@ Packet *LoRaMac::encapsulate(Packet *msg)
     auto frame = makeShared<LoRaMacFrame>();
     frame->setChunkLength(B(headerLength));
     msg->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
-    auto tag = msg->getTag<LoRaTag>();
+//    auto tag = msg->getTag<LoRaTag>();
 
     frame->setTransmitterAddress(address);
-    frame->setLoRaTP(tag->getPower().get());
-    frame->setLoRaCF(tag->getCenterFrequency());
-    frame->setLoRaSF(tag->getSpreadFactor());
-    frame->setLoRaBW(tag->getBandwidth());
-    frame->setLoRaCR(tag->getCodeRendundance());
+//    frame->setLoRaTP(tag->getPower().get());
+//    frame->setLoRaCF(tag->getCenterFrequency());
+//    frame->setLoRaSF(tag->getSpreadFactor());
+//    frame->setLoRaBW(tag->getBandwidth());
+//    frame->setLoRaCR(tag->getCodeRendundance());
     frame->setSequenceNumber(sequenceNumber);
     frame->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
 
     ++sequenceNumber;
     //frame->setLoRaUseHeader(cInfo->getLoRaUseHeader());
-    frame->setLoRaUseHeader(tag->getUseHeader());
+//    frame->setLoRaUseHeader(tag->getUseHeader());
 
     msg->insertAtFront(frame);
 

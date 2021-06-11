@@ -37,12 +37,19 @@ public:
   static simsignal_t symbolErrorRateSignal;
   static simsignal_t droppedPacket;
 
-protected:
+public:
   /**
    * An identifier which is globally unique for the whole lifetime of the
    * simulation among all radios.
    */
   double currentTxPower;
+  //LoRa physical layer parameters
+  double loRaTP;
+  units::values::Hz loRaCF;
+  int loRaSF;
+  units::values::Hz loRaBW;
+  int loRaCR;
+  bool loRaUseHeader;
 
 private:
   void parseRadioModeSwitchingTimes();

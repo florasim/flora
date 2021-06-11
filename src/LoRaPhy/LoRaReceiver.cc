@@ -55,8 +55,11 @@ bool LoRaReceiver::computeIsReceptionPossible(const IListening *listening, const
 {
     //here we can check compatibility of LoRaTx parameters (or beeing a gateway)
     const LoRaTransmission *loRaTransmission = check_and_cast<const LoRaTransmission *>(transmission);
-    auto *loRaApp = check_and_cast<SimpleLoRaApp *>(getParentModule()->getParentModule()->getSubmodule("SimpleLoRaApp"));
-    if(iAmGateway || (loRaTransmission->getLoRaCF() == loRaApp->loRaCF && loRaTransmission->getLoRaBW() == loRaApp->loRaBW && loRaTransmission->getLoRaSF() == loRaApp->loRaSF))
+//    auto *loRaApp = check_and_cast<SimpleLoRaApp *>(getParentModule()->getParentModule()->getSubmodule("SimpleLoRaApp"));
+    auto *loRaRadio = check_and_cast<LoRaRadio *>(getParentModule());
+//    auto node = getContainingNode(this);
+//    auto loRaRadio = check_and_cast<LoRaRadio *>(node->getSubmodule("LoRaNic")->getSubmodule("LoRaRadio"));
+    if(iAmGateway || (loRaTransmission->getLoRaCF() == loRaRadio->loRaCF && loRaTransmission->getLoRaBW() == loRaRadio->loRaBW && loRaTransmission->getLoRaSF() == loRaRadio->loRaSF))
         return true;
     else
         return false;
@@ -256,8 +259,9 @@ const IListening *LoRaReceiver::createListening(const IRadio *radio, const simti
     if(iAmGateway == false)
     {
         auto node = getContainingNode(this);
-        auto loRaApp = check_and_cast<SimpleLoRaApp *>(node->getSubmodule("SimpleLoRaApp"));
-        return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, loRaApp->loRaCF, loRaApp->loRaBW, loRaApp->loRaSF);
+//        auto loRaApp = check_and_cast<SimpleLoRaApp *>(node->getSubmodule("SimpleLoRaApp"));
+        auto loRaRadio = check_and_cast<LoRaRadio *>(node->getSubmodule("LoRaNic")->getSubmodule("LoRaRadio"));
+        return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, loRaRadio->loRaCF, loRaRadio->loRaBW, loRaRadio->loRaSF);
     }
     else return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, LoRaCF, LoRaBW, LoRaSF);
 }

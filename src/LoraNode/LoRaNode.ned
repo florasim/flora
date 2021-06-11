@@ -17,13 +17,14 @@ package flora.LoraNode;
 
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
+import inet.applications.contract.IApp;
 import flora.LoRa.LoRaNic;
-import flora.LoRaApp.SimpleLoRaApp;
 
 
 module LoRaNode
 {
     parameters:
+        int numApps = default(0);
         string deploymentType = default("");
         double maxGatewayDistance = default(320.0);
         double gatewayX = default(320.0);
@@ -41,11 +42,13 @@ module LoRaNode
         LoRaNic: LoRaNic {
             @display("p=137,239");
         }
-        SimpleLoRaApp: SimpleLoRaApp {
-            @display("p=137,32");
+        app[numApps]: <> like IApp {
+            parameters:
+                @display("p=375,76,row,150");
         }
     connections allowunconnected:
-
-        SimpleLoRaApp.appOut --> LoRaNic.upperLayerIn;
-        LoRaNic.upperLayerOut --> SimpleLoRaApp.appIn;
+        for i=0..numApps-1 {		
+        	app[i].socketOut --> LoRaNic.upperLayerIn;
+        	LoRaNic.upperLayerOut --> app[i].socketIn;
+        }
 }

@@ -24,6 +24,7 @@
 
 #include "LoRaAppPacket_m.h"
 #include "LoRa/LoRaMacControlInfo_m.h"
+#include "LoRa/LoRaRadio.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -61,6 +62,18 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle
         cOutVector sfVector;
         cOutVector tpVector;
 
+        //LoRa parameters control
+        LoRaRadio *loRaRadio = check_and_cast<LoRaRadio *>(getParentModule()->getSubmodule("LoRaRadio"));
+
+        void setSF(int SF);
+        int getSF();
+        void setTP(int TP);
+        double getTP();
+        void setCF(units::values::Hz CF);
+        units::values::Hz getCF();
+        void setBW(units::values::Hz BW);
+        units::values::Hz getBW();
+
 
         //variables to control ADR
         bool evaluateADRinNode;
@@ -73,13 +86,7 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle
     public:
         SimpleLoRaApp() {}
         simsignal_t LoRa_AppPacketSent;
-        //LoRa physical layer parameters
-        double loRaTP;
-        units::values::Hz loRaCF;
-        int loRaSF;
-        units::values::Hz loRaBW;
-        int loRaCR;
-        bool loRaUseHeader;
+
 };
 
 }
