@@ -60,7 +60,7 @@ void SimpleLoRaApp::initialize(int stage)
         LoRa_AppPacketSent = registerSignal("LoRa_AppPacketSent");
 
         //LoRa physical layer parameters
-//        loRaTP = par("initialLoRaTP").doubleValue();
+        loRaRadio = check_and_cast<LoRaRadio *>(getParentModule()->getSubmodule("LoRaNic")->getSubmodule("radio"));
         loRaRadio->loRaTP = par("initialLoRaTP").doubleValue();
         setTP(par("initialLoRaTP").doubleValue());
 //        loRaCF = units::values::Hz(par("initialLoRaCF").doubleValue());
@@ -200,12 +200,12 @@ void SimpleLoRaApp::sendJoinRequest()
     }
 
 
-//    auto loraTag = pktRequest->addTagIfAbsent<LoRaTag>();
-//    loraTag->setBandwidth(loRaBW);
-//    loraTag->setCenterFrequency(loRaCF);
-//    loraTag->setSpreadFactor(loRaSF);
-//    loraTag->setCodeRendundance(loRaCR);
-//    loraTag->setPower(mW(math::dBmW2mW(loRaTP)));
+    auto loraTag = pktRequest->addTagIfAbsent<LoRaTag>();
+    loraTag->setBandwidth(getBW());
+    loraTag->setCenterFrequency(getCF());
+    loraTag->setSpreadFactor(getSF());
+    loraTag->setCodeRendundance(getCR());
+    loraTag->setPower(mW(math::dBmW2mW(getTP())));
 
     //add LoRa control info
   /*  LoRaMacControlInfo *cInfo = new LoRaMacControlInfo();
@@ -269,6 +269,14 @@ void SimpleLoRaApp::setBW(units::values::Hz BW) {
 
 units::values::Hz SimpleLoRaApp::getBW() {
     return loRaRadio->loRaBW;
+}
+
+void SimpleLoRaApp::setCR(int CR) {
+    loRaRadio->loRaCR = CR;
+}
+
+int SimpleLoRaApp::getCR() {
+    return loRaRadio->loRaCR;
 }
 
 } //end namespace inet

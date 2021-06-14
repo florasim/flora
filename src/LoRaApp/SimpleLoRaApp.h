@@ -63,12 +63,14 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle
         cOutVector tpVector;
 
         //LoRa parameters control
-        LoRaRadio *loRaRadio = check_and_cast<LoRaRadio *>(getParentModule()->getSubmodule("LoRaRadio"));
+        LoRaRadio *loRaRadio;
 
         void setSF(int SF);
         int getSF();
         void setTP(int TP);
         double getTP();
+        void setCR(int CR);
+        int getCR();
         void setCF(units::values::Hz CF);
         units::values::Hz getCF();
         void setBW(units::values::Hz BW);
