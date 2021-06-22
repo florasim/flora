@@ -88,8 +88,15 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
 
     if(!iAmGateway) {
         LoRaRadio *radio = check_and_cast<LoRaRadio *>(getParentModule());
-        radio->setCurrentTxPower(transmissionPower.get());
+        transmissionPower = mW(math::dBmW2mW(radio->loRaTP));
     }
+    else
+        transmissionPower = mW(math::dBmW2mW(14));
+
+    EV << "[MSDebug] I am sending packet with TP: " << transmissionPower << endl;
+    EV << "[MSDebug] I am sending packet with SF: " << frame->getSpreadFactor() << endl;
+
+
     return new LoRaTransmission(transmitter,
             macFrame,
             startTime,

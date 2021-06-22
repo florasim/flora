@@ -218,6 +218,8 @@ void SimpleLoRaApp::sendJoinRequest()
 
     sfVector.record(getSF());
     tpVector.record(getTP());
+    EV << "Wysylam pakiet z TP: " << getTP() << endl;
+    EV << "Wysylam pakiet z SF: " << getSF() << endl;
     pktRequest->insertAtBack(payload);
     send(pktRequest, "socketOut");
     if(evaluateADRinNode)
