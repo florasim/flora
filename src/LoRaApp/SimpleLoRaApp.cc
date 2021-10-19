@@ -62,7 +62,7 @@ void SimpleLoRaApp::initialize(int stage)
         //LoRa physical layer parameters
         loRaRadio = check_and_cast<LoRaRadio *>(getParentModule()->getSubmodule("LoRaNic")->getSubmodule("radio"));
         loRaRadio->loRaTP = par("initialLoRaTP").doubleValue();
-        setTP(par("initialLoRaTP").doubleValue());
+//        setTP(par("initialLoRaTP").doubleValue());
 //        loRaCF = units::values::Hz(par("initialLoRaCF").doubleValue());
         loRaRadio->loRaCF = units::values::Hz(par("initialLoRaCF").doubleValue());
 //        loRaSF = par("initialLoRaSF");
@@ -218,6 +218,8 @@ void SimpleLoRaApp::sendJoinRequest()
 
     sfVector.record(getSF());
     tpVector.record(getTP());
+    EV << "Wysylam pakiet z TP: " << getTP() << endl;
+    EV << "Wysylam pakiet z SF: " << getSF() << endl;
     pktRequest->insertAtBack(payload);
     send(pktRequest, "socketOut");
     if(evaluateADRinNode)
