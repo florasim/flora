@@ -23,10 +23,11 @@ import inet.linklayer.loopback.LoopbackInterface;
 import flora.LoRa.LoRaGWNic;
 import flora.LoRaApp.SimpleLoRaApp;
 import flora.LoRa.PacketForwarder;
-import inet.linklayer.contract.IWiredInterface;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.applications.contract.IApp;
 import inet.transportlayer.contract.IUdp;
 import inet.networklayer.contract.IRoutingTable;
+import inet.common.MessageDispatcher;
 
 module LoRaGW like INetworkNode
 {
@@ -50,50 +51,78 @@ module LoRaGW like INetworkNode
 
         *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
 
-        @display("bgb=611,560;i=device/antennatower");
+        @display("bgb=783.96,587.688;i=device/antennatower");
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
         input radioIn[numWlanInterfaces] @directIn;
 
     submodules:
+        at: MessageDispatcher {
+            parameters:
+                @display("p=394.80002,142.128;b=100,5,,,,1");
+        }
+        tn: MessageDispatcher {
+            parameters:
+                @display("p=394.80002,276.36002;b=100,5,,,,1");
+        }
+        nl: MessageDispatcher {
+            parameters:
+                @display("p=394.80002,391.41602;b=100,5,,,,1");
+        }
+        li: MessageDispatcher {
+            parameters:
+                @display("p=394.80002,442.17603;b=100,5,,,,1");
+        }
         interfaceTable: InterfaceTable {
-            @display("p=30,26");
+            @display("p=135.36,69.936005");
         }
         mobility: StationaryMobility {
-            @display("p=24,88");
+            @display("p=135.36,199.656");
         }
         LoRaGWNic: LoRaGWNic {
-            @display("p=163.56,367.728");
+            @display("p=626.04004,94.75201");
         }
         packetForwarder: PacketForwarder {
-            @display("p=256.056,162.432;is=vl");
+            @display("p=394.80002,69.936005;is=vl");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=340.656,442.17603,row,60;q=txQueue");
+                @display("p=394.80002,503.088,row,150;q=txQueue");
         }
         udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             parameters:
-                @display("p=422.25,177.90799");
+                @display("p=394.80002,206.42401");
         }
         ipv4: <default("Ipv4NetworkLayer")> like INetworkLayer if hasIpv4 {
             parameters:
-                @display("p=363.698,284.878;q=queue");
+                @display("p=394.80002,333.888;q=queue");
         }
         routingTable: <routingTableType> like IRoutingTable if routingTableType != "" {
             parameters:
-                @display("p=53,250;is=s");
+                @display("p=135.36,313.584;is=s");
         }
     connections allowunconnected:
+        at.out++ --> udp.appIn;
+        at.in++ <-- udp.appOut;
+
         packetForwarder.lowerLayerOut --> LoRaGWNic.upperLayerIn;
         LoRaGWNic.upperLayerOut --> packetForwarder.lowerLayerIn;
-        packetForwarder.socketOut --> udp.appIn;
-        packetForwarder.socketIn <-- udp.appOut;
+        packetForwarder.socketOut --> at.in++;
+        packetForwarder.socketIn <-- at.out++;
+
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> { @display("m=s"); } <--> eth[i].phys;
-            eth[i].upperLayerOut --> ipv4.ifIn;
-            eth[i].upperLayerIn <-- ipv4.ifOut;
+            eth[i].upperLayerOut --> li.in++;
+            eth[i].upperLayerIn <-- li.out++;
         }
-        udp.ipOut --> ipv4.transportIn;
-        udp.ipIn <-- ipv4.transportOut;
+
+        ipv4.ifIn <-- nl.out++;
+        ipv4.ifOut --> nl.in++;
+
+        tn.out++ --> ipv4.transportIn;
+        tn.in++ <-- ipv4.transportOut;
+        nl.out++ --> li.in++;
+        nl.in++ <-- li.out++;
+        udp.ipOut --> tn.in++;
+        udp.ipIn <-- tn.out++;
 }
