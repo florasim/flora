@@ -14,6 +14,7 @@
 // 
 
 #include "LoRaReceiver.h"
+#include "LoRaReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
 #include "../LoRaApp/SimpleLoRaApp.h"
 #include "LoRaPhyPreamble_m.h"
@@ -263,7 +264,9 @@ const IListening *LoRaReceiver::createListening(const IRadio *radio, const simti
         auto loRaRadio = check_and_cast<LoRaRadio *>(node->getSubmodule("LoRaNic")->getSubmodule("radio"));
         return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, loRaRadio->loRaCF, loRaRadio->loRaBW, loRaRadio->loRaSF);
     }
-    else return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, LoRaCF, LoRaBW, LoRaSF);
+    else {
+        return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, LoRaCF, LoRaBW, LoRaSF);
+    }
 }
 
 const IListeningDecision *LoRaReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
