@@ -224,7 +224,7 @@ void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
             packetExists = true;
             const auto& networkHeader = getNetworkProtocolHeader(pkt);
             const L3Address& gwAddress = networkHeader->getSourceAddress();
-            elem.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
+            elem.possibleGateways.emplace_back(gwAddress, frame->getSNIR(), frame->getRSSI());
             delete pkt;
             break;
         }
@@ -237,8 +237,8 @@ void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
         rcvPkt.endOfWaiting->setControlInfo(pkt);
         const auto& networkHeader = getNetworkProtocolHeader(pkt);
         const L3Address& gwAddress = networkHeader->getSourceAddress();
-        rcvPkt.possibleGateways.emplace_back(gwAddress, math::fraction2dB(frame->getSNIR()), frame->getRSSI());
-        EV << "Added " << gwAddress << " " << math::fraction2dB(frame->getSNIR()) << " " << frame->getRSSI() << endl;
+        rcvPkt.possibleGateways.emplace_back(gwAddress, frame->getSNIR(), frame->getRSSI());
+        EV << "Added " << gwAddress << " " << frame->getSNIR() << " " << frame->getRSSI() << endl;
         scheduleAt(simTime() + 1.2, rcvPkt.endOfWaiting);
         receivedPackets.push_back(rcvPkt);
     }
