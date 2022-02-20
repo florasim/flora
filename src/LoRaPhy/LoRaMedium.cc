@@ -14,6 +14,8 @@
 // 
 #include "LoRaMedium.h"
 #include "../LoRa/LoRaMacFrame_m.h"
+#include "LoRaBandListening.h"
+#include "LoRaTransmission.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -90,6 +92,32 @@ const IReceptionResult *LoRaMedium::getReceptionResult(const IRadio *radio, cons
         EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << result->getReception() << " and results in " << result << endl;
     }
     return result;
+}
+
+void LoRaMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
+{
+    Enter_Method("addTransmission");
+    transmissionCount++;
+    communicationCache->addTransmission(transmission);
+    simtime_t maxArrivalEndTime = transmission->getEndTime();
+    communicationCache->mapRadios([&] (const IRadio *receiverRadio) {
+        if (receiverRadio != nullptr && receiverRadio != transmitterRadio && receiverRadio->getReceiver() != nullptr) {
+            const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+            const IntervalTree::Interval *interval = new IntervalTree::Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
+            const LoRaTransmission *loRaTransmission = check_and_cast<const LoRaTransmission *>(transmission);
+            LoRaBandListening *loraListening = new LoRaBandListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition(), loRaTransmission->getLoRaCF(), loRaTransmission->getLoRaBW(), loRaTransmission->getLoRaSF());
+            const simtime_t arrivalEndTime = arrival->getEndTime();
+            if (arrivalEndTime > maxArrivalEndTime)
+                maxArrivalEndTime = arrivalEndTime;
+            communicationCache->setCachedArrival(receiverRadio, transmission, arrival);
+            communicationCache->setCachedInterval(receiverRadio, transmission, interval);
+            communicationCache->setCachedListening(receiverRadio, transmission, loraListening);
+        }
+    });
+    communicationCache->setCachedInterferenceEndTime(transmission, maxArrivalEndTime + mediumLimitCache->getMaxTransmissionDuration());
+    if (!removeNonInterferingTransmissionsTimer->isScheduled())
+        scheduleAt(communicationCache->getCachedInterferenceEndTime(transmission), removeNonInterferingTransmissionsTimer);
+    emit(signalAddedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 }

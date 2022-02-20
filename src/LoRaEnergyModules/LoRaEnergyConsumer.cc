@@ -134,7 +134,7 @@ bool LoRaEnergyConsumer::readConfigurationFile()
             supplyCurrent = (*aComb)->getAttribute("supplyCurrent");
         else
             supplyCurrent = "";
-        transmitterTransmittingSupplyCurrent[math::dBmW2mW(strtod(txPower, nullptr))/1000] = strtod(supplyCurrent, nullptr);
+        transmitterTransmittingSupplyCurrent[strtod(txPower, nullptr)] = strtod(supplyCurrent, nullptr);
     }
     return true;
 }
@@ -203,7 +203,7 @@ W LoRaEnergyConsumer::getPowerConsumption() const
                 ;
             else if (part == IRadioSignal::SIGNAL_PART_WHOLE || part == IRadioSignal::SIGNAL_PART_PREAMBLE || part == IRadioSignal::SIGNAL_PART_HEADER || part == IRadioSignal::SIGNAL_PART_DATA)
             {
-                auto current = transmitterTransmittingSupplyCurrent.find(radio->getCurrentTxPower());
+                auto current = transmitterTransmittingSupplyCurrent.find(radio->loRaTP);
                 powerConsumption += mW(supplyVoltage*current->second);
             }
             else

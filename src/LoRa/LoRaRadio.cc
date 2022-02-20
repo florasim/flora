@@ -517,14 +517,14 @@ void LoRaRadio::sendUp(Packet *macFrame)
     //send(macFrame, upperLayerOut);
 }
 
-double LoRaRadio::getCurrentTxPower()
-{
-    return currentTxPower;
-}
-
-void LoRaRadio::setCurrentTxPower(double txPower)
-{
-    currentTxPower = txPower;
-}
+//double LoRaRadio::getCurrentTxPower()
+//{
+//    return currentTxPower;
+//}
+//
+//void LoRaRadio::setCurrentTxPower(double txPower)
+//{
+//    currentTxPower = txPower;
+//}
 
 } // namespace inet
