@@ -31,9 +31,11 @@ LoRaReceiver::LoRaReceiver() :
 
 void LoRaReceiver::initialize(int stage)
 {
+    FlatReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
         snirThreshold = math::dB2fraction(par("snirThreshold"));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
         if(strcmp(getParentModule()->getClassName(), "flora::LoRaGWRadio") == 0)
         {
             iAmGateway = true;

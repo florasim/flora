@@ -21,14 +21,15 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
+//#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandRadioBase.h"
 
 using namespace inet;
 using namespace inet::physicallayer;
 
 namespace flora {
 
-class LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, public virtual IRadio
+class LoRaRadio : public NarrowbandRadioBase //: public PhysicalLayerBase, public virtual IRadio
 {
 public:
   static simsignal_t minSNIRSignal;

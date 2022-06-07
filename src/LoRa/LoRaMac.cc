@@ -90,7 +90,7 @@ void LoRaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = getQueue(gate(upperLayerInGateId));//check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         // state variables
         fsm.setName("LoRaMac State Machine");
@@ -163,16 +163,15 @@ void LoRaMac::handleSelfMessage(cMessage *msg)
     EV << "received self message: " << msg << endl;
     handleWithFsm(msg);
 }
-
-void LoRaMac::handleUpperMessage(cMessage *msg)
+#if 0
+void LoRaMac::handleUpperPacket(cMessage *msg)
 {
     if(fsm.getState() != IDLE) {
-            error(fsm.getStateName());
-            error("Wrong, it should not happen");
+            error("Wrong, it should not happen erroneous state: %s", fsm.getStateName());
     }
     auto pkt = check_and_cast<Packet *>(msg);
 
-    pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
+    pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::lora);
 //    LoRaMacControlInfo *cInfo = check_and_cast<LoRaMacControlInfo *>(msg->getControlInfo());
     auto pktEncap = encapsulate(pkt);
 
@@ -188,11 +187,56 @@ void LoRaMac::handleUpperMessage(cMessage *msg)
         handleWithFsm(currentTxFrame);
     }
 }
+#endif
+void LoRaMac::handleUpperPacket(Packet *packet)
+{
+    if(fsm.getState() != IDLE) {
+         error("Wrong, it should not happen erroneous state: %s", fsm.getStateName());
+    }
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 
-void LoRaMac::handleLowerMessage(cMessage *msg)
+    EV << "frame " << packet << " received from higher layer " << endl;
+    auto pktEncap = encapsulate(packet);
+    const auto &frame = pktEncap->peekAtFront<LoRaMacFrame>();
+    if (frame == nullptr)
+        throw cRuntimeError("Header LoRaMacFrame not found");
+
+    if (currentTxFrame != nullptr)
+        throw cRuntimeError("Model error: incomplete transmission exists");
+    currentTxFrame = pktEncap;
+    handleWithFsm(currentTxFrame);
+}
+
+
+void LoRaMac::handleLowerPacket(Packet *msg)
 {
     if( (fsm.getState() == RECEIVING_1) || (fsm.getState() == RECEIVING_2)) handleWithFsm(msg);
     else delete msg;
+}
+
+void LoRaMac::processUpperPacket()
+{
+    Packet *packet = dequeuePacket();
+    handleUpperMessage(packet);
+}
+
+queueing::IPassivePacketSource *LoRaMac::getProvider(cGate *gate)
+{
+    return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
+}
+
+void LoRaMac::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    if (fsm.getState() == IDLE && !txQueue->isEmpty()) {
+        processUpperPacket();
+    }
+}
+
+void LoRaMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Not supported callback");
 }
 
 void LoRaMac::handleWithFsm(cMessage *msg)
@@ -302,9 +346,19 @@ void LoRaMac::handleWithFsm(cMessage *msg)
                                   msg == droppedPacket,
                                   LISTENING_2,
             );
-
         }
     }
+
+//    if (fsm.getState() == IDLE) {
+//        if (isReceiving())
+//            handleWithFsm(mediumStateChange);
+//        else if (currentTxFrame != nullptr)
+//            handleWithFsm(currentTxFrame);
+//        else if (!txQueue->isEmpty()) {
+//            popTxQueue();
+//            handleWithFsm(currentTxFrame);
+//        }
+//    }
 
     if (fsm.getState() == IDLE) {
         if (isReceiving())
@@ -312,10 +366,10 @@ void LoRaMac::handleWithFsm(cMessage *msg)
         else if (currentTxFrame != nullptr)
             handleWithFsm(currentTxFrame);
         else if (!txQueue->isEmpty()) {
-            popTxQueue();
-            handleWithFsm(currentTxFrame);
+            processUpperPacket();
         }
     }
+
     if (endSifs) {
         if (isLowerMessage(msg) && pkt->getOwner() == this && (endSifs->getContextPointer() != pkt))
             delete pkt;
@@ -448,6 +502,7 @@ void LoRaMac::finishCurrentTransmission()
     scheduleAt(simTime() + waitDelay1Time + listening1Time + waitDelay2Time, endDelay_2);
     scheduleAt(simTime() + waitDelay1Time + listening1Time + waitDelay2Time + listening2Time, endListening_2);
     deleteCurrentTxFrame();
+    //popTxQueue();
 }
 
 Packet *LoRaMac::getCurrentTransmission()

@@ -17,9 +17,11 @@ package flora.LoRa;
 
 import flora.LoRaPhy.LoRaTransmitter;
 import flora.LoRaPhy.LoRaReceiver;
-import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
+//import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
+import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandRadioBase;
 import inet.power.storage.IdealEpEnergyStorage;
-module LoRaRadio extends FlatRadioBase
+//module LoRaRadio extends FlatRadioBase
+module LoRaRadio extends NarrowbandRadioBase
 {
     parameters:
         antenna.typename = default("IsotropicAntenna");

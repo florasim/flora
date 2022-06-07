@@ -55,7 +55,6 @@ private:
     bool iAmGateway;
     bool alohaChannelModel;
 
-    W energyDetection;
     simsignal_t LoRaReceptionCollision;
 
     int nonOrthDelta[6][6] = {

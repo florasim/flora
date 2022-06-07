@@ -56,11 +56,9 @@ void LoRaEnergyConsumer::initialize(int stage)
         //radioModule->subscribe(EpEnergyStorageBase::residualEnergyCapacityChangedSignal, this);
         //radioModule->subscribe(IdealEpEnergyStorage::residualEnergyCapacityChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
-        const char *energySourceModule = par("energySourceModule");
-        energySource = dynamic_cast<IdealEpEnergyStorage *>(getParentModule()->getSubmodule(energySourceModule));
-        if (!energySource)
-            throw cRuntimeError("Cannot find power source");
-        //energyConsumerId = energySource->addEnergyConsumer(this);
+
+        energySource.reference(this, "energySourceModule", true);
+
         totalEnergyConsumed = 0;
         energyBalance = J(0);
     }
@@ -175,43 +173,53 @@ W LoRaEnergyConsumer::getPowerConsumption() const
     IRadio::ReceptionState receptionState = radio->getReceptionState();
     IRadio::TransmissionState transmissionState = radio->getTransmissionState();
 
-    if (radioMode == IRadio::RADIO_MODE_RECEIVER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
-        if (receptionState == IRadio::RECEPTION_STATE_IDLE)
-            powerConsumption += receiverIdlePowerConsumption;
-        else if (receptionState == IRadio::RECEPTION_STATE_RECEIVING) {
-            auto part = radio->getReceivedSignalPart();
-            if (part == IRadioSignal::SIGNAL_PART_NONE)
-                ;
-            else if (part == IRadioSignal::SIGNAL_PART_WHOLE || part == IRadioSignal::SIGNAL_PART_PREAMBLE || part == IRadioSignal::SIGNAL_PART_HEADER || part == IRadioSignal::SIGNAL_PART_DATA )
-                powerConsumption += receiverReceivingPowerConsumption;
-            else
-                throw cRuntimeError("Unknown received signal part");
-        }
-        else if (receptionState == IRadio::RECEPTION_STATE_BUSY)
-            powerConsumption += receiverBusyPowerConsumption;
-        else if (receptionState != IRadio::RECEPTION_STATE_UNDEFINED)
-            throw cRuntimeError("Unknown radio reception state");
+    if (radioMode == IRadio::RADIO_MODE_RECEIVER) {
+        powerConsumption += mW(supplyVoltage*receiverBusySupplyCurrent);
+    } else if (radioMode == IRadio::RADIO_MODE_TRANSMITTER) {
+        LoRaRadio *radio = check_and_cast<LoRaRadio *>(getParentModule());
+        auto current = transmitterTransmittingSupplyCurrent.find(radio->loRaTP);
+        powerConsumption += mW(supplyVoltage*current->second);
+    } else {
+        powerConsumption += mW(supplyVoltage*idleSupplyCurrent);
     }
 
-    if (radioMode == IRadio::RADIO_MODE_TRANSMITTER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
-        if (transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
-            powerConsumption += transmitterIdlePowerConsumption;
-        else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
-            LoRaRadio *radio = check_and_cast<LoRaRadio *>(getParentModule());
-            auto part = radio->getTransmittedSignalPart();
-            if (part == IRadioSignal::SIGNAL_PART_NONE)
-                ;
-            else if (part == IRadioSignal::SIGNAL_PART_WHOLE || part == IRadioSignal::SIGNAL_PART_PREAMBLE || part == IRadioSignal::SIGNAL_PART_HEADER || part == IRadioSignal::SIGNAL_PART_DATA)
-            {
-                auto current = transmitterTransmittingSupplyCurrent.find(radio->loRaTP);
-                powerConsumption += mW(supplyVoltage*current->second);
-            }
-            else
-                throw cRuntimeError("Unknown transmitted signal part");
-        }
-        else if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED)
-            throw cRuntimeError("Unknown radio transmission state");
-    }
+//    if (radioMode == IRadio::RADIO_MODE_RECEIVER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
+//        if (receptionState == IRadio::RECEPTION_STATE_IDLE)
+//            powerConsumption += receiverIdlePowerConsumption;
+//        else if (receptionState == IRadio::RECEPTION_STATE_RECEIVING) {
+//            auto part = radio->getReceivedSignalPart();
+//            if (part == IRadioSignal::SIGNAL_PART_NONE)
+//                ;
+//            else if (radioMode == IRadio::RADIO_MODE_RECEIVER || part == IRadioSignal::SIGNAL_PART_WHOLE || part == IRadioSignal::SIGNAL_PART_PREAMBLE || part == IRadioSignal::SIGNAL_PART_HEADER || part == IRadioSignal::SIGNAL_PART_DATA )
+//                powerConsumption += receiverReceivingPowerConsumption;
+//            else
+//                throw cRuntimeError("Unknown received signal part");
+//        }
+//        else if (receptionState == IRadio::RECEPTION_STATE_BUSY || radioMode == IRadio::RADIO_MODE_RECEIVER)
+//            powerConsumption += receiverBusyPowerConsumption;
+//        else if (receptionState != IRadio::RECEPTION_STATE_UNDEFINED)
+//            throw cRuntimeError("Unknown radio reception state");
+//    }
+//
+//    if (radioMode == IRadio::RADIO_MODE_TRANSMITTER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
+//        if (transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
+//            powerConsumption += transmitterIdlePowerConsumption;
+//        else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
+//            LoRaRadio *radio = check_and_cast<LoRaRadio *>(getParentModule());
+//            auto part = radio->getTransmittedSignalPart();
+//            if (part == IRadioSignal::SIGNAL_PART_NONE)
+//                ;
+//            else if (part == IRadioSignal::SIGNAL_PART_WHOLE || part == IRadioSignal::SIGNAL_PART_PREAMBLE || part == IRadioSignal::SIGNAL_PART_HEADER || part == IRadioSignal::SIGNAL_PART_DATA)
+//            {
+//                auto current = transmitterTransmittingSupplyCurrent.find(radio->loRaTP);
+//                powerConsumption += mW(supplyVoltage*current->second);
+//            }
+//            else
+//                throw cRuntimeError("Unknown transmitted signal part");
+//        }
+//        else if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED)
+//            throw cRuntimeError("Unknown radio transmission state");
+//    }
     return powerConsumption;
 }
 }

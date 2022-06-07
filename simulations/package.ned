@@ -18,34 +18,34 @@ network LoRaNetworkTest
         int numberOfGateways = default(1);
         int networkSizeX = default(500);
         int networkSizeY = default(500);
-        @display("bgb=355.824,356.832");
+        @display("bgb=562,417");
     submodules:
         loRaNodes[numberOfNodes]: LoRaNode {
-            @display("p=83.664,233.856");
+            @display("p=400,304");
         }
         loRaGW[numberOfGateways]: LoRaGW {
-            @display("p=83.664,150.192;is=s");
+            @display("p=157,238;is=s");
         }
         LoRaMedium: LoRaMedium {
-            @display("p=167.328,88.704");
+            @display("p=309,102");
         }
         networkServer: StandardHost {
             parameters:
-                @display("p=208.24002,27.216002");
+                @display("p=49,44");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 assignDisjunctSubnetAddresses = false;
-                @display("p=207.64801,88.704");
+                @display("p=318,27");
         }
         internetCloud: InternetCloud {
-            @display("p=83.664,27.216002");
+            @display("p=231,44");
         }
         gwRouter[numberOfGateways]: Router {
-            @display("p=24.192001,27.216002");
+            @display("p=231,134");
         }
         nsRouter: Router {
-            @display("p=138.09601,27.216002");
+            @display("p=137,44");
         }
     connections:
         networkServer.ethg++ <--> Eth1G <--> nsRouter.ethg++;

@@ -15,27 +15,20 @@
 
 package flora.LoRaPhy;
 
-import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
-import inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel;
+package inet.physicallayer.wireless.common.base.packetlevel;
+import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBase;
 
 //
 // TODO auto-generated module
 //
-module LoRaReceiver like IReceiver
-{
+ module LoRaReceiver extends NarrowbandReceiverBase
+ {
         parameters:
         @signal[LoRaReceptionCollision](type=bool); // optional
         @statistic[LoRaReceptionCollision](source=LoRaReceptionCollision; record=count);
-        double energyDetection @unit(dBm); // no signal is detected at all below this reception power threshold (idle state)
-        double sensitivity @unit(dBm);     // reception is not possible if the signal power is below sensitivity (idle or busy states)
-        double snirThreshold @unit(dB);    // reception is not successful if the SNIR is below this threshold (unsuccessful reception)
-        double centerFrequency @unit(Hz); // center frequency of the band where this receiver listens on the medium
-        double bandwidth @unit(Hz);        // bandwidth of the band where this receiver listens on the medium
+        errorModel.typename = default("");
+        modulation = default("BPSK"); // not used for the lora module 
         bool alohaChannelModel = default(false);
-        string errorModelType = default("");             // NED type of the error model
         @class(LoRaReceiver);
         @display("i=block/wrx");
-
-    submodules:
-        errorModel: <errorModelType> like IErrorModel if errorModelType != "";
 }
