@@ -1,5 +1,5 @@
-# set to the inet 4.3 directory (use relative dir)
-INET_DIR = ../inet4.3
+# set to the inet 4.4 directory (use relative dir)
+INET_DIR = ../inet4.4
 
 all: checkmakefiles
 	@cd src && $(MAKE)
