@@ -25,6 +25,9 @@ using namespace physicallayer;
 
 class LoRaMac : public MacProtocolBase, public IMacProtocol, public queueing::IActivePacketSink
 {
+  public:
+    using cIListener::finish;
+    using MacProtocolBase::receiveSignal;
   protected:
     /**
      * @name Configuration parameters

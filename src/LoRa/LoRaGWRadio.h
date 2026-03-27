@@ -29,6 +29,9 @@
 namespace flora {
 
 class LoRaGWRadio : public FlatRadioBase {
+public:
+    using FlatRadioBase::continueTransmission;
+    using FlatRadioBase::endTransmission;
 private:
     void completeRadioModeSwitch(RadioMode newRadioMode);
 protected:
