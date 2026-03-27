@@ -17,6 +17,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/common/math/PrimitiveFunctions.h"
 #include "LoRaReception.h"
 #include "LoRaTransmission.h"
 #include "LoRaReceiver.h"
@@ -175,14 +176,20 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
             powerChanges->insert(std::pair<simtime_t, W>(backgroundNoisePowerChange.first, backgroundNoisePowerChange.second));
     }
 
+    (*powerChanges)[inet::math::getLowerBound<simtime_t>()] = W(0);
+    (*powerChanges)[inet::math::getUpperBound<simtime_t>()] = W(0);
     EV_TRACE << "Noise power begin " << endl;
     W noise = W(0);
-    for (std::map<simtime_t, W>::const_iterator it = powerChanges->begin(); it != powerChanges->end(); it++) {
+    for (auto it = powerChanges->begin(); it != powerChanges->end(); it++) {
         noise += it->second;
+        it->second = noise;
         EV_TRACE << "Noise at " << it->first << " = " << noise << endl;
     }
     EV_TRACE << "Noise power end" << endl;
-    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerChanges);
+    const auto& powerFunction = inet::makeShared<inet::math::Interpolated1DFunction<W, simtime_t>>(*powerChanges, &inet::math::LeftInterpolator<simtime_t, W>::singleton);
+    delete powerChanges;
+    delete backgroundNoisePowerChanges;
+    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerFunction);
 }
 
 const ISnir *LoRaAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
