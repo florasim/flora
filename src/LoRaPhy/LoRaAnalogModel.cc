@@ -128,7 +128,7 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
     Hz commonBandwidth = bandListening->getLoRaBW();
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
-    std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
+    std::map<simtime_t, W> powerChanges;
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
         const ISignalAnalogModel *signalAnalogModel = reception->getAnalogModel();
@@ -146,16 +146,16 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
                 noiseStartTime = startTime;
             if (endTime > noiseEndTime)
                 noiseEndTime = endTime;
-            std::map<simtime_t, W>::iterator itStartTime = powerChanges->find(startTime);
-            if (itStartTime != powerChanges->end())
+            std::map<simtime_t, W>::iterator itStartTime = powerChanges.find(startTime);
+            if (itStartTime != powerChanges.end())
                 itStartTime->second += power;
             else
-                powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
-            std::map<simtime_t, W>::iterator itEndTime = powerChanges->find(endTime);
-            if (itEndTime != powerChanges->end())
+                powerChanges.insert(std::pair<simtime_t, W>(startTime, power));
+            std::map<simtime_t, W>::iterator itEndTime = powerChanges.find(endTime);
+            if (itEndTime != powerChanges.end())
                 itEndTime->second -= power;
             else
-                powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
+                powerChanges.insert(std::pair<simtime_t, W>(endTime, -power));
         }
         else if (areOverlappingBands(commonCarrierFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCenterFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
             throw cRuntimeError("Overlapping bands are not supported");
@@ -163,32 +163,30 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
 
     simtime_t startTime = listening->getStartTime();
     simtime_t endTime = listening->getEndTime();
-    std::map<simtime_t, W> *backgroundNoisePowerChanges = new std::map<simtime_t, W>();
+    std::map<simtime_t, W> backgroundNoisePowerChanges;
     const W noisePower = getBackgroundNoisePower(bandListening);
-    backgroundNoisePowerChanges->insert(std::pair<simtime_t, W>(startTime, noisePower));
-    backgroundNoisePowerChanges->insert(std::pair<simtime_t, W>(endTime, -noisePower));
+    backgroundNoisePowerChanges.insert(std::pair<simtime_t, W>(startTime, noisePower));
+    backgroundNoisePowerChanges.insert(std::pair<simtime_t, W>(endTime, -noisePower));
 
-    for (const auto & backgroundNoisePowerChange : *backgroundNoisePowerChanges) {
-        std::map<simtime_t, W>::iterator jt = powerChanges->find(backgroundNoisePowerChange.first);
-        if (jt != powerChanges->end())
+    for (const auto & backgroundNoisePowerChange : backgroundNoisePowerChanges) {
+        std::map<simtime_t, W>::iterator jt = powerChanges.find(backgroundNoisePowerChange.first);
+        if (jt != powerChanges.end())
             jt->second += backgroundNoisePowerChange.second;
         else
-            powerChanges->insert(std::pair<simtime_t, W>(backgroundNoisePowerChange.first, backgroundNoisePowerChange.second));
+            powerChanges.insert(std::pair<simtime_t, W>(backgroundNoisePowerChange.first, backgroundNoisePowerChange.second));
     }
 
-    (*powerChanges)[inet::math::getLowerBound<simtime_t>()] = W(0);
-    (*powerChanges)[inet::math::getUpperBound<simtime_t>()] = W(0);
+    powerChanges[inet::math::getLowerBound<simtime_t>()] = W(0);
+    powerChanges[inet::math::getUpperBound<simtime_t>()] = W(0);
     EV_TRACE << "Noise power begin " << endl;
     W noise = W(0);
-    for (auto it = powerChanges->begin(); it != powerChanges->end(); it++) {
+    for (auto it = powerChanges.begin(); it != powerChanges.end(); it++) {
         noise += it->second;
         it->second = noise;
         EV_TRACE << "Noise at " << it->first << " = " << noise << endl;
     }
     EV_TRACE << "Noise power end" << endl;
-    const auto& powerFunction = inet::makeShared<inet::math::Interpolated1DFunction<W, simtime_t>>(*powerChanges, &inet::math::LeftInterpolator<simtime_t, W>::singleton);
-    delete powerChanges;
-    delete backgroundNoisePowerChanges;
+    const auto& powerFunction = inet::makeShared<inet::math::Interpolated1DFunction<W, simtime_t>>(powerChanges, &inet::math::LeftInterpolator<simtime_t, W>::singleton);
     return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerFunction);
 }
 
