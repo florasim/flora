@@ -163,18 +163,17 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
 
     simtime_t startTime = listening->getStartTime();
     simtime_t endTime = listening->getEndTime();
-    std::map<simtime_t, W> backgroundNoisePowerChanges;
     const W noisePower = getBackgroundNoisePower(bandListening);
-    backgroundNoisePowerChanges.insert(std::pair<simtime_t, W>(startTime, noisePower));
-    backgroundNoisePowerChanges.insert(std::pair<simtime_t, W>(endTime, -noisePower));
-
-    for (const auto & backgroundNoisePowerChange : backgroundNoisePowerChanges) {
-        std::map<simtime_t, W>::iterator jt = powerChanges.find(backgroundNoisePowerChange.first);
-        if (jt != powerChanges.end())
-            jt->second += backgroundNoisePowerChange.second;
-        else
-            powerChanges.insert(std::pair<simtime_t, W>(backgroundNoisePowerChange.first, backgroundNoisePowerChange.second));
-    }
+    auto jt1 = powerChanges.find(startTime);
+    if (jt1 != powerChanges.end())
+        jt1->second += noisePower;
+    else
+        powerChanges.insert(std::pair<simtime_t, W>(startTime, noisePower));
+    auto jt2 = powerChanges.find(endTime);
+    if (jt2 != powerChanges.end())
+        jt2->second -= noisePower;
+    else
+        powerChanges.insert(std::pair<simtime_t, W>(endTime, -noisePower));
 
     powerChanges[inet::math::getLowerBound<simtime_t>()] = W(0);
     powerChanges[inet::math::getUpperBound<simtime_t>()] = W(0);
