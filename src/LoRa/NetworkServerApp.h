@@ -62,6 +62,8 @@ public:
 
 class NetworkServerApp : public cSimpleModule, cListener
 {
+  public:
+    using cIListener::finish;
   protected:
     std::vector<knownNode> knownNodes;
     std::vector<knownGW> knownGateways;

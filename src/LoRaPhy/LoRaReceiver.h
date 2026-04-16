@@ -43,6 +43,8 @@ namespace flora {
 class LoRaReceiver : public FlatReceiverBase
 
 {
+public:
+  using FlatReceiverBase::getSensitivity;
 private:
     W LoRaTP;
     Hz LoRaCF;

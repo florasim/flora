@@ -129,7 +129,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     simtime_t m_x = (loRaReception->getStartTime() + loRaReception->getEndTime())/2;
     simtime_t d_x = (loRaReception->getEndTime() - loRaReception->getStartTime())/2;
     EV << "Czas transmisji to " << loRaReception->getEndTime() - loRaReception->getStartTime() << endl;
-    double P_threshold = 6;
+    // double P_threshold = 6;
     W signalRSSI_w = loRaReception->getPower();
     double signalRSSI_mw = signalRSSI_w.get()*1000;
     double signalRSSI_dBm = math::mW2dBmW(signalRSSI_mw);

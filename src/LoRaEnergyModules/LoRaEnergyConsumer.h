@@ -27,6 +27,7 @@ namespace flora {
 
 class LoRaEnergyConsumer: public inet::physicallayer::StateBasedEpEnergyConsumer {
 public:
+    using cIListener::finish;
     void initialize(int stage) override;
     void finish() override;
     virtual W getPowerConsumption() const override;

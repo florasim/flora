@@ -30,6 +30,8 @@ namespace flora {
 
 class PacketForwarder : public cSimpleModule, public cListener
 {
+  public:
+    using cIListener::finish;
   protected:
     std::vector<L3Address> destAddresses;
     int localPort = -1, destPort = -1;

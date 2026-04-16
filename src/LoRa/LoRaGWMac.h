@@ -37,6 +37,8 @@ using namespace inet::physicallayer;
 
 class LoRaGWMac: public MacProtocolBase {
 public:
+    using cIListener::finish;
+    using MacProtocolBase::receiveSignal;
     bool waitingForDC;
     cMessage *dutyCycleTimer;
     virtual void initialize(int stage) override;

@@ -170,8 +170,8 @@ W LoRaEnergyConsumer::getPowerConsumption() const
         return W(0);
 
     W powerConsumption = W(0);
-    IRadio::ReceptionState receptionState = radio->getReceptionState();
-    IRadio::TransmissionState transmissionState = radio->getTransmissionState();
+    // IRadio::ReceptionState receptionState = radio->getReceptionState();
+    // IRadio::TransmissionState transmissionState = radio->getTransmissionState();
 
     if (radioMode == IRadio::RADIO_MODE_RECEIVER) {
         powerConsumption += mW(supplyVoltage*receiverBusySupplyCurrent);
