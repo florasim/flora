@@ -1,3 +1,9 @@
+FLoRa-1.3.1 (2026-09-16)
+------------------------
+
+- NetworkServerApp: Fixed ADR SNIR units by converting SNIR to dB (math::fraction2dB) before use in ADR. frame->getSNIR() returns a linear fraction, so comparing it against the dB SNR thresholds systematically inflated the ADR margin.
+
+
 FLoRa-1.3.0 (2026-05-22)
 ------------------------
 
