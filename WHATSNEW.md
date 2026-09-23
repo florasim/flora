@@ -1,3 +1,9 @@
+FLoRa-1.3.2 (unreleased)
+------------------------
+
+- LoRaMac: Fixed re-entrant FSM invocation that triggered INET 4.6's `ASSERT(!fsm.busy)` in debug builds (e.g. `LoRaNetworkTest` aborted at event #66). Radio-touching FSM entry actions are now deferred with `FSMA_Delay_Action` and executed via `fsm.executeDelayedActions()` after the `FSMA_Switch` scope has been closed, as in INET's `CsmaCaMac`. Release builds previously ran a nested state transition instead of aborting, which could drop uplinks at the MAC; results of scenarios with downlinks (e.g. ADR) change slightly.
+
+
 FLoRa-1.3.1 (2026-09-16)
 ------------------------
 
